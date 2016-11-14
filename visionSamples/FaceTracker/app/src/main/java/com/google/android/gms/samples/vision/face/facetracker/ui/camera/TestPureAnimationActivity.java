@@ -663,7 +663,7 @@ public class TestPureAnimationActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                if (beemEars) {
+                if (beemEyes) {
                     createSakuraEyes1((MAX_X / 2) + 100, (MAX_X / 2) - 120);
                     createSakuraEyes2((MAX_X / 2) - 150, (MAX_X / 2) - 120);
 

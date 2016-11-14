@@ -27,4 +27,28 @@
 
   </RelativeLayout>
 
+  <Button
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentRight="true"
+      android:layout_alignParentBottom="true"
+      android:text="ปาก"
+      android:id="@+id/buttonMouth"/>
+
+  <Button
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentRight="true"
+      android:layout_above="@id/buttonMouth"
+      android:text="ตา"
+      android:id="@+id/buttonEyes"/>
+
+  <Button
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentRight="true"
+      android:layout_above="@id/buttonEyes"
+      android:text="หู"
+      android:id="@+id/buttonEars"/>
+
 </RelativeLayout>

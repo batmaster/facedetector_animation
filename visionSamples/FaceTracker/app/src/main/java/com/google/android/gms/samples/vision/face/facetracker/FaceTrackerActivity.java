@@ -16,22 +16,35 @@
 package com.google.android.gms.samples.vision.face.facetracker;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
@@ -49,7 +62,12 @@ import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview;
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
+import java.util.Random;
 
 /**
  * Activity for the face tracker app.  This app detects faces with the rear facing camera, and draws
@@ -96,6 +114,112 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         } else {
             requestCameraPermission();
         }
+
+
+
+        makeThreadSakura();
+    }
+
+    private boolean beem = true;
+    private boolean beemEars = true;
+    private boolean beemEyes = true;
+    private boolean flora = true;
+
+    private int volume1 = 10;
+    private int speed1 = 10;
+    private int fspeed1 = 14;
+    private int speedx1 = 1;
+    private int fspeedx1 = 3;
+    private int speedy1 = 5;
+    private int fspeedy1 = 10;
+    private int startSize1 = 0;
+    private int finalSize1 = 15;
+
+    private int volume2 = 2;
+    private int speed2 = 19;
+    private int fspeed2 = 19;
+    private int speedx2 = 2;
+    private int fspeedx2 = 3;
+    private int speedy2 = 2;
+    private int fspeedy2 = 3;
+    private int startSize2 = 1;
+    private int finalSize2 = 17;
+
+    private int SIZE = 0;
+    private static int MAX_X = 1080;
+    private static int MAX_Y = 1920;
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public void makeThreadSakura() {
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        MAX_X = size.x;
+        MAX_Y = size.y;
+        SIZE = size.x/10;
+
+        final Handler mHandler = new Handler();
+        mHandler.post(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public void run() {
+
+                if (beem) {
+                    createSakura(MAX_X / 2, MAX_X / 2);
+                    createSakura(MAX_X / 2, MAX_X / 2);
+                }
+
+                mHandler.postDelayed(this, (500 / volume1));
+            }
+        });
+
+        final Handler mHandler2 = new Handler();
+        mHandler2.post(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public void run() {
+
+                if (flora) {
+                    createSakura2(MAX_X / 2, MAX_X / 2);
+                }
+
+                mHandler.postDelayed(this, (500 / volume2));
+            }
+        });
+
+
+        final Handler mHandler3 = new Handler();
+        mHandler3.post(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public void run() {
+
+                if (beemEars) {
+                    createSakuraEars1((MAX_X / 2) + 150, (MAX_X / 2) - 50);
+                    createSakuraEars2((MAX_X / 2) - 200, (MAX_X / 2) - 50);
+
+                }
+
+                mHandler3.postDelayed(this, (long) (1.5 * 500 / volume1));
+            }
+        });
+
+        final Handler mHandler4 = new Handler();
+        mHandler4.post(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public void run() {
+
+                if (beemEyes) {
+                    createSakuraEyes1((MAX_X / 2) + 100, (MAX_X / 2) - 120);
+                    createSakuraEyes2((MAX_X / 2) - 150, (MAX_X / 2) - 120);
+
+                }
+
+                mHandler4.postDelayed(this, (long) (1.5 * 500 / volume1));
+            }
+        });
     }
 
     /**
@@ -341,69 +465,831 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
-    int SIZE = 100;
-    int i = 0;
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void createSakura(float x, float y) {
 
-        if (i < 1000) {
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(SIZE, SIZE);
-            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-            params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-            params.leftMargin = (int) x;
-            params.topMargin = (int) y;
+        Random r = new Random();
+        int k = r.nextInt(120);
 
-            final ImageView sakura = new ImageView(getApplicationContext());
-            sakura.setImageResource(R.drawable.sakura);
-            sakura.setLayoutParams(params);
+        int im = (k < 40 ? 0 :
+                (k < 60 ? 1 :
+                        (k < 70 ? 2 :
+                                (k < 100 ? 3 :
+                                        (k < 110 ? 4 :
+                                                (k < 115 ? 5 : 6))))));
 
-            layoutSakura.addView(sakura);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.leftMargin = (int) x - (SIZE / 2);
+        params.topMargin = (int) y - (SIZE / 2);
 
+        int[] sa = {
+                R.drawable.sakura,
+                R.drawable.sakura2,
+                R.drawable.sakura3,
+                R.drawable.sakura4,
+                R.drawable.sakura5,
+                R.drawable.sakura6,
+                R.drawable.sakura7
+        };
 
-            RotateAnimation rotateAnimation = new RotateAnimation(0, 359, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-            rotateAnimation.setRepeatCount(Animation.INFINITE);
-            rotateAnimation.setRepeatMode(Animation.RESTART);
-            rotateAnimation.setFillAfter(true);
-            rotateAnimation.setDuration(1000);
+        final ImageView sakura = new ImageView(getApplicationContext());
+        sakura.setImageResource(sa[im]);
+        sakura.setLayoutParams(params);
 
+        layoutSakura.addView(sakura);
 
-            ScaleAnimation scaleAnimation = new ScaleAnimation(sakura.getScaleX(), 2f, sakura.getScaleY(), 2f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-            scaleAnimation.setDuration(3000);
+        sakura.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
+        final AnimatorSet animatorSet = new AnimatorSet();
 
-            TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, 0, 1820 - y + (SIZE / 2));
-            translateAnimation.setDuration(3000);
-            translateAnimation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
+        boolean sign = r.nextDouble() > 0.5 ? true : false;
+        int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
+        int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
+        long duration = (long) (((r.nextDouble() * 500.0 * fspeedx1) + 8000) / (speedx1/10.0));
 
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    sakura.clearAnimation();
-                    sakura.setVisibility(View.GONE);
-                    layoutSakura.removeView(sakura);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-
-            AnimationSet animSet = new AnimationSet(true);
-            animSet.setInterpolator(new LinearInterpolator());
-            animSet.addAnimation(rotateAnimation);
-            animSet.addAnimation(scaleAnimation);
-            animSet.addAnimation(translateAnimation);
+        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
+        rotationX.setRepeatCount(ValueAnimator.INFINITE);
+        rotationX.setRepeatMode(ValueAnimator.RESTART);
+        rotationX.setInterpolator(new LinearInterpolator());
+        rotationX.setDuration(duration);
 
 
-            sakura.startAnimation(animSet);
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (((r.nextDouble() * 500.0 * fspeedy1) + 8000) / (speedy1/10.0));
 
-            Log.d("sakura", "create " + (i + 1));
-            i++;
+        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
+        rotationY.setRepeatCount(ValueAnimator.INFINITE);
+        rotationY.setRepeatMode(ValueAnimator.RESTART);
+        rotationY.setInterpolator(new LinearInterpolator());
+        rotationY.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (r.nextDouble() * 5000) + 2000;
+
+        ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
+        rotationZ.setRepeatCount(ValueAnimator.INFINITE);
+        rotationZ.setRepeatMode(ValueAnimator.RESTART);
+        rotationZ.setInterpolator(new LinearInterpolator());
+        rotationZ.setDuration(duration);
+
+
+        float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
+        duration = (long) (((r.nextDouble() * 200.0 * fspeed1) + 2000) / (speed1/10.0));
+
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
+        scaleX.setInterpolator(new LinearInterpolator());
+        scaleX.setDuration(duration);
+
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.05f * startSize1)), scale);
+        scaleY.setInterpolator(new LinearInterpolator());
+        scaleY.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        float posX = (float) (r.nextDouble() * (MAX_X/4.0) * (sign ? 1 : -1));
+
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, posX);
+        translationX.setInterpolator(new DecelerateInterpolator());
+        translationX.setDuration(duration);
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, MAX_Y - y + (SIZE / 2));
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+        translationY.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                sakura.setLayerType(View.LAYER_TYPE_NONE, null);
+
+                sakura.clearAnimation();
+                sakura.setVisibility(View.GONE);
+                layoutSakura.removeView(sakura);
+                animatorSet.cancel();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY/*, alpha*/);
+        animatorSet.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+    public void createSakura2(float x, float y) {
+
+        Random r = new Random();
+
+        if (r.nextDouble() < 0.3) {
+            return;
         }
+
+        int k = r.nextInt(120);
+
+        int im = (k < 20 ? 0 :
+                (k < 60 ? 1 :
+                        (k < 80 ? 2 :
+                                (k < 100 ? 3 :
+                                        (k < 110 ? 4 :
+                                                (k < 115 ? 5 : 6))))));
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.leftMargin = (int) x - (SIZE / 2);
+        params.topMargin = (int) y - (SIZE / 2);
+
+        int[] sa = {
+                R.drawable.sakura,
+                R.drawable.sakura2,
+                R.drawable.sakura3,
+                R.drawable.sakura4,
+                R.drawable.sakura5,
+                R.drawable.sakura6,
+                R.drawable.sakura7
+        };
+
+        final ImageView sakura = new ImageView(getApplicationContext());
+        sakura.setImageResource(sa[im]);
+        sakura.setLayoutParams(params);
+
+        layoutSakura.addView(sakura);
+
+        final AnimatorSet animatorSet = new AnimatorSet();
+
+        boolean sign = r.nextDouble() > 0.5 ? true : false;
+        int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
+        int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
+        long duration = (long) (r.nextDouble() * 1000 * fspeedx2) + 15000 + (1000 * (20 - speedx2));
+
+        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
+        rotationX.setRepeatCount(ValueAnimator.INFINITE);
+        rotationX.setRepeatMode(ValueAnimator.RESTART);
+        rotationX.setInterpolator(new LinearInterpolator());
+        rotationX.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (r.nextDouble() * 1000 * fspeedy2) + 15000 + (1000 * (20 - speedy2));
+
+        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
+        rotationY.setRepeatCount(ValueAnimator.INFINITE);
+        rotationY.setRepeatMode(ValueAnimator.RESTART);
+        rotationY.setInterpolator(new LinearInterpolator());
+        rotationY.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (((r.nextDouble() * 500.0 * fspeed2) + 4000) / (speed2/10.0));
+
+        ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
+        rotationZ.setRepeatCount(ValueAnimator.INFINITE);
+        rotationZ.setRepeatMode(ValueAnimator.RESTART);
+        rotationZ.setInterpolator(new LinearInterpolator());
+        rotationZ.setDuration(duration);
+
+
+        float scale = (float) (r.nextDouble() * 0.25 * finalSize2);
+        duration = (long) (((r.nextDouble() * 400.0 * fspeed2) + 2500) / (speed2/10.0));
+
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.02f * startSize2)), sakura.getScaleX() * (1f + (0.02f * startSize2)) + scale);
+        scaleX.setInterpolator(new AccelerateInterpolator());
+        scaleX.setDuration(duration);
+
+        Log.d("scaleee", sakura.getScaleX() * (1f + (0.02f * startSize2)) + " " + scale);
+
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.02f * startSize2)), sakura.getScaleX() * (1f + (0.02f * startSize2)) + scale);
+        scaleY.setInterpolator(new AccelerateInterpolator());
+        scaleY.setDuration(duration);
+
+        duration = (long) (((r.nextDouble() * 500.0 * fspeed2) + 2500) / (speed2/10.0));
+        sign = r.nextDouble() > 0.5 ? true : false;
+        int x2 = r.nextInt(MAX_X) + 250;
+
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, x2 * (sign ? 1 : -1));
+        translationX.setInterpolator(new DecelerateInterpolator());
+        translationX.setDuration(duration);
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        int y2 = r.nextInt((int) (MAX_Y / 1.5)) + 250;
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y2 * (sign ? 1 : -1));
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+
+        duration = (long) (r.nextDouble() * 3000) + 1500;
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(sakura, View.ALPHA, 1f, 0f);
+        alpha.setInterpolator(new AccelerateInterpolator());
+        alpha.setDuration(duration);
+        alpha.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                sakura.setLayerType(View.LAYER_TYPE_NONE, null);
+
+                sakura.clearAnimation();
+                sakura.setVisibility(View.GONE);
+                layoutSakura.removeView(sakura);
+                animatorSet.cancel();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY, alpha);
+        animatorSet.start();
+    }
+
+    int fr = 0;
+
+    public void getBitmapFromView(View view) {
+        long l = SystemClock.currentThreadTimeMillis();
+        Log.d("bitmaps", "Frame: " + fr + " start at " + new Date());
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(bitmap);
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        view.draw(canvas);
+
+        File file;
+        File f = null;
+        if (android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
+            file = new File(android.os.Environment.getExternalStorageDirectory(), "frame");
+            if (!file.exists()) {
+                file.mkdirs();
+
+            }
+            f = new File(file.getAbsolutePath() + "/frameX" + fr + ".png");
+        }
+
+        try {
+            FileOutputStream ostream = new FileOutputStream(f);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 10, ostream);
+            ostream.close();
+            Log.d("bitmaps", "Frame: " + fr + " take" + (SystemClock.currentThreadTimeMillis() - l) + " ms");
+            fr++;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public void createSakuraEars1(float x, float y) {
+
+        Random r = new Random();
+        int k = r.nextInt(120);
+
+        int im = (k < 40 ? 0 :
+                (k < 60 ? 1 :
+                        (k < 70 ? 2 :
+                                (k < 100 ? 3 :
+                                        (k < 110 ? 4 :
+                                                (k < 115 ? 5 : 6))))));
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.leftMargin = (int) x - (SIZE / 2);
+        params.topMargin = (int) y - (SIZE / 2);
+
+        int[] sa = {
+                R.drawable.sakura,
+                R.drawable.sakura2,
+                R.drawable.sakura3,
+                R.drawable.sakura4,
+                R.drawable.sakura5,
+                R.drawable.sakura6,
+                R.drawable.sakura7
+        };
+
+        final ImageView sakura = new ImageView(getApplicationContext());
+        sakura.setImageResource(sa[im]);
+        sakura.setLayoutParams(params);
+
+        layoutSakura.addView(sakura);
+
+        sakura.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        final AnimatorSet animatorSet = new AnimatorSet();
+
+        boolean sign = r.nextDouble() > 0.5 ? true : false;
+        int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
+        int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
+        long duration = (long) (((r.nextDouble() * 500.0 * fspeedx1) + 8000) / (speedx1/5.0));
+
+        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
+        rotationX.setRepeatCount(ValueAnimator.INFINITE);
+        rotationX.setRepeatMode(ValueAnimator.RESTART);
+        rotationX.setInterpolator(new LinearInterpolator());
+        rotationX.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (((r.nextDouble() * 500.0 * fspeedy1) + 8000) / (speedy1/5.0));
+
+        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
+        rotationY.setRepeatCount(ValueAnimator.INFINITE);
+        rotationY.setRepeatMode(ValueAnimator.RESTART);
+        rotationY.setInterpolator(new LinearInterpolator());
+        rotationY.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (r.nextDouble() * 5000) + 2000;
+
+        ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
+        rotationZ.setRepeatCount(ValueAnimator.INFINITE);
+        rotationZ.setRepeatMode(ValueAnimator.RESTART);
+        rotationZ.setInterpolator(new LinearInterpolator());
+        rotationZ.setDuration(duration);
+
+
+        float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
+        duration = (long) (((r.nextDouble() * 200.0 * fspeed1) + 2000) / (speed1/7.0));
+
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
+        scaleX.setInterpolator(new LinearInterpolator());
+        scaleX.setDuration(duration);
+
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.05f * startSize1)), scale);
+        scaleY.setInterpolator(new LinearInterpolator());
+        scaleY.setDuration(duration);
+
+
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, MAX_X - x + SIZE);
+        translationX.setInterpolator(new DecelerateInterpolator());
+        translationX.setDuration(duration);
+        translationX.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                sakura.setLayerType(View.LAYER_TYPE_NONE, null);
+
+                sakura.clearAnimation();
+                sakura.setVisibility(View.GONE);
+                layoutSakura.removeView(sakura);
+                animatorSet.cancel();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        float posY = (float) (r.nextDouble() * (MAX_X/10.0) * (sign ? 1 : -1));
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, posY);
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+
+
+
+        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);
+        animatorSet.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public void createSakuraEars2(float x, float y) {
+
+        Random r = new Random();
+        int k = r.nextInt(120);
+
+        int im = (k < 40 ? 0 :
+                (k < 60 ? 1 :
+                        (k < 70 ? 2 :
+                                (k < 100 ? 3 :
+                                        (k < 110 ? 4 :
+                                                (k < 115 ? 5 : 6))))));
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.leftMargin = (int) x - (SIZE / 2);
+        params.topMargin = (int) y - (SIZE / 2);
+
+        int[] sa = {
+                R.drawable.sakura,
+                R.drawable.sakura2,
+                R.drawable.sakura3,
+                R.drawable.sakura4,
+                R.drawable.sakura5,
+                R.drawable.sakura6,
+                R.drawable.sakura7
+        };
+
+        final ImageView sakura = new ImageView(getApplicationContext());
+        sakura.setImageResource(sa[im]);
+        sakura.setLayoutParams(params);
+
+        layoutSakura.addView(sakura);
+
+        sakura.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        final AnimatorSet animatorSet = new AnimatorSet();
+
+        boolean sign = r.nextDouble() > 0.5 ? true : false;
+        int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
+        int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
+        long duration = (long) (((r.nextDouble() * 500.0 * fspeedx1) + 8000) / (speedx1/5.0));
+
+        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
+        rotationX.setRepeatCount(ValueAnimator.INFINITE);
+        rotationX.setRepeatMode(ValueAnimator.RESTART);
+        rotationX.setInterpolator(new LinearInterpolator());
+        rotationX.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (((r.nextDouble() * 500.0 * fspeedy1) + 8000) / (speedy1/5.0));
+
+        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
+        rotationY.setRepeatCount(ValueAnimator.INFINITE);
+        rotationY.setRepeatMode(ValueAnimator.RESTART);
+        rotationY.setInterpolator(new LinearInterpolator());
+        rotationY.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (r.nextDouble() * 5000) + 2000;
+
+        ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
+        rotationZ.setRepeatCount(ValueAnimator.INFINITE);
+        rotationZ.setRepeatMode(ValueAnimator.RESTART);
+        rotationZ.setInterpolator(new LinearInterpolator());
+        rotationZ.setDuration(duration);
+
+
+        float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
+        duration = (long) (((r.nextDouble() * 200.0 * fspeed1) + 2000) / (speed1/7.0));
+
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
+        scaleX.setInterpolator(new LinearInterpolator());
+        scaleX.setDuration(duration);
+
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.05f * startSize1)), scale);
+        scaleY.setInterpolator(new LinearInterpolator());
+        scaleY.setDuration(duration);
+
+
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, 0 - x - SIZE);
+        translationX.setInterpolator(new DecelerateInterpolator());
+        translationX.setDuration(duration);
+        translationX.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                sakura.setLayerType(View.LAYER_TYPE_NONE, null);
+
+                sakura.clearAnimation();
+                sakura.setVisibility(View.GONE);
+                layoutSakura.removeView(sakura);
+                animatorSet.cancel();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        float posY = (float) (r.nextDouble() * (MAX_X/10.0) * (sign ? 1 : -1));
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, posY);
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+
+
+
+        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);
+        animatorSet.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public void createSakuraEyes1(float x, float y) {
+
+        Random r = new Random();
+        int k = r.nextInt(120);
+
+        int im = (k < 40 ? 0 :
+                (k < 60 ? 1 :
+                        (k < 70 ? 2 :
+                                (k < 100 ? 3 :
+                                        (k < 110 ? 4 :
+                                                (k < 115 ? 5 : 6))))));
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.leftMargin = (int) x - (SIZE / 2);
+        params.topMargin = (int) y - (SIZE / 2);
+
+        int[] sa = {
+                R.drawable.sakura,
+                R.drawable.sakura2,
+                R.drawable.sakura3,
+                R.drawable.sakura4,
+                R.drawable.sakura5,
+                R.drawable.sakura6,
+                R.drawable.sakura7
+        };
+
+        final ImageView sakura = new ImageView(getApplicationContext());
+        sakura.setImageResource(sa[im]);
+        sakura.setLayoutParams(params);
+
+        layoutSakura.addView(sakura);
+
+        sakura.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        final AnimatorSet animatorSet = new AnimatorSet();
+
+        boolean sign = r.nextDouble() > 0.5 ? true : false;
+        int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
+        int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
+        long duration = (long) (((r.nextDouble() * 500.0 * fspeedx1) + 8000) / (speedx1/5.0));
+
+        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
+        rotationX.setRepeatCount(ValueAnimator.INFINITE);
+        rotationX.setRepeatMode(ValueAnimator.RESTART);
+        rotationX.setInterpolator(new LinearInterpolator());
+        rotationX.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (((r.nextDouble() * 500.0 * fspeedy1) + 8000) / (speedy1/5.0));
+
+        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
+        rotationY.setRepeatCount(ValueAnimator.INFINITE);
+        rotationY.setRepeatMode(ValueAnimator.RESTART);
+        rotationY.setInterpolator(new LinearInterpolator());
+        rotationY.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (r.nextDouble() * 5000) + 2000;
+
+        ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
+        rotationZ.setRepeatCount(ValueAnimator.INFINITE);
+        rotationZ.setRepeatMode(ValueAnimator.RESTART);
+        rotationZ.setInterpolator(new LinearInterpolator());
+        rotationZ.setDuration(duration);
+
+
+        float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
+        duration = (long) (((r.nextDouble() * 200.0 * fspeed1) + 2000) / (speed1/5.0));
+
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
+        scaleX.setInterpolator(new LinearInterpolator());
+        scaleX.setDuration(duration);
+
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.05f * startSize1)), scale);
+        scaleY.setInterpolator(new LinearInterpolator());
+        scaleY.setDuration(duration);
+
+
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, MAX_X - x + SIZE);
+        translationX.setInterpolator(new DecelerateInterpolator());
+        translationX.setDuration(duration);
+        translationX.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                sakura.setLayerType(View.LAYER_TYPE_NONE, null);
+
+                sakura.clearAnimation();
+                sakura.setVisibility(View.GONE);
+                layoutSakura.removeView(sakura);
+                animatorSet.cancel();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        float posY = (float) (r.nextDouble() * (MAX_X/5.0)) + 200f;
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, -posY);
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+
+
+        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);
+        animatorSet.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public void createSakuraEyes2(float x, float y) {
+
+        Random r = new Random();
+        int k = r.nextInt(120);
+
+        int im = (k < 40 ? 0 :
+                (k < 60 ? 1 :
+                        (k < 70 ? 2 :
+                                (k < 100 ? 3 :
+                                        (k < 110 ? 4 :
+                                                (k < 115 ? 5 : 6))))));
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.leftMargin = (int) x - (SIZE / 2);
+        params.topMargin = (int) y - (SIZE / 2);
+
+        int[] sa = {
+                R.drawable.sakura,
+                R.drawable.sakura2,
+                R.drawable.sakura3,
+                R.drawable.sakura4,
+                R.drawable.sakura5,
+                R.drawable.sakura6,
+                R.drawable.sakura7
+        };
+
+        final ImageView sakura = new ImageView(getApplicationContext());
+        sakura.setImageResource(sa[im]);
+        sakura.setLayoutParams(params);
+
+        layoutSakura.addView(sakura);
+
+        sakura.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        final AnimatorSet animatorSet = new AnimatorSet();
+
+        boolean sign = r.nextDouble() > 0.5 ? true : false;
+        int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
+        int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
+        long duration = (long) (((r.nextDouble() * 500.0 * fspeedx1) + 8000) / (speedx1/5.0));
+
+        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
+        rotationX.setRepeatCount(ValueAnimator.INFINITE);
+        rotationX.setRepeatMode(ValueAnimator.RESTART);
+        rotationX.setInterpolator(new LinearInterpolator());
+        rotationX.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (((r.nextDouble() * 500.0 * fspeedy1) + 8000) / (speedy1/5.0));
+
+        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
+        rotationY.setRepeatCount(ValueAnimator.INFINITE);
+        rotationY.setRepeatMode(ValueAnimator.RESTART);
+        rotationY.setInterpolator(new LinearInterpolator());
+        rotationY.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (r.nextDouble() * 5000) + 2000;
+
+        ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
+        rotationZ.setRepeatCount(ValueAnimator.INFINITE);
+        rotationZ.setRepeatMode(ValueAnimator.RESTART);
+        rotationZ.setInterpolator(new LinearInterpolator());
+        rotationZ.setDuration(duration);
+
+
+        float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
+        duration = (long) (((r.nextDouble() * 200.0 * fspeed1) + 2000) / (speed1/5.0));
+
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
+        scaleX.setInterpolator(new LinearInterpolator());
+        scaleX.setDuration(duration);
+
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.05f * startSize1)), scale);
+        scaleY.setInterpolator(new LinearInterpolator());
+        scaleY.setDuration(duration);
+
+
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, 0 - x - SIZE);
+        translationX.setInterpolator(new DecelerateInterpolator());
+        translationX.setDuration(duration);
+        translationX.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                sakura.setLayerType(View.LAYER_TYPE_NONE, null);
+
+                sakura.clearAnimation();
+                sakura.setVisibility(View.GONE);
+                layoutSakura.removeView(sakura);
+                animatorSet.cancel();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        float posY = (float) (r.nextDouble() * (MAX_X/5.0)) + 200f;
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, -posY);
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+
+
+        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);
+        animatorSet.start();
     }
 }
