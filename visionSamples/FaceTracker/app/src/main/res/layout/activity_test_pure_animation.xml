@@ -14,10 +14,12 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/been"
+            android:src="@drawable/face"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="90dp" />
+            android:layout_marginTop="70dp" />
 
     </com.google.android.gms.samples.vision.face.facetracker.ui.camera.ClonableRelativeLayout>
 
@@ -25,6 +27,7 @@
 
 
     <Button
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -33,6 +36,7 @@
         android:id="@+id/buttonMouth"/>
 
     <Button
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
@@ -41,6 +45,7 @@
         android:id="@+id/buttonEyes"/>
 
     <Button
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

@@ -281,7 +281,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
-                .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                .setLandmarkType(FaceDetector.ALL_LANDMARKS)
+                .setClassificationType(FaceDetector.NO_CLASSIFICATIONS)
                 .build();
 
         detector.setProcessor(
@@ -303,7 +304,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         mCameraSource = new CameraSource.Builder(context, detector)
 //                .setRequestedPreviewSize(640, 480)
                 .setRequestedPreviewSize(1920, 1080)
-                .setFacing(CameraSource.CAMERA_FACING_FRONT)
+                .setFacing(CameraSource.CAMERA_FACING_BACK)
                 .setRequestedFps(30.0f)
                 .build();
 

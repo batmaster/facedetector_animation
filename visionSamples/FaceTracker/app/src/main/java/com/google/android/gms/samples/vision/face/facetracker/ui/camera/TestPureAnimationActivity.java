@@ -610,6 +610,34 @@ public class TestPureAnimationActivity extends AppCompatActivity {
             }
         });
 
+        final Handler mHandler01 = new Handler();
+        mHandler01.post(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public void run() {
+
+                if (beem) {
+                    createSakura(MAX_X / 2, MAX_X / 2);
+                }
+
+                mHandler01.postDelayed(this, (500 / volume1));
+            }
+        });
+
+        final Handler mHandler0 = new Handler();
+        mHandler0.post(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public void run() {
+
+                if (beem) {
+                    createSakura(MAX_X / 2, MAX_X / 2);
+                }
+
+                mHandler0.postDelayed(this, (500 / volume1));
+            }
+        });
+
 
         final Handler mHandler = new Handler();
         mHandler.post(new Runnable() {
@@ -618,7 +646,6 @@ public class TestPureAnimationActivity extends AppCompatActivity {
             public void run() {
 
                 if (beem) {
-                    createSakura(MAX_X / 2, MAX_X / 2);
                     createSakura(MAX_X / 2, MAX_X / 2);
                 }
 
@@ -641,37 +668,37 @@ public class TestPureAnimationActivity extends AppCompatActivity {
         });
 
 
-        final Handler mHandler3 = new Handler();
-        mHandler3.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-            @Override
-            public void run() {
-
-                if (beemEars) {
-                    createSakuraEars1((MAX_X / 2) + 150, (MAX_X / 2) - 50);
-                    createSakuraEars2((MAX_X / 2) - 200, (MAX_X / 2) - 50);
-
-                }
-
-                mHandler3.postDelayed(this, (long) (1.5 * 500 / volume1));
-            }
-        });
-
-        final Handler mHandler4 = new Handler();
-        mHandler4.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-            @Override
-            public void run() {
-
-                if (beemEyes) {
-                    createSakuraEyes1((MAX_X / 2) + 100, (MAX_X / 2) - 120);
-                    createSakuraEyes2((MAX_X / 2) - 150, (MAX_X / 2) - 120);
-
-                }
-
-                mHandler4.postDelayed(this, (long) (1.5 * 500 / volume1));
-            }
-        });
+//        final Handler mHandler3 = new Handler();
+//        mHandler3.post(new Runnable() {
+//            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+//            @Override
+//            public void run() {
+//
+//                if (beemEars) {
+//                    createSakuraEars1((MAX_X / 2) + 150, (MAX_X / 2) - 50);
+//                    createSakuraEars2((MAX_X / 2) - 200, (MAX_X / 2) - 50);
+//
+//                }
+//
+//                mHandler3.postDelayed(this, (long) (1.5 * 500 / volume1));
+//            }
+//        });
+//
+//        final Handler mHandler4 = new Handler();
+//        mHandler4.post(new Runnable() {
+//            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+//            @Override
+//            public void run() {
+//
+//                if (beemEyes) {
+//                    createSakuraEyes1((MAX_X / 2) + 100, (MAX_X / 2) - 120);
+//                    createSakuraEyes2((MAX_X / 2) - 150, (MAX_X / 2) - 120);
+//
+//                }
+//
+//                mHandler4.postDelayed(this, (long) (1.5 * 500 / volume1));
+//            }
+//        });
 
 
         final ArrayList<View> views = new ArrayList<View>();
@@ -811,7 +838,7 @@ public class TestPureAnimationActivity extends AppCompatActivity {
 
 
         sign = r.nextDouble() > 0.5 ? true : false;
-        float posX = (float) (r.nextDouble() * (MAX_X/4.0) * (sign ? 1 : -1));
+        float posX = (float) (r.nextDouble() * (MAX_X/2.0) * (sign ? 1 : -1));
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, posX);
         translationX.setInterpolator(new DecelerateInterpolator());
