@@ -126,15 +126,26 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         double imageHeight = 1920;
         float scale = (float) Math.min(viewWidth / imageWidth, viewHeight / imageHeight);
 
-
+        List<Landmark> landmarks = face.getLandmarks();
         float x1 = 0;
         float x2 = 0;
         float y1 = 0;
         float y2 = 0;
 
-        List<Landmark> landmarks = face.getLandmarks();
+        Singleton.activity.mouthX = 0;
+        Singleton.activity.mouthY = 0;
+        Singleton.activity.leftEarX = 0;
+        Singleton.activity.leftEarY = 0;
+        Singleton.activity.rightEarX = 0;
+        Singleton.activity.rightEarY = 0;
+        Singleton.activity.leftEyeX = 0;
+        Singleton.activity.leftEyeY = 0;
+        Singleton.activity.rightEyeX = 0;
+        Singleton.activity.rightEyeY = 0;
+
         for (int i = 0; i < landmarks.size(); i++) {
-                canvas.drawCircle(landmarks.get(i).getPosition().x * scale, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+            canvas.drawCircle(landmarks.get(i).getPosition().x * scale, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {
                 x1 = landmarks.get(i).getPosition().x  * scale;
                 y1 = landmarks.get(i).getPosition().y  * scale;
@@ -143,11 +154,28 @@ class FaceGraphic extends GraphicOverlay.Graphic {
                 x2 = landmarks.get(i).getPosition().x  * scale;
                 y2 = landmarks.get(i).getPosition().y  * scale;
             }
+            else if (landmarks.get(i).getType() == Landmark.LEFT_EAR) {
+                Singleton.activity.leftEarX = landmarks.get(i).getPosition().x  * scale;
+                Singleton.activity.leftEarY = landmarks.get(i).getPosition().y  * scale;
+            }
+            else if (landmarks.get(i).getType() == Landmark.RIGHT_EAR) {
+                Singleton.activity.rightEarX = landmarks.get(i).getPosition().x  * scale;
+                Singleton.activity.rightEarY = landmarks.get(i).getPosition().y  * scale;
+            }
+            else if (landmarks.get(i).getType() == Landmark.LEFT_EYE) {
+                Log.d("landmarkss", landmarks.get(i).getType() + "");
+                Singleton.activity.leftEyeX = landmarks.get(i).getPosition().x  * scale;
+                Singleton.activity.leftEyeY = landmarks.get(i).getPosition().y  * scale;
+            }
+            else if (landmarks.get(i).getType() == Landmark.RIGHT_EYE) {
+                Singleton.activity.rightEyeX = landmarks.get(i).getPosition().x  * scale;
+                Singleton.activity.rightEyeY = landmarks.get(i).getPosition().y  * scale;
+            }
+
         }
 
-        if (x1 != 0 && x2 != 0) {
-            Singleton.activity.createSakura(Math.abs((x2 + x1)/2), Math.abs((y2 + y1)/2));
-        }
+        Singleton.activity.mouthX = Math.abs((x2 + x1)/2);
+        Singleton.activity.mouthY = Math.abs((y2 + y1)/2);
 
 
 

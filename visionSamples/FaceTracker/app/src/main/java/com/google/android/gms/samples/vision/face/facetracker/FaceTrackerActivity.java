@@ -120,10 +120,21 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         makeThreadSakura();
     }
 
-    private boolean beem = true;
-    private boolean beemEars = true;
-    private boolean beemEyes = true;
-    private boolean flora = true;
+    public float mouthX = 0;
+    public float mouthY = 0;
+
+    public float leftEarX = 0;
+    public float leftEarY = 0;
+
+    public float rightEarX = 0;
+    public float rightEarY = 0;
+
+    public float leftEyeX = 0;
+    public float leftEyeY = 0;
+
+    public float rightEyeX = 0;
+    public float rightEyeY = 0;
+
 
     private int volume1 = 10;
     private int speed1 = 10;
@@ -165,9 +176,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                if (beem) {
-                    createSakura(MAX_X / 2, MAX_X / 2);
-                    createSakura(MAX_X / 2, MAX_X / 2);
+                if (mouthX != 0 && mouthY != 0) {
+                    createSakura(mouthX, mouthY);
+                    createSakura(mouthX, mouthY);
                 }
 
                 mHandler.postDelayed(this, (500 / volume1));
@@ -180,8 +191,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                if (flora) {
-                    createSakura2(MAX_X / 2, MAX_X / 2);
+                if (mouthX != 0 && mouthY != 0) {
+                    createSakura2(mouthX, mouthY);
                 }
 
                 mHandler.postDelayed(this, (500 / volume2));
@@ -195,10 +206,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                if (beemEars) {
-                    createSakuraEars1((MAX_X / 2) + 150, (MAX_X / 2) - 50);
-                    createSakuraEars2((MAX_X / 2) - 200, (MAX_X / 2) - 50);
+                if (leftEarX != 0 && leftEarY != 0) {
+                    createSakuraEars2(leftEarX, leftEarY);
+                }
 
+                if (rightEarX != 0 && rightEarY != 0) {
+                    createSakuraEars1(rightEarX, rightEarY);
                 }
 
                 mHandler3.postDelayed(this, (long) (1.5 * 500 / volume1));
@@ -211,10 +224,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                if (beemEyes) {
-                    createSakuraEyes1((MAX_X / 2) + 100, (MAX_X / 2) - 120);
-                    createSakuraEyes2((MAX_X / 2) - 150, (MAX_X / 2) - 120);
 
+                Log.d("landmarkss", leftEyeX + " " + leftEyeY);
+
+                if (leftEyeX != 0 && leftEyeY != 0) {
+                    createSakuraEyes1(leftEyeX, leftEyeY);
+                }
+
+                if (rightEyeX != 0 && rightEyeY != 0) {
+                    createSakuraEyes2(rightEyeX, rightEyeY);
                 }
 
                 mHandler4.postDelayed(this, (long) (1.5 * 500 / volume1));
@@ -285,7 +303,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         mCameraSource = new CameraSource.Builder(context, detector)
 //                .setRequestedPreviewSize(640, 480)
                 .setRequestedPreviewSize(1920, 1080)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setFacing(CameraSource.CAMERA_FACING_FRONT)
                 .setRequestedFps(30.0f)
                 .build();
 
@@ -467,7 +485,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void createSakura(float x, float y) {
+    private void createSakura(float x, float y) {
 
         Random r = new Random();
         int k = r.nextInt(120);
@@ -596,7 +614,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-    public void createSakura2(float x, float y) {
+    private void createSakura2(float x, float y) {
 
         Random r = new Random();
 
@@ -738,7 +756,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     int fr = 0;
 
-    public void getBitmapFromView(View view) {
+    private void getBitmapFromView(View view) {
         long l = SystemClock.currentThreadTimeMillis();
         Log.d("bitmaps", "Frame: " + fr + " start at " + new Date());
         view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
@@ -774,7 +792,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void createSakuraEars1(float x, float y) {
+    private void createSakuraEars1(float x, float y) {
 
         Random r = new Random();
         int k = r.nextInt(120);
@@ -904,7 +922,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void createSakuraEars2(float x, float y) {
+    private void createSakuraEars2(float x, float y) {
 
         Random r = new Random();
         int k = r.nextInt(120);
@@ -1034,7 +1052,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void createSakuraEyes1(float x, float y) {
+    private void createSakuraEyes1(float x, float y) {
 
         Random r = new Random();
         int k = r.nextInt(120);
@@ -1164,7 +1182,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void createSakuraEyes2(float x, float y) {
+    private void createSakuraEyes2(float x, float y) {
 
         Random r = new Random();
         int k = r.nextInt(120);
