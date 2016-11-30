@@ -48,7 +48,7 @@ import java.util.Random;
 public class TestPureAnimationActivity extends AppCompatActivity {
 
     private RelativeLayout parent;
-    private ClonableRelativeLayout layoutSakura;
+    private RelativeLayout layoutSakura;
 
     private TextView tVolume1;
     private SeekBar sVolume1;
@@ -148,7 +148,7 @@ public class TestPureAnimationActivity extends AppCompatActivity {
         SIZE = size.x/10;
 
         parent = (RelativeLayout) findViewById(R.id.parent);
-        layoutSakura = (ClonableRelativeLayout) findViewById(R.id.layoutSakura);
+        layoutSakura = (RelativeLayout) findViewById(R.id.layoutSakura);
 
         tVolume1 = (TextView) findViewById(R.id.tVolume1);
         sVolume1 = (SeekBar) findViewById(R.id.sVolume1);

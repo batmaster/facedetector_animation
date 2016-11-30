@@ -27,28 +27,35 @@
 
   </RelativeLayout>
 
-  <Button
+  <ToggleButton
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_alignParentRight="true"
       android:layout_alignParentBottom="true"
-      android:text="ปาก"
-      android:id="@+id/buttonMouth"/>
+      android:textOn="ปาก"
+      android:textOff="ปาก"
+      android:checked="true"
+      android:id="@+id/toggleButtonMouth"/>
 
-  <Button
+  <ToggleButton
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_alignParentRight="true"
-      android:layout_above="@id/buttonMouth"
-      android:text="ตา"
-      android:id="@+id/buttonEyes"/>
+      android:layout_above="@id/toggleButtonMouth"
+      android:textOn="ตา"
+      android:textOff="ตา"
+      android:checked="true"
+      android:id="@+id/toggleButtonEyes"/>
 
-  <Button
+  <ToggleButton
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_alignParentRight="true"
-      android:layout_above="@id/buttonEyes"
+      android:layout_above="@id/toggleButtonEyes"
       android:text="หู"
-      android:id="@+id/buttonEars"/>
+      android:textOn="หู"
+      android:textOff="หู"
+      android:checked="true"
+      android:id="@+id/toggleButtonEars"/>
 
 </RelativeLayout>

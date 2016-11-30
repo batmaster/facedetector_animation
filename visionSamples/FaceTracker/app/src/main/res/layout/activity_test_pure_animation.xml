@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.google.android.gms.samples.vision.face.facetracker.ui.camera.TestPureAnimationActivity">
 
-    <com.google.android.gms.samples.vision.face.facetracker.ui.camera.ClonableRelativeLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/layoutSakura">
@@ -21,7 +21,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="70dp" />
 
-    </com.google.android.gms.samples.vision.face.facetracker.ui.camera.ClonableRelativeLayout>
+    </RelativeLayout>
 
 
 

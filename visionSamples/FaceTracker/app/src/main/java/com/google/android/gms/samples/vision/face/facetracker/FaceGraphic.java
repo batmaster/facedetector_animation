@@ -23,9 +23,11 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
+import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -127,24 +129,32 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float scale = (float) Math.min(viewWidth / imageWidth, viewHeight / imageHeight);
 
         List<Landmark> landmarks = face.getLandmarks();
-        float x1 = 0;
-        float x2 = 0;
-        float y1 = 0;
-        float y2 = 0;
+        float x1 = -1;
+        float x2 = -1;
+        float y1 = -1;
+        float y2 = -1;
 
-        Singleton.activity.mouthX = 0;
-        Singleton.activity.mouthY = 0;
-        Singleton.activity.leftEarX = 0;
-        Singleton.activity.leftEarY = 0;
-        Singleton.activity.rightEarX = 0;
-        Singleton.activity.rightEarY = 0;
-        Singleton.activity.leftEyeX = 0;
-        Singleton.activity.leftEyeY = 0;
-        Singleton.activity.rightEyeX = 0;
-        Singleton.activity.rightEyeY = 0;
+        com.google.android.gms.samples.vision.face.facetracker.Face f = new com.google.android.gms.samples.vision.face.facetracker.Face();
+        f.id = face.getId();
+
+        Log.d("fff", f.id + " " + landmarks.size());
+
+        if (landmarks.size() == 0) {
+            for (int i = 0; i < Singleton.activity.faces.size(); i++) {
+                if (Singleton.activity.faces.get(i).id == face.getId()) {
+                    Singleton.activity.faces.remove(i);
+                    return;
+                }
+            }
+
+        }
 
         for (int i = 0; i < landmarks.size(); i++) {
-            canvas.drawCircle(landmarks.get(i).getPosition().x * scale, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+            float whereX = landmarks.get(i).getPosition().x * scale;
+            if (Singleton.activity.CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+                whereX = Singleton.activity.MAX_X - whereX;
+            }
+            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
 
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {
                 x1 = landmarks.get(i).getPosition().x  * scale;
@@ -155,30 +165,95 @@ class FaceGraphic extends GraphicOverlay.Graphic {
                 y2 = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.LEFT_EAR) {
-                Singleton.activity.leftEarX = landmarks.get(i).getPosition().x  * scale;
-                Singleton.activity.leftEarY = landmarks.get(i).getPosition().y  * scale;
+                f.leftEarX = landmarks.get(i).getPosition().x  * scale;
+                f.leftEarY = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EAR) {
-                Singleton.activity.rightEarX = landmarks.get(i).getPosition().x  * scale;
-                Singleton.activity.rightEarY = landmarks.get(i).getPosition().y  * scale;
+                f.rightEarX = landmarks.get(i).getPosition().x  * scale;
+                f.rightEarY = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.LEFT_EYE) {
-                Log.d("landmarkss", landmarks.get(i).getType() + "");
-                Singleton.activity.leftEyeX = landmarks.get(i).getPosition().x  * scale;
-                Singleton.activity.leftEyeY = landmarks.get(i).getPosition().y  * scale;
+                f.leftEyeX = landmarks.get(i).getPosition().x  * scale;
+                f.leftEyeY = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EYE) {
-                Singleton.activity.rightEyeX = landmarks.get(i).getPosition().x  * scale;
-                Singleton.activity.rightEyeY = landmarks.get(i).getPosition().y  * scale;
+                f.rightEyeX = landmarks.get(i).getPosition().x  * scale;
+                f.rightEyeY = landmarks.get(i).getPosition().y  * scale;
             }
 
         }
 
-        Singleton.activity.mouthX = Math.abs((x2 + x1)/2);
-        Singleton.activity.mouthY = Math.abs((y2 + y1)/2);
+        Log.d("Euler", face.getEulerY() + " " + face.getEulerZ());
+
+        if (x1 != -1 && x2 != -1 && y1 != -1 && y2 != -1) {
+            f.mouthX = Math.abs((x2 + x1) / 2);
+            f.mouthY = Math.abs((y2 + y1) / 2);
+        }
+
+        f.eulerY = face.getEulerY();
+        f.eulerZ = face.getEulerZ();
+
+        int existIndex = -1;
+
+        for (int i = 0; i < Singleton.activity.faces.size(); i++) {
+            if (Singleton.activity.faces.get(i).id == face.getId()) {
+                existIndex = i;
+                break;
+            }
+        }
+        if (existIndex == -1) {
+            Singleton.activity.faces.add(f);
+        }
+        else {
+            Singleton.activity.faces.set(existIndex, f);
+        }
+    }
 
 
 
+
+    private String getLandmarkType(int which) {
+        switch (which) {
+            case Landmark.BOTTOM_MOUTH:
+                return "Bottom mouth";
+
+            case Landmark.LEFT_CHEEK:
+                return "Left cheek";
+
+            case Landmark.LEFT_EAR:
+                return "Left ear";
+
+            case Landmark.LEFT_EAR_TIP:
+                return "Left ear tip";
+
+            case Landmark.LEFT_EYE:
+                return "Left eye";
+
+            case Landmark.LEFT_MOUTH:
+                return "Left mouth";
+
+            case Landmark.NOSE_BASE:
+                return "nose base";
+
+            case Landmark.RIGHT_CHEEK:
+                return "Right cheek";
+
+            case Landmark.RIGHT_EAR:
+                return "Right ear";
+
+            case Landmark.RIGHT_EAR_TIP:
+                return "Right ear tip";
+
+            case Landmark.RIGHT_EYE:
+                return "Right eye";
+
+            case Landmark.RIGHT_MOUTH:
+                return "Right mouth";
+
+            default:
+                return "Unidentified";
+
+        }
     }
 
 }
