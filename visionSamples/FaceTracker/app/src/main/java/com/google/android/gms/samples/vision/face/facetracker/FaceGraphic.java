@@ -134,11 +134,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float y1 = -1;
         float y2 = -1;
 
-        com.google.android.gms.samples.vision.face.facetracker.Face f = new com.google.android.gms.samples.vision.face.facetracker.Face();
-        f.id = face.getId();
-
-        Log.d("fff", f.id + " " + landmarks.size());
-
         if (landmarks.size() == 0) {
             for (int i = 0; i < Singleton.activity.faces.size(); i++) {
                 if (Singleton.activity.faces.get(i).id == face.getId()) {
@@ -148,6 +143,27 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             }
 
         }
+
+
+
+
+        int existIndex = -1;
+        com.google.android.gms.samples.vision.face.facetracker.Face existFace = null;
+        for (int i = 0; i < Singleton.activity.faces.size(); i++) {
+            if (Singleton.activity.faces.get(i).id == face.getId()) {
+                existFace = Singleton.activity.faces.get(i);
+                existIndex = i;
+                break;
+            }
+        }
+
+        if (existIndex == -1) {
+            existFace = new com.google.android.gms.samples.vision.face.facetracker.Face();
+            existFace.id = face.getId();
+        }
+
+
+
 
         for (int i = 0; i < landmarks.size(); i++) {
             float whereX = landmarks.get(i).getPosition().x * scale;
@@ -165,20 +181,20 @@ class FaceGraphic extends GraphicOverlay.Graphic {
                 y2 = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.LEFT_EAR) {
-                f.leftEarX = landmarks.get(i).getPosition().x  * scale;
-                f.leftEarY = landmarks.get(i).getPosition().y  * scale;
+                existFace.leftEarX = landmarks.get(i).getPosition().x  * scale;
+                existFace.leftEarY = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EAR) {
-                f.rightEarX = landmarks.get(i).getPosition().x  * scale;
-                f.rightEarY = landmarks.get(i).getPosition().y  * scale;
+                existFace.rightEarX = landmarks.get(i).getPosition().x  * scale;
+                existFace.rightEarY = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.LEFT_EYE) {
-                f.leftEyeX = landmarks.get(i).getPosition().x  * scale;
-                f.leftEyeY = landmarks.get(i).getPosition().y  * scale;
+                existFace.leftEyeX = landmarks.get(i).getPosition().x  * scale;
+                existFace.leftEyeY = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EYE) {
-                f.rightEyeX = landmarks.get(i).getPosition().x  * scale;
-                f.rightEyeY = landmarks.get(i).getPosition().y  * scale;
+                existFace.rightEyeX = landmarks.get(i).getPosition().x  * scale;
+                existFace.rightEyeY = landmarks.get(i).getPosition().y  * scale;
             }
 
         }
@@ -186,26 +202,17 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         Log.d("Euler", face.getEulerY() + " " + face.getEulerZ());
 
         if (x1 != -1 && x2 != -1 && y1 != -1 && y2 != -1) {
-            f.mouthX = Math.abs((x2 + x1) / 2);
-            f.mouthY = Math.abs((y2 + y1) / 2);
+            existFace.mouthX = Math.abs((x2 + x1) / 2);
+            existFace.mouthY = Math.abs((y2 + y1) / 2);
         }
 
-        f.eulerY = face.getEulerY();
-        f.eulerZ = face.getEulerZ();
+        existFace.eulerY = face.getEulerY();
+        existFace.eulerZ = face.getEulerZ();
 
-        int existIndex = -1;
 
-        for (int i = 0; i < Singleton.activity.faces.size(); i++) {
-            if (Singleton.activity.faces.get(i).id == face.getId()) {
-                existIndex = i;
-                break;
-            }
-        }
+
         if (existIndex == -1) {
-            Singleton.activity.faces.add(f);
-        }
-        else {
-            Singleton.activity.faces.set(existIndex, f);
+            Singleton.activity.faces.add(existFace);
         }
     }
 

@@ -1214,7 +1214,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
         int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
         long duration = (long) (((r.nextDouble() * 500.0 * facespeedx1) + 8000) / (speedx1/5.0));
-        duration *= 8;
+        duration *= 4;
 
         ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
         rotationX.setRepeatCount(ValueAnimator.INFINITE);
@@ -1227,7 +1227,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         startD = sign ? 0 : 359;
         endD = sign ? 359 : 0;
         duration = (long) (((r.nextDouble() * 500.0 * facespeedy1) + 8000) / (speedy1/5.0));
-        duration *= 8;
+        duration *= 4;
 
         ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
         rotationY.setRepeatCount(ValueAnimator.INFINITE);
@@ -1240,7 +1240,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         startD = sign ? 0 : 359;
         endD = sign ? 359 : 0;
         duration = (long) (r.nextDouble() * 5000) + 2000;
-        duration *= 8;
+        duration *= 4;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
@@ -1360,7 +1360,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
         int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
         long duration = (long) (((r.nextDouble() * 500.0 * facespeedx1) + 8000) / (speedx1/5.0));
-        duration *= 8;
+        duration *= 4;
 
         ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
         rotationX.setRepeatCount(ValueAnimator.INFINITE);
@@ -1373,7 +1373,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         startD = sign ? 0 : 359;
         endD = sign ? 359 : 0;
         duration = (long) (((r.nextDouble() * 500.0 * facespeedy1) + 8000) / (speedy1/5.0));
-        duration *= 8;
+        duration *= 4;
 
         ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
         rotationY.setRepeatCount(ValueAnimator.INFINITE);
@@ -1386,7 +1386,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         startD = sign ? 0 : 359;
         endD = sign ? 359 : 0;
         duration = (long) (r.nextDouble() * 5000) + 2000;
-        duration *= 8;
+        duration *= 4;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
