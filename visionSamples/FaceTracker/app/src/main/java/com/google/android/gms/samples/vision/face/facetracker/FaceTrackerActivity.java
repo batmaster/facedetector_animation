@@ -1186,7 +1186,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x - (SIZE / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = MAX_X - params.leftMargin;
+            params.leftMargin = (MAX_X - params.leftMargin) - SIZE;
         }
         params.topMargin = (int) y - (SIZE / 2);
 
@@ -1214,6 +1214,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
         int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
         long duration = (long) (((r.nextDouble() * 500.0 * facespeedx1) + 8000) / (speedx1/5.0));
+        duration *= 8;
 
         ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
         rotationX.setRepeatCount(ValueAnimator.INFINITE);
@@ -1226,6 +1227,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         startD = sign ? 0 : 359;
         endD = sign ? 359 : 0;
         duration = (long) (((r.nextDouble() * 500.0 * facespeedy1) + 8000) / (speedy1/5.0));
+        duration *= 8;
 
         ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
         rotationY.setRepeatCount(ValueAnimator.INFINITE);
@@ -1238,6 +1240,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         startD = sign ? 0 : 359;
         endD = sign ? 359 : 0;
         duration = (long) (r.nextDouble() * 5000) + 2000;
+        duration *= 8;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
@@ -1248,6 +1251,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/5.0));
+        duration *= 8;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1257,12 +1261,23 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         scaleY.setInterpolator(new LinearInterpolator());
         scaleY.setDuration(duration);
 
-        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (MAX_Y - x + SIZE) : (MAX_Y - x + SIZE);
+        float realX = (float) Math.sin(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
+        float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) + TRIANGLE;
+
+        float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
+
+        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
-        translationX.addListener(new Animator.AnimatorListener() {
+
+        Log.d("transs", (realX + posX) + " " + (y + realY));
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y + realY);
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+        translationY.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
 
@@ -1290,14 +1305,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         });
 
 
-        sign = r.nextDouble() > 0.5 ? true : false;
-        float posY = (float) (r.nextDouble() * (MAX_Y/5.0)) + 200f;
-
-        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, -posY);
-        translationY.setInterpolator(new DecelerateInterpolator());
-        translationY.setDuration(duration);
-
-
         animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);
         animatorSet.start();
     }
@@ -1323,7 +1330,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x - (SIZE / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = MAX_X - params.leftMargin;
+            params.leftMargin = (MAX_X - params.leftMargin) - SIZE;
         }
         params.topMargin = (int) y - (SIZE / 2);
 
@@ -1353,6 +1360,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
         int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
         long duration = (long) (((r.nextDouble() * 500.0 * facespeedx1) + 8000) / (speedx1/5.0));
+        duration *= 8;
 
         ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
         rotationX.setRepeatCount(ValueAnimator.INFINITE);
@@ -1365,6 +1373,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         startD = sign ? 0 : 359;
         endD = sign ? 359 : 0;
         duration = (long) (((r.nextDouble() * 500.0 * facespeedy1) + 8000) / (speedy1/5.0));
+        duration *= 8;
 
         ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
         rotationY.setRepeatCount(ValueAnimator.INFINITE);
@@ -1377,6 +1386,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         startD = sign ? 0 : 359;
         endD = sign ? 359 : 0;
         duration = (long) (r.nextDouble() * 5000) + 2000;
+        duration *= 8;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
@@ -1387,6 +1397,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/5.0));
+        duration *= 8;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1396,12 +1407,25 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         scaleY.setInterpolator(new LinearInterpolator());
         scaleY.setDuration(duration);
 
-        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (0 - x - SIZE) : (0 - x - SIZE);
+
+
+        float realX = (float) Math.sin(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
+        float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) + TRIANGLE;
+
+        float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
+
+        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
-        translationX.addListener(new Animator.AnimatorListener() {
+
+        Log.d("transs", (realX + posX) + " " + (y + realY));
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y + realY);
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+        translationY.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
 
@@ -1427,14 +1451,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
             }
         });
-
-
-        sign = r.nextDouble() > 0.5 ? true : false;
-        float posY = (float) (r.nextDouble() * (MAX_Y/5.0)) + 200f;
-
-        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, -posY);
-        translationY.setInterpolator(new DecelerateInterpolator());
-        translationY.setDuration(duration);
 
 
         animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);

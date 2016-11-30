@@ -34,7 +34,6 @@
       android:layout_alignParentBottom="true"
       android:textOn="ปาก"
       android:textOff="ปาก"
-      android:checked="true"
       android:id="@+id/toggleButtonMouth"/>
 
   <ToggleButton
@@ -44,7 +43,6 @@
       android:layout_above="@id/toggleButtonMouth"
       android:textOn="ตา"
       android:textOff="ตา"
-      android:checked="true"
       android:id="@+id/toggleButtonEyes"/>
 
   <ToggleButton
@@ -55,7 +53,6 @@
       android:text="หู"
       android:textOn="หู"
       android:textOff="หู"
-      android:checked="true"
       android:id="@+id/toggleButtonEars"/>
 
 </RelativeLayout>
