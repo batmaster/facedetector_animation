@@ -20,6 +20,9 @@ public class Face {
     public float eulerY = -1;
     public float eulerZ = -1;
 
+    public float bottomMouthX = -1;
+    public float bottomMouthY = -1;
+
     public int count;
 
     public static int MAX_COUNT = 5;
@@ -49,6 +52,8 @@ public class Face {
                 ", rightEyeY=" + rightEyeY +
                 ", eulerY=" + eulerY +
                 ", eulerZ=" + eulerZ +
+                ", bottomMouthX=" + bottomMouthX +
+                ", bottomMouthY=" + bottomMouthY +
                 ", count=" + count +
                 '}';
     }

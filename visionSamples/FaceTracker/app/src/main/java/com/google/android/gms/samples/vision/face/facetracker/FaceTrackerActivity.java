@@ -232,7 +232,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                 if (toggleButtonMouth.isChecked()) {
                     for (int i = 0; i < faces.size(); i++) {
-                        if (faces.get(i).mouthX != -1 && faces.get(i).mouthY != -1) {
+                        if ((faces.get(i).bottomMouthX != -1 && faces.get(i).bottomMouthY != -1) ||
+                                (faces.get(i).mouthX != -1 && faces.get(i).mouthY != -1)) {
                             createSakura(faces.get(i));
                             createSakura(faces.get(i));
                         }
@@ -274,12 +275,23 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 if (toggleButtonEars.isChecked()) {
                     for (int i = 0; i < faces.size(); i++) {
                         if (faces.get(i).leftEarX != -1 && faces.get(i).leftEarY != -1) {
-                            createSakuraEars1(faces.get(i));
+                            createSakuraEars1(faces.get(i), 0);
+                            Log.d("ears", 0 + "");
+                        }
+                        else if ((faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) &&
+                                (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1)) {
+                            createSakuraEars1(faces.get(i), 1);
+                            Log.d("ears", 1 + "");
+                        }
+                        else if ((faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1) &&
+                                (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1)) {
+                            createSakuraEars1(faces.get(i), 2);
+                            Log.d("ears", 2 + "");
                         }
 
-                        if (faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) {
-                            createSakuraEars2(faces.get(i));
-                        }
+//                        if (faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) {
+//                            createSakuraEars2(faces.get(i));
+//                        }
                     }
                 }
 
@@ -565,8 +577,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakura(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
-        float x = face.mouthX;
-        float y = face.mouthY;
+        float x = 0;
+        float y = 0;
+
+        if (face.bottomMouthX != -1 && face.bottomMouthY != -1) {
+            x = face.bottomMouthX;
+            y = face.bottomMouthY;
+        }
+        else {
+            x = face.mouthX;
+            y = face.mouthY;
+        }
 
         Random r = new Random();
         int k = r.nextInt(120);
@@ -583,7 +604,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x - (SIZE / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = MAX_X - params.leftMargin;
+            params.leftMargin = (MAX_X - params.leftMargin) - SIZE;
         }
         params.topMargin = (int) y - (SIZE / 2);
 
@@ -657,8 +678,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         sign = r.nextDouble() > 0.5 ? true : false;
 
-        float realX = (float) Math.sin(Math.toRadians(face.eulerY)) * TRIANGLE;
-        float realY = (float) Math.cos(Math.toRadians(face.eulerY)) + TRIANGLE;
+        float realX = (float) Math.sin(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
+        float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
 
         float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
 
@@ -892,10 +913,28 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    private void createSakuraEars1(com.google.android.gms.samples.vision.face.facetracker.Face face) {
+    private void createSakuraEars1(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
 
-        float x = face.leftEarX;
-        float y = face.leftEarY;
+        float x = 0;
+        float y = 0;
+
+        if (type == 0) {
+            x = face.leftEarX;
+            y = face.leftEarY;
+        }
+        else if (type == 1) {
+            float eeX = face.rightEarX - face.rightEyeX;
+            float eeY = face.rightEarY - face.rightEyeY;
+            // TODO do euler calculate
+            x = face.leftEyeX - eeX;
+            y = face.leftEyeY - eeY;
+        }
+        else if (type == 2) {
+            float eeX = (face.rightEyeX - face.leftEyeX) / 2;
+            float eeY = (face.rightEyeY - face.leftEyeY) / 2;
+            x = face.leftEyeX - eeX;
+            y = face.leftEyeY - eeY;
+        }
 
         Random r = new Random();
         int k = r.nextInt(120);
@@ -912,7 +951,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x - (SIZE / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = MAX_X - params.leftMargin;
+            params.leftMargin = (MAX_X - params.leftMargin) - SIZE;
         }
         params.topMargin = (int) y - (SIZE / 2);
 
@@ -983,7 +1022,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         scaleY.setInterpolator(new LinearInterpolator());
         scaleY.setDuration(duration);
 
-        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * MAX_Y - x + SIZE : MAX_Y - x + SIZE;
+        float realX = (float) Math.cos(Math.toRadians(face.eulerZ * 2)) * TRIANGLE * -1;
+        float realY = (float) Math.sin(Math.toRadians(face.eulerZ * 2)) * MAX_Y/10;
+
+        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (x - realX) : (x - realX);
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -1016,9 +1058,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         });
 
         sign = r.nextDouble() > 0.5 ? true : false;
-        float posY = (float) (r.nextDouble() * (MAX_Y/10.0) * (sign ? 1 : -1));
+        float posY = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
 
-        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, posY);
+        float toY = realY + posY;
+
+        Log.d("toyy", toY + " ");
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, toY);
         translationY.setInterpolator(new DecelerateInterpolator());
         translationY.setDuration(duration);
 
@@ -1262,7 +1308,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         scaleY.setDuration(duration);
 
         float realX = (float) Math.sin(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
-        float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) + TRIANGLE;
+        float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
 
         float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
 
@@ -1410,7 +1456,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
         float realX = (float) Math.sin(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
-        float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) + TRIANGLE;
+        float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
 
         float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
 

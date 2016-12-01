@@ -166,11 +166,13 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
 
         for (int i = 0; i < landmarks.size(); i++) {
+
+            Log.d("landmarkkk", getLandmarkType(landmarks.get(i).getType()));
+
             float whereX = landmarks.get(i).getPosition().x * scale;
             if (Singleton.activity.CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
                 whereX = Singleton.activity.MAX_X - whereX;
             }
-            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
 
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {
                 x1 = landmarks.get(i).getPosition().x  * scale;
@@ -180,21 +182,32 @@ class FaceGraphic extends GraphicOverlay.Graphic {
                 x2 = landmarks.get(i).getPosition().x  * scale;
                 y2 = landmarks.get(i).getPosition().y  * scale;
             }
-            else if (landmarks.get(i).getType() == Landmark.LEFT_EAR) {
+            else if (landmarks.get(i).getType() == Landmark.LEFT_EAR_TIP) {
                 existFace.leftEarX = landmarks.get(i).getPosition().x  * scale;
                 existFace.leftEarY = landmarks.get(i).getPosition().y  * scale;
+
+                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+
             }
-            else if (landmarks.get(i).getType() == Landmark.RIGHT_EAR) {
+            else if (landmarks.get(i).getType() == Landmark.RIGHT_EAR_TIP) {
                 existFace.rightEarX = landmarks.get(i).getPosition().x  * scale;
                 existFace.rightEarY = landmarks.get(i).getPosition().y  * scale;
             }
             else if (landmarks.get(i).getType() == Landmark.LEFT_EYE) {
                 existFace.leftEyeX = landmarks.get(i).getPosition().x  * scale;
                 existFace.leftEyeY = landmarks.get(i).getPosition().y  * scale;
+
+                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EYE) {
                 existFace.rightEyeX = landmarks.get(i).getPosition().x  * scale;
                 existFace.rightEyeY = landmarks.get(i).getPosition().y  * scale;
+
+                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+            }
+            else if (landmarks.get(i).getType() == Landmark.BOTTOM_MOUTH) {
+                existFace.bottomMouthX = landmarks.get(i).getPosition().x  * scale;
+                existFace.bottomMouthY = landmarks.get(i).getPosition().y  * scale;
             }
 
         }
