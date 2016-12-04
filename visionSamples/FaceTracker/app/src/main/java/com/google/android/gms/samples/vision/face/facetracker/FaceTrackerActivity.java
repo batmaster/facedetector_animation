@@ -100,6 +100,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     /**
      * Initializes the UI and initiates the creation of a face detector.
      */
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB_MR2)
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -108,6 +109,19 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         faces = new ArrayList<com.google.android.gms.samples.vision.face.facetracker.Face>();
 
         Singleton.activity = this;
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        MAX_X = size.x;
+        MAX_Y = size.y;
+        SIZE = size.x/10;
+        TRIANGLE = (int) Math.sqrt((MAX_X * MAX_X + MAX_Y * MAX_Y)) + SIZE / 2;
+
+        PREVIEW_CAM_X = (int)(MAX_X);
+        PREVIEW_CAM_Y = (int)(MAX_Y);
+
+
         layoutSakura = (RelativeLayout) findViewById(R.id.layoutSakura);
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
@@ -150,9 +164,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private int startSize2 = 1;
     private int finalSize2 = 17;
 
-    private int SIZE = 0;
-    public static int MAX_X = 1080;
+    //private int SIZE = 0;
+    private static int MAX_X = 1080;
     private static int MAX_Y = 1920;
+    public static int PREVIEW_CAM_X = 0;
+    public static int PREVIEW_CAM_Y = 0;
     private static int TRIANGLE = 0;
 
     private ToggleButton toggleButtonEars;
@@ -163,14 +179,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
-
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        MAX_X = size.x;
-        MAX_Y = size.y;
-        SIZE = size.x/10;
-        TRIANGLE = (int) Math.sqrt((MAX_X * MAX_X + MAX_Y * MAX_Y)) + SIZE / 2;
 
 
         toggleButtonEars = (ToggleButton) findViewById(R.id.toggleButtonEars);
@@ -240,9 +248,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
 
-                Log.d("facesss", faces.size() + "");
-
-
                 mHandler.postDelayed(this, (500 / volume1));
             }
         });
@@ -274,19 +279,30 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                 if (toggleButtonEars.isChecked()) {
                     for (int i = 0; i < faces.size(); i++) {
+                        // left ear
                         if (faces.get(i).leftEarX != -1 && faces.get(i).leftEarY != -1) {
                             createSakuraEars1(faces.get(i), 0);
-                            Log.d("ears", 0 + "");
                         }
                         else if ((faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) &&
                                 (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1)) {
                             createSakuraEars1(faces.get(i), 1);
-                            Log.d("ears", 1 + "");
                         }
                         else if ((faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1) &&
                                 (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1)) {
                             createSakuraEars1(faces.get(i), 2);
-                            Log.d("ears", 2 + "");
+                        }
+
+                        // right ear
+                        if (faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) {
+                            createSakuraEars2(faces.get(i), 0);
+                        }
+                        else if ((faces.get(i).leftEarX != -1 && faces.get(i).leftEarY != -1) &&
+                                (faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1)) {
+                            createSakuraEars2(faces.get(i), 1);
+                        }
+                        else if ((faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1) &&
+                                (faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1)) {
+                            createSakuraEars2(faces.get(i), 2);
                         }
 
 //                        if (faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) {
@@ -387,7 +403,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         mCameraSource = new CameraSource.Builder(context, detector)
 //                .setRequestedPreviewSize(640, 480)
-                .setRequestedPreviewSize(1920, 1080)
+                .setRequestedPreviewSize(PREVIEW_CAM_Y, PREVIEW_CAM_X)
                 .setFacing(CAMERA_FACING)
                 .setAutoFocusEnabled(true)
                 .setRequestedFps(15f)
@@ -599,14 +615,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                         (k < 110 ? 4 :
                                                 (k < 115 ? 5 : 6))))));
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-        params.leftMargin = (int) x - (SIZE / 2);
+        params.leftMargin = (int) x - (size / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = (MAX_X - params.leftMargin) - SIZE;
+            params.leftMargin = (MAX_X - params.leftMargin) - size;
         }
-        params.topMargin = (int) y - (SIZE / 2);
+        params.topMargin = (int) y - (size / 2);
 
         int[] sa = {
                 R.drawable.sakura,
@@ -689,8 +707,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
 
-        Log.d("transs", (realX + posX) + " " + (y + realY));
-
         ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y + realY);
         translationY.setInterpolator(new DecelerateInterpolator());
         translationY.setDuration(duration);
@@ -747,14 +763,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                         (k < 110 ? 4 :
                                                 (k < 115 ? 5 : 6))))));
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-        params.leftMargin = (int) x - (SIZE / 2);
+        params.leftMargin = (int) x - (size / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = MAX_X - params.leftMargin;
+            params.leftMargin = (MAX_X - params.leftMargin) - size;
         }
-        params.topMargin = (int) y - (SIZE / 2);
+        params.topMargin = (int) y - (size / 2);
 
         int[] sa = {
                 R.drawable.sakura,
@@ -816,8 +834,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.02f * startSize2)), sakura.getScaleX() * (1f + (0.02f * startSize2)) + scale);
         scaleX.setInterpolator(new AccelerateInterpolator());
         scaleX.setDuration(duration);
-
-        Log.d("scaleee", sakura.getScaleX() * (1f + (0.02f * startSize2)) + " " + scale);
 
         ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.02f * startSize2)), sakura.getScaleX() * (1f + (0.02f * startSize2)) + scale);
         scaleY.setInterpolator(new AccelerateInterpolator());
@@ -930,8 +946,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.leftEyeY - eeY;
         }
         else if (type == 2) {
-            float eeX = (face.rightEyeX - face.leftEyeX) / 2;
-            float eeY = (face.rightEyeY - face.leftEyeY) / 2;
+            float eeX = (face.rightEyeX - face.leftEyeX);
+            float eeY = (face.rightEyeY - face.leftEyeY);
             x = face.leftEyeX - eeX;
             y = face.leftEyeY - eeY;
         }
@@ -946,14 +962,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                         (k < 110 ? 4 :
                                                 (k < 115 ? 5 : 6))))));
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-        params.leftMargin = (int) x - (SIZE / 2);
+        params.leftMargin = (int) x - (size / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = (MAX_X - params.leftMargin) - SIZE;
+            params.leftMargin = (MAX_X - params.leftMargin) - size;
         }
-        params.topMargin = (int) y - (SIZE / 2);
+        params.topMargin = (int) y - (size / 2) + size;
 
         int[] sa = {
                 R.drawable.sakura,
@@ -1022,10 +1040,174 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         scaleY.setInterpolator(new LinearInterpolator());
         scaleY.setDuration(duration);
 
-        float realX = (float) Math.cos(Math.toRadians(face.eulerZ * 2)) * TRIANGLE * -1;
-        float realY = (float) Math.sin(Math.toRadians(face.eulerZ * 2)) * MAX_Y/10;
 
-        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (x - realX) : (x - realX);
+        float posX = (float) (0 - size / 2);
+        float realY = (float) Math.sin(Math.toRadians(face.eulerZ * -1)) * MAX_Y;
+
+        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (MAX_X - x - posX) : (MAX_X - x - posX);
+
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
+        translationX.setInterpolator(new DecelerateInterpolator());
+        translationX.setDuration((int) (duration * (x - posX) / TRIANGLE));
+        translationX.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                sakura.setLayerType(View.LAYER_TYPE_NONE, null);
+
+                sakura.clearAnimation();
+                sakura.setVisibility(View.GONE);
+                layoutSakura.removeView(sakura);
+                animatorSet.cancel();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        float posY = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
+
+        float toY = realY + posY;
+
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, toY);
+        translationY.setInterpolator(new DecelerateInterpolator());
+        translationY.setDuration(duration);
+
+
+
+        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);
+        animatorSet.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    private void createSakuraEars2(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
+
+        float x = 0;
+        float y = 0;
+
+        if (type == 0) {
+            x = face.rightEarX;
+            y = face.rightEarY;
+        }
+        else if (type == 1) {
+            float eeX = face.leftEyeX - face.leftEarX;
+            float eeY = face.leftEyeY - face.leftEarY;
+            // TODO do euler calculate
+            x = face.rightEyeX + eeX;
+            y = face.rightEyeY + eeY;
+        }
+        else if (type == 2) {
+            float eeX = (face.rightEyeX - face.leftEyeX);
+            float eeY = (face.rightEyeY - face.leftEyeY);
+            x = face.rightEyeX + eeX;
+            y = face.rightEyeY + eeY;
+        }
+
+        Random r = new Random();
+        int k = r.nextInt(120);
+
+        int im = (k < 40 ? 0 :
+                (k < 60 ? 1 :
+                        (k < 70 ? 2 :
+                                (k < 100 ? 3 :
+                                        (k < 110 ? 4 :
+                                                (k < 115 ? 5 : 6))))));
+
+        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.leftMargin = (int) x - (size / 2);
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            params.leftMargin = (MAX_X - params.leftMargin) - size;
+        }
+        params.topMargin = (int) y - (size / 2) + size;
+
+        int[] sa = {
+                R.drawable.sakura,
+                R.drawable.sakura2,
+                R.drawable.sakura3,
+                R.drawable.sakura4,
+                R.drawable.sakura5,
+                R.drawable.sakura6,
+                R.drawable.sakura7
+        };
+
+        final ImageView sakura = new ImageView(getApplicationContext());
+        sakura.setImageResource(sa[im]);
+        sakura.setLayoutParams(params);
+
+        layoutSakura.addView(sakura);
+
+        sakura.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
+        final AnimatorSet animatorSet = new AnimatorSet();
+
+        boolean sign = r.nextDouble() > 0.5 ? true : false;
+        int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
+        int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
+        long duration = (long) (((r.nextDouble() * 500.0 * facespeedx1) + 8000) / (speedx1/5.0));
+
+        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
+        rotationX.setRepeatCount(ValueAnimator.INFINITE);
+        rotationX.setRepeatMode(ValueAnimator.RESTART);
+        rotationX.setInterpolator(new LinearInterpolator());
+        rotationX.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (((r.nextDouble() * 500.0 * facespeedy1) + 8000) / (speedy1/5.0));
+
+        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
+        rotationY.setRepeatCount(ValueAnimator.INFINITE);
+        rotationY.setRepeatMode(ValueAnimator.RESTART);
+        rotationY.setInterpolator(new LinearInterpolator());
+        rotationY.setDuration(duration);
+
+
+        sign = r.nextDouble() > 0.5 ? true : false;
+        startD = sign ? 0 : 359;
+        endD = sign ? 359 : 0;
+        duration = (long) (r.nextDouble() * 5000) + 2000;
+
+        ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
+        rotationZ.setRepeatCount(ValueAnimator.INFINITE);
+        rotationZ.setRepeatMode(ValueAnimator.RESTART);
+        rotationZ.setInterpolator(new LinearInterpolator());
+        rotationZ.setDuration(duration);
+
+
+        float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
+        duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/7.0));
+
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
+        scaleX.setInterpolator(new LinearInterpolator());
+        scaleX.setDuration(duration);
+
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.05f * startSize1)), scale);
+        scaleY.setInterpolator(new LinearInterpolator());
+        scaleY.setDuration(duration);
+
+
+        float posX = (float) (0 - size / 2);
+        float realY = (float) Math.sin(Math.toRadians(face.eulerZ)) * MAX_Y;
+
+        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? (MAX_X - x - posX) : -1 * (MAX_X - x - posX);
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -1062,146 +1244,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float toY = realY + posY;
 
-        Log.d("toyy", toY + " ");
-
         ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, toY);
-        translationY.setInterpolator(new DecelerateInterpolator());
-        translationY.setDuration(duration);
-
-
-
-        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);
-        animatorSet.start();
-    }
-
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    private void createSakuraEars2(com.google.android.gms.samples.vision.face.facetracker.Face face) {
-
-        float x = face.rightEarX;
-        float y = face.rightEarY;
-
-        Random r = new Random();
-        int k = r.nextInt(120);
-
-        int im = (k < 40 ? 0 :
-                (k < 60 ? 1 :
-                        (k < 70 ? 2 :
-                                (k < 100 ? 3 :
-                                        (k < 110 ? 4 :
-                                                (k < 115 ? 5 : 6))))));
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
-        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-        params.leftMargin = (int) x - (SIZE / 2);
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = MAX_X - params.leftMargin;
-        }
-        params.topMargin = (int) y - (SIZE / 2);
-
-        int[] sa = {
-                R.drawable.sakura,
-                R.drawable.sakura2,
-                R.drawable.sakura3,
-                R.drawable.sakura4,
-                R.drawable.sakura5,
-                R.drawable.sakura6,
-                R.drawable.sakura7
-        };
-
-        final ImageView sakura = new ImageView(getApplicationContext());
-        sakura.setImageResource(sa[im]);
-        sakura.setLayoutParams(params);
-
-        layoutSakura.addView(sakura);
-
-        sakura.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
-        final AnimatorSet animatorSet = new AnimatorSet();
-
-        boolean sign = r.nextDouble() > 0.5 ? true : false;
-        int startD = sign ? r.nextInt(60) : r.nextInt(60) + 300;
-        int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
-        long duration = (long) (((r.nextDouble() * 500.0 * facespeedx1) + 8000) / (speedx1/5.0));
-
-        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
-        rotationX.setRepeatCount(ValueAnimator.INFINITE);
-        rotationX.setRepeatMode(ValueAnimator.RESTART);
-        rotationX.setInterpolator(new LinearInterpolator());
-        rotationX.setDuration(duration);
-
-
-        sign = r.nextDouble() > 0.5 ? true : false;
-        startD = sign ? 0 : 359;
-        endD = sign ? 359 : 0;
-        duration = (long) (((r.nextDouble() * 500.0 * facespeedy1) + 8000) / (speedy1/5.0));
-
-        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
-        rotationY.setRepeatCount(ValueAnimator.INFINITE);
-        rotationY.setRepeatMode(ValueAnimator.RESTART);
-        rotationY.setInterpolator(new LinearInterpolator());
-        rotationY.setDuration(duration);
-
-
-        sign = r.nextDouble() > 0.5 ? true : false;
-        startD = sign ? 0 : 359;
-        endD = sign ? 359 : 0;
-        duration = (long) (r.nextDouble() * 5000) + 2000;
-
-        ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
-        rotationZ.setRepeatCount(ValueAnimator.INFINITE);
-        rotationZ.setRepeatMode(ValueAnimator.RESTART);
-        rotationZ.setInterpolator(new LinearInterpolator());
-        rotationZ.setDuration(duration);
-
-
-        float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
-        duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/7.0));
-
-        ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
-        scaleX.setInterpolator(new LinearInterpolator());
-        scaleX.setDuration(duration);
-
-        ObjectAnimator scaleY = ObjectAnimator.ofFloat(sakura, View.SCALE_Y, sakura.getScaleY() * (1f + (0.05f * startSize1)), scale);
-        scaleY.setInterpolator(new LinearInterpolator());
-        scaleY.setDuration(duration);
-
-        float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (0 - x - SIZE) : (0 - x - SIZE);
-
-        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
-        translationX.setInterpolator(new DecelerateInterpolator());
-        translationX.setDuration(duration);
-        translationX.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                sakura.setLayerType(View.LAYER_TYPE_NONE, null);
-
-                sakura.clearAnimation();
-                sakura.setVisibility(View.GONE);
-                layoutSakura.removeView(sakura);
-                animatorSet.cancel();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-
-        sign = r.nextDouble() > 0.5 ? true : false;
-        float posY = (float) (r.nextDouble() * (MAX_Y/10.0) * (sign ? 1 : -1));
-
-        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, posY);
         translationY.setInterpolator(new DecelerateInterpolator());
         translationY.setDuration(duration);
 
@@ -1227,14 +1270,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                         (k < 110 ? 4 :
                                                 (k < 115 ? 5 : 6))))));
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-        params.leftMargin = (int) x - (SIZE / 2);
+        params.leftMargin = (int) x - (size / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = (MAX_X - params.leftMargin) - SIZE;
+            params.leftMargin = (MAX_X - params.leftMargin) - size;
         }
-        params.topMargin = (int) y - (SIZE / 2);
+        params.topMargin = (int) y - (size / 2);
 
         int[] sa = {
                 R.drawable.sakura,
@@ -1317,8 +1362,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
-
-        Log.d("transs", (realX + posX) + " " + (y + realY));
 
         ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y + realY);
         translationY.setInterpolator(new DecelerateInterpolator());
@@ -1371,16 +1414,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                         (k < 110 ? 4 :
                                                 (k < 115 ? 5 : 6))))));
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? SIZE : SIZE / 3, im < 4 ? SIZE : SIZE / 3);
+        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-        params.leftMargin = (int) x - (SIZE / 2);
+        params.leftMargin = (int) x - (size / 2);
         if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            params.leftMargin = (MAX_X - params.leftMargin) - SIZE;
+            params.leftMargin = (MAX_X - params.leftMargin) - size;
         }
-        params.topMargin = (int) y - (SIZE / 2);
-
-        Log.d("eyes", x + " " + params.leftMargin);
+        params.topMargin = (int) y - (size / 2);
 
         int[] sa = {
                 R.drawable.sakura,
@@ -1465,8 +1508,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
-
-        Log.d("transs", (realX + posX) + " " + (y + realY));
 
         ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y + realY);
         translationY.setInterpolator(new DecelerateInterpolator());

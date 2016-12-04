@@ -124,8 +124,8 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
         double viewWidth = canvas.getWidth();
         double viewHeight = canvas.getHeight();
-        double imageWidth = 1080;
-        double imageHeight = 1920;
+        double imageWidth = Singleton.activity.PREVIEW_CAM_X;
+        double imageHeight = Singleton.activity.PREVIEW_CAM_Y;
         float scale = (float) Math.min(viewWidth / imageWidth, viewHeight / imageHeight);
 
         List<Landmark> landmarks = face.getLandmarks();
@@ -164,6 +164,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
 
 
+        Log.d("landmarkkk", "======");
 
         for (int i = 0; i < landmarks.size(); i++) {
 
@@ -171,8 +172,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
             float whereX = landmarks.get(i).getPosition().x * scale;
             if (Singleton.activity.CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-                whereX = Singleton.activity.MAX_X - whereX;
+                whereX = Singleton.activity.PREVIEW_CAM_X - whereX;
             }
+            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+
 
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {
                 x1 = landmarks.get(i).getPosition().x  * scale;
@@ -185,9 +188,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             else if (landmarks.get(i).getType() == Landmark.LEFT_EAR_TIP) {
                 existFace.leftEarX = landmarks.get(i).getPosition().x  * scale;
                 existFace.leftEarY = landmarks.get(i).getPosition().y  * scale;
-
-                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
-
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EAR_TIP) {
                 existFace.rightEarX = landmarks.get(i).getPosition().x  * scale;
@@ -196,14 +196,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             else if (landmarks.get(i).getType() == Landmark.LEFT_EYE) {
                 existFace.leftEyeX = landmarks.get(i).getPosition().x  * scale;
                 existFace.leftEyeY = landmarks.get(i).getPosition().y  * scale;
-
-                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EYE) {
                 existFace.rightEyeX = landmarks.get(i).getPosition().x  * scale;
                 existFace.rightEyeY = landmarks.get(i).getPosition().y  * scale;
-
-                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
             }
             else if (landmarks.get(i).getType() == Landmark.BOTTOM_MOUTH) {
                 existFace.bottomMouthX = landmarks.get(i).getPosition().x  * scale;
