@@ -1,58 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/topLayout"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:keepScreenOn="true">
+    android:keepScreenOn="true"
+    android:orientation="vertical">
 
-  <com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview
-      android:id="@+id/preview"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent">
-
-    <com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay
-        android:id="@+id/faceOverlay"
+    <com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview
+        android:id="@+id/preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-  </com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview>
+        android:layout_height="match_parent">
+
+        <com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay
+            android:id="@+id/faceOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.google.android.gms.samples.vision.face.facetracker.ui.camera.CameraSourcePreview>
+
+    <com.google.android.gms.samples.vision.face.facetracker.CanvasView
+        android:id="@+id/canvasView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/frame"/>
+
+    <RelativeLayout
+        android:id="@+id/layoutSakura"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </RelativeLayout>
 
 
-  <RelativeLayout
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:id="@+id/layoutSakura">
+    <LinearLayout
+        android:id="@+id/selector"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="100">
 
-  </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="10"></RelativeLayout>
 
-  <ToggleButton
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignParentRight="true"
-      android:layout_alignParentBottom="true"
-      android:textOn="ปาก"
-      android:textOff="ปาก"
-      android:id="@+id/toggleButtonMouth"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="90">
 
-  <ToggleButton
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignParentRight="true"
-      android:layout_above="@id/toggleButtonMouth"
-      android:textOn="ตา"
-      android:textOff="ตา"
-      android:id="@+id/toggleButtonEyes"/>
+            <ToggleButton
+                android:id="@+id/toggleButtonEyes"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentRight="true"
+                android:textOff=""
+                android:textOn=""
+                android:background="@drawable/eye" />
 
-  <ToggleButton
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignParentRight="true"
-      android:layout_above="@id/toggleButtonEyes"
-      android:text="หู"
-      android:textOn="หู"
-      android:textOff="หู"
-      android:id="@+id/toggleButtonEars"/>
+            <ToggleButton
+                android:id="@+id/toggleButtonMouth"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentRight="true"
+                android:textOff=""
+                android:textOn=""
+                android:layout_below="@+id/toggleButtonEyes"
+                android:background="@drawable/mouth" />
+
+            <ToggleButton
+                android:id="@+id/toggleButtonEars"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentRight="true"
+                android:textOff=""
+                android:textOn=""
+                android:layout_below="@+id/toggleButtonMouth"
+                android:background="@drawable/ear" />
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
 
 </RelativeLayout>

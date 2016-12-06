@@ -135,9 +135,9 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float y2 = -1;
 
         if (landmarks.size() == 0) {
-            for (int i = 0; i < Singleton.activity.faces.size(); i++) {
-                if (Singleton.activity.faces.get(i).id == face.getId()) {
-                    Singleton.activity.faces.remove(i);
+            for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
+                if (Singleton.activity.getFaces().get(i).id == face.getId()) {
+                    Singleton.activity.removeFace(i);
                     return;
                 }
             }
@@ -149,9 +149,9 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
         int existIndex = -1;
         com.google.android.gms.samples.vision.face.facetracker.Face existFace = null;
-        for (int i = 0; i < Singleton.activity.faces.size(); i++) {
-            if (Singleton.activity.faces.get(i).id == face.getId()) {
-                existFace = Singleton.activity.faces.get(i);
+        for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
+            if (Singleton.activity.getFaces().get(i).id == face.getId()) {
+                existFace = Singleton.activity.getFaces().get(i);
                 existIndex = i;
                 break;
             }
@@ -174,7 +174,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             if (Singleton.activity.CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
                 whereX = Singleton.activity.PREVIEW_CAM_X - whereX;
             }
-            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
 
 
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {
@@ -205,6 +204,18 @@ class FaceGraphic extends GraphicOverlay.Graphic {
                 existFace.bottomMouthX = landmarks.get(i).getPosition().x  * scale;
                 existFace.bottomMouthY = landmarks.get(i).getPosition().y  * scale;
             }
+            else if (landmarks.get(i).getType() == Landmark.LEFT_CHEEK) {
+                existFace.leftCheekX = landmarks.get(i).getPosition().x  * scale;
+                existFace.leftCheekY = landmarks.get(i).getPosition().y  * scale;
+                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+
+            }
+            else if (landmarks.get(i).getType() == Landmark.RIGHT_CHEEK) {
+                existFace.rightCheekX = landmarks.get(i).getPosition().x  * scale;
+                existFace.rightCheekY = landmarks.get(i).getPosition().y  * scale;
+                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+
+            }
 
         }
 
@@ -221,7 +232,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
 
         if (existIndex == -1) {
-            Singleton.activity.faces.add(existFace);
+            Singleton.activity.addFace(existFace);
         }
     }
 

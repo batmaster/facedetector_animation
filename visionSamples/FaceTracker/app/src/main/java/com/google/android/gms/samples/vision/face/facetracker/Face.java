@@ -1,11 +1,14 @@
 package com.google.android.gms.samples.vision.face.facetracker;
 
+import android.content.Context;
+import android.media.MediaPlayer;
+
 /**
  * Created by batmaster on 11/21/2016 AD.
  */
 
 public class Face {
-    
+
     public int id;
     public float mouthX = -1;
     public float mouthY = -1;
@@ -23,9 +26,45 @@ public class Face {
     public float bottomMouthX = -1;
     public float bottomMouthY = -1;
 
+    public float leftCheekX = -1;
+    public float leftCheekY = -1;
+    public float rightCheekX = -1;
+    public float rightCheekY = -1;
+
     public int count;
 
     public static int MAX_COUNT = 5;
+
+    private MediaPlayer mp;
+
+    public Face() {
+
+    }
+
+    public void initSound(Context context) {
+        mp = MediaPlayer.create(context, R.raw.beam);
+        mp.setLooping(true);
+    }
+
+    public void playSound() {
+        mp.start();
+    }
+
+    public void pauseSound() {
+        if (mp.isPlaying()) {
+            mp.pause();
+        }
+    }
+
+    public void stopSound() {
+        mp.stop();
+        mp.reset();
+        mp.release();
+    }
+
+    public boolean isPlayingSound() {
+        return mp.isPlaying();
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -34,27 +73,5 @@ public class Face {
         }
 
         return this.id == ((Face) obj).id;
-    }
-
-    @Override
-    public String toString() {
-        return "Face{" +
-                "id=" + id +
-                ", mouthX=" + mouthX +
-                ", mouthY=" + mouthY +
-                ", leftEarX=" + leftEarX +
-                ", leftEarY=" + leftEarY +
-                ", rightEarX=" + rightEarX +
-                ", rightEarY=" + rightEarY +
-                ", leftEyeX=" + leftEyeX +
-                ", leftEyeY=" + leftEyeY +
-                ", rightEyeX=" + rightEyeX +
-                ", rightEyeY=" + rightEyeY +
-                ", eulerY=" + eulerY +
-                ", eulerZ=" + eulerZ +
-                ", bottomMouthX=" + bottomMouthX +
-                ", bottomMouthY=" + bottomMouthY +
-                ", count=" + count +
-                '}';
     }
 }

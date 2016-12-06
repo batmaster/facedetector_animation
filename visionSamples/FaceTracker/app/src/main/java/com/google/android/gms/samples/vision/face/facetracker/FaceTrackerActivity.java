@@ -81,6 +81,7 @@ import java.util.Random;
 public final class FaceTrackerActivity extends AppCompatActivity {
 
     private RelativeLayout layoutSakura;
+    private CanvasView canvasView;
 
     private static final String TAG = "FaceTracker";
 
@@ -115,7 +116,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         display.getSize(size);
         MAX_X = size.x;
         MAX_Y = size.y;
-        SIZE = size.x/10;
+        int SIZE = size.x/10;
         TRIANGLE = (int) Math.sqrt((MAX_X * MAX_X + MAX_Y * MAX_Y)) + SIZE / 2;
 
         PREVIEW_CAM_X = (int)(MAX_X);
@@ -123,6 +124,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
         layoutSakura = (RelativeLayout) findViewById(R.id.layoutSakura);
+        canvasView = (CanvasView) findViewById(R.id.canvasView);
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
@@ -141,7 +143,22 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         makeThreadSakura();
     }
 
-    public static ArrayList<com.google.android.gms.samples.vision.face.facetracker.Face> faces;
+    private static ArrayList<com.google.android.gms.samples.vision.face.facetracker.Face> faces;
+
+    public ArrayList<com.google.android.gms.samples.vision.face.facetracker.Face> getFaces() {
+        return faces;
+    }
+
+    public void addFace(com.google.android.gms.samples.vision.face.facetracker.Face face) {
+        face.initSound(getApplicationContext());
+        faces.add(face);
+    }
+
+    public void removeFace(int index) {
+        faces.get(index).stopSound();
+        faces.remove(index);
+        canvasView.clear();
+    }
 
 
     private int volume1 = 10;
@@ -176,6 +193,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private ToggleButton toggleButtonMouth;
 
     public static int CAMERA_FACING = CameraSource.CAMERA_FACING_FRONT;
+
+    private ArrayList<ImageView> cheeks = new ArrayList<ImageView>();
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
@@ -232,6 +251,34 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 //            }
 //        });
 
+
+
+
+        final Handler mHandler0 = new Handler();
+        mHandler0.post(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public void run() {
+
+                for (int i = 0; i < cheeks.size(); i++) {
+                    layoutSakura.removeView(cheeks.get(i));
+                    cheeks.get(i).setVisibility(View.GONE);
+                    cheeks.remove(i);
+                }
+
+                for (int i = 0; i < faces.size(); i++) {
+                    if ((faces.get(i).leftCheekX != -1 && faces.get(i).leftCheekY != -1) &&
+                            (faces.get(i).rightCheekX != -1 && faces.get(i).rightCheekY != -1)) {
+
+                        createCheek(faces.get(i));
+                    }
+                }
+
+                mHandler0.postDelayed(this, (500 / volume1));
+            }
+        });
+
+
         final Handler mHandler = new Handler();
         mHandler.post(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
@@ -244,6 +291,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                 (faces.get(i).mouthX != -1 && faces.get(i).mouthY != -1)) {
                             createSakura(faces.get(i));
                             createSakura(faces.get(i));
+
+                            if (!faces.get(i).isPlayingSound()) {
+                                faces.get(i).playSound();
+                            }
+
+                        }
+                        else {
+                            if (faces.get(i).isPlayingSound()) {
+                                faces.get(i).pauseSound();
+                            }
                         }
                     }
                 }
@@ -382,6 +439,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .setMode(FaceDetector.ACCURATE_MODE)
+                .setTrackingEnabled(true)
                 .build();
 
         detector.setProcessor(
@@ -589,6 +647,34 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+    private void createCheek(com.google.android.gms.samples.vision.face.facetracker.Face face) {
+
+        ImageView cheek = new ImageView(getApplicationContext());
+        cheek.setImageResource(R.drawable.cheek1);
+
+        int sizeX = (int) (Math.abs(face.leftCheekX - face.rightCheekX) * 2.4);
+        int sizeY = (int) (sizeX * 188 / 518.0);
+
+//        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int) Math.abs(face.leftCheekX - face.rightCheekX), (int) Math.abs(face.leftCheekY - face.rightCheekY));
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(sizeX, sizeY);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.leftMargin = (int) face.leftCheekX;// - (sizeX / 2);
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            params.leftMargin = (MAX_X - params.leftMargin) - (int) (sizeX * 160.0 / 518);
+        }
+        params.topMargin = (int) face.leftCheekY - (sizeY / 2);
+
+        cheek.setRotation(face.eulerZ);
+
+        // TODO do (check) inverse for BACK CAM
+
+        cheek.setLayoutParams(params);
+        layoutSakura.addView(cheek);
+        cheeks.add(cheek);
+    }
+
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakura(com.google.android.gms.samples.vision.face.facetracker.Face face) {
@@ -697,7 +783,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         sign = r.nextDouble() > 0.5 ? true : false;
 
         float realX = (float) Math.sin(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
-        float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
+        final float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * TRIANGLE;
 
         float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
 
@@ -739,7 +825,23 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY/*, alpha*/);
         animatorSet.start();
+
+//        frame++;
+//        if (frame == 30) {
+//            final float x1 = params.leftMargin + (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? size : -1 * size) / 2;
+//            final float y1 = params.topMargin + size / 2;
+//            final float x2 = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * realX : realX;
+//            final float y2 = y + realY;
+//            new Handler().post(new Runnable() {
+//                @Override
+//                public void run() {
+//                    canvasView.create(x1, y1, x2, y2);
+//                }
+//            });
+//            frame = 0 ;
+//        }
     }
+//    int frame = 0;
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
