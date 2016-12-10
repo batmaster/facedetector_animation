@@ -174,6 +174,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             if (Singleton.activity.CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
                 whereX = Singleton.activity.PREVIEW_CAM_X - whereX;
             }
+            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
 
 
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {
@@ -207,14 +208,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             else if (landmarks.get(i).getType() == Landmark.LEFT_CHEEK) {
                 existFace.leftCheekX = landmarks.get(i).getPosition().x  * scale;
                 existFace.leftCheekY = landmarks.get(i).getPosition().y  * scale;
-                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
-
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_CHEEK) {
                 existFace.rightCheekX = landmarks.get(i).getPosition().x  * scale;
                 existFace.rightCheekY = landmarks.get(i).getPosition().y  * scale;
-                canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
-
             }
 
         }
@@ -234,6 +231,8 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         if (existIndex == -1) {
             Singleton.activity.addFace(existFace);
         }
+
+        Singleton.activity.createLight(existFace);
     }
 
 

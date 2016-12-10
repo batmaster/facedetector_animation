@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.gms.samples.vision.face.facetracker.ClonableRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/topLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,9 +25,25 @@
         android:background="@null" />
 
     <ImageView
+        android:visibility="invisible"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scaleType="fitXY"
         android:src="@drawable/frame"/>
+
+    <FrameLayout
+        android:id="@+id/layoutUnderSakura"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
+
+    <ImageView
+        android:visibility="invisible"
+        android:id="@+id/imageFrameIce"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/frame_ice"/>
 
     <RelativeLayout
         android:id="@+id/layoutSakura"
@@ -84,8 +100,19 @@
 
         </RelativeLayout>
 
+        <ToggleButton
+            android:id="@+id/toggleButtonRecord"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignParentRight="true"
+            android:textOff=""
+            android:textOn=""
+            android:checked="false"
+            android:layout_below="@+id/toggleButtonMouth"
+            android:background="@drawable/ear" />
+
 
     </LinearLayout>
 
 
-</RelativeLayout>
+</com.google.android.gms.samples.vision.face.facetracker.ClonableRelativeLayout>

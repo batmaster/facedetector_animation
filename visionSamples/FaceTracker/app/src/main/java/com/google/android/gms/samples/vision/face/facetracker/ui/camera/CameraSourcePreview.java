@@ -97,6 +97,8 @@ public class CameraSourcePreview extends ViewGroup {
                     mOverlay.setCameraInfo(max, min, mCameraSource.getCameraFacing());
                 }
                 mOverlay.clear();
+
+                Log.d("mPreview", "startIfReady " + min + " " + max);
             }
             mStartRequested = false;
         }
@@ -164,6 +166,8 @@ public class CameraSourcePreview extends ViewGroup {
         } catch (IOException e) {
             Log.e(TAG, "Could not start camera source.", e);
         }
+
+        Log.d("mPreview", "onLayout " + layoutWidth + " " + layoutHeight + " " + childWidth + " " + childHeight);
     }
 
     private boolean isPortraitMode() {
