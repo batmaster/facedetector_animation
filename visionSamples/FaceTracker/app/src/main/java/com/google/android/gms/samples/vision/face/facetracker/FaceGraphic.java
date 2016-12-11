@@ -231,8 +231,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         if (existIndex == -1) {
             Singleton.activity.addFace(existFace);
         }
-
-        Singleton.activity.createLight(existFace);
     }
 
 

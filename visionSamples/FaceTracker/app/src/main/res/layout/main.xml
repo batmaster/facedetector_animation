@@ -25,7 +25,6 @@
         android:background="@null" />
 
     <ImageView
-        android:visibility="invisible"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
@@ -98,18 +97,21 @@
                 android:layout_below="@+id/toggleButtonMouth"
                 android:background="@drawable/ear" />
 
+
+            <ToggleButton
+                android:id="@+id/toggleButtonRecord"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:textOff=""
+                android:textOn=""
+                android:checked="false"
+                android:layout_marginBottom="5dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/record" />
+
         </RelativeLayout>
 
-        <ToggleButton
-            android:id="@+id/toggleButtonRecord"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_alignParentRight="true"
-            android:textOff=""
-            android:textOn=""
-            android:checked="false"
-            android:layout_below="@+id/toggleButtonMouth"
-            android:background="@drawable/ear" />
 
 
     </LinearLayout>

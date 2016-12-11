@@ -26,22 +26,36 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.hardware.Camera;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.MediaRecorder;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Display;
+import android.view.Surface;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -55,6 +69,7 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -128,6 +143,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         PREVIEW_CAM_X = (int)(MAX_X);
         PREVIEW_CAM_Y = (int)(MAX_Y);
 
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        mScreenDensity = metrics.densityDpi;
+
 
         topLayout = (ClonableRelativeLayout) findViewById(R.id.topLayout);
         layoutSakura = (RelativeLayout) findViewById(R.id.layoutSakura);
@@ -157,6 +176,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
         makeThreadSakura();
+
+
+
+        // mediaProjection
+
+        mMediaRecorder = new MediaRecorder();
+        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
     }
 
     private static ArrayList<com.google.android.gms.samples.vision.face.facetracker.Face> faces;
@@ -272,11 +298,26 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
-                if (b) {
+                if (ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) +
+                        ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 
-                }
-                else {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
+                            ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO)) {
+                        toggleButtonRecord.setChecked(false);
 
+                        Snackbar.make(findViewById(android.R.id.content), label_permissions,
+                                Snackbar.LENGTH_INDEFINITE).setAction("ENABLE", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        ActivityCompat.requestPermissions(FaceTrackerActivity.this,
+                                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
+                                    }
+                                }).show();
+                    } else {
+                        ActivityCompat.requestPermissions(FaceTrackerActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
+                    }
+                } else {
+                    onToggleScreenShare(compoundButton);
                 }
 
 
@@ -289,7 +330,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 //                        @Override
 //                        public void run() {
 //                            if (cloning) {
-//                                views.add(topLayout.clone());
+//                                views.add(FaceTrackerActivity.this.clone());
 //                                Log.d("viewss", views.size() + " " + new Date());
 //
 //                                mHandler0.postDelayed(this, 1000 / 25);
@@ -306,7 +347,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 //                        new Handler().post(new Runnable() {
 //                            @Override
 //                            public void run() {
-//                                getBitmapFromView((ClonableRelativeLayout) views.get(finalI));
+//                                FaceTrackerActivity activity = (FaceTrackerActivity) views.get(finalI);
+//                                getBitmapFromView(activity.topLayout);
 //                            }
 //                        });
 //                    }
@@ -341,27 +383,31 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             }
         });
 
-//        final Handler mHandlerLights = new Handler();
-//        mHandlerLights.post(new Runnable() {
-//            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-//            @Override
-//            public void run() {
-//
-//                createli
-//
-//                if (toggleButtonMouth.isChecked()) {
-//                    for (int i = 0; i < faces.size(); i++) {
-//                        if ((faces.get(i).bottomMouthX != -1 && faces.get(i).bottomMouthY != -1) ||
-//                                (faces.get(i).mouthX != -1 && faces.get(i).mouthY != -1)) {
-//
-//                            createLight(faces.get(i));
-//                        }
-//                    }
-//                }
-//
-//                mHandlerLights.postDelayed(this, (250 / volume1));
-//            }
-//        });
+        final Handler mHandlerLights = new Handler();
+        mHandlerLights.post(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
+            @Override
+            public void run() {
+
+                for (int i = 0; i < lights.size(); i++) {
+                    layoutUnderSakura.removeView(lights.get(i));
+                    lights.get(i).setVisibility(View.GONE);
+                    lights.remove(i);
+                }
+
+                if (toggleButtonMouth.isChecked()) {
+                    for (int i = 0; i < faces.size(); i++) {
+                        if ((faces.get(i).bottomMouthX != -1 && faces.get(i).bottomMouthY != -1) ||
+                                (faces.get(i).mouthX != -1 && faces.get(i).mouthY != -1)) {
+
+                            createLight(faces.get(i));
+                        }
+                    }
+                }
+
+                mHandlerLights.postDelayed(this, 16);
+            }
+        });
 
 
         final Handler mHandler = new Handler();
@@ -557,9 +603,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .show();
     }
 
-    private ArrayList views = new ArrayList();
-    private boolean cloning = false;
-
     /**
      * Creates and starts the camera.  Note that this uses a higher resolution in comparison
      * to other detection examples to enable the barcode detector to detect small barcodes
@@ -628,38 +671,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         if (mCameraSource != null) {
             mCameraSource.release();
         }
+
+
+        destroyMediaProjection();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode != RC_HANDLE_CAMERA_PERM) {
-            Log.d(TAG, "Got unexpected permission result: " + requestCode);
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            return;
-        }
-
-        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Camera permission granted - initialize the camera source");
-            // we have permission, so create the camerasource
-            createCameraSource();
-            return;
-        }
-
-        Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
-                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
-
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                finish();
-            }
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Face Tracker sample")
-                .setMessage(R.string.no_camera_permission)
-                .setPositiveButton(R.string.ok, listener)
-                .show();
-    }
 
     private void startCameraSource() {
 
@@ -704,7 +720,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             mFaceGraphic.setId(faceId);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
             mOverlay.add(mFaceGraphic);
@@ -768,14 +783,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-    public void createLight(com.google.android.gms.samples.vision.face.facetracker.Face face) {
-
-        for (int i = 0; i < lights.size(); i++) {
-            layoutUnderSakura.removeView(lights.get(i));
-            lights.get(i).setVisibility(View.GONE);
-            lights.remove(i);
-        }
-
+    private void createLight(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         final ImageView light = new ImageView(getApplicationContext());
         light.setImageResource(R.drawable.light_pink);
@@ -806,14 +814,20 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         params.topMargin = (int) y;
 
-        Log.d("xyy", "light " + (params.leftMargin + sizeX/2) + " " + params.topMargin + " " + sizeX + " " + sizeY);
-
         // TODO do (check) inverse for BACK CAM
 
+        float ang = face.eulerY * 2 + face.eulerZ * 2;
+        float leftX = ang > 0 ? x : MAX_X - x;
+        float leftY = y;
+        float triangle = (float) Math.sqrt(Math.pow(leftX, 2) + Math.pow(leftY, 2));
+        float realX = (float) Math.sin(Math.toRadians(ang)) * triangle;
+        final float realY = (float) Math.cos(Math.toRadians(ang)) * triangle;
 
         light.setPivotX(sizeX / 2);
         light.setPivotY(0);
-        light.setRotation(face.eulerY * 2);
+        light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+
+        Log.d("finddegree", "light " + x + " " + leftX + " " + y + " " + leftY + " " + triangle + (((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90)));
 
         light.setLayoutParams(params);
 
@@ -945,19 +959,25 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         sign = r.nextDouble() > 0.5 ? true : false;
 
-        float triangle = (float) Math.sqrt(Math.pow(MAX_X - x, 2) + Math.pow(MAX_Y - y, 2));
-        float realX = (float) Math.sin(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * triangle;
-        final float realY = (float) Math.cos(Math.toRadians(face.eulerY * 2 + face.eulerZ * 2)) * triangle;
+        float ang = face.eulerY * 2 + face.eulerZ * 2;
+        float leftX = ang > 0 ? x : MAX_X - x;
+        float leftY = y;
+        float triangle = (float) Math.sqrt(Math.pow(leftX, 2) + Math.pow(leftY, 2));
+        float realX = (float) Math.sin(Math.toRadians(ang)) * triangle;
+        final float realY = (float) Math.cos(Math.toRadians(ang)) * triangle;
 
         float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
+        posX = 0;
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
 
-        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX - (size / 2));
         translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
 
-        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y + realY);
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y + realY - (size / 2));
+        double angs = Math.toDegrees(Math.atan2((y + realY - (0)), (toX - (0)))) - 90;
+        Log.d("finddegree", "sakura " + x + " " + leftX + " " + y + " " + leftY + " " + triangle + (angs));
         translationY.setInterpolator(new DecelerateInterpolator());
         translationY.setDuration(duration);
         translationY.addListener(new Animator.AnimatorListener() {
@@ -989,11 +1009,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY/*, alpha*/);
         animatorSet.start();
-
-        Log.d("mouthposs", toX + " " + y + realY);
-
-
-
 
 
 
@@ -1821,5 +1836,200 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY);
         animatorSet.start();
+
+
     }
+
+
+    // mediaProjection http://www.truiton.com/2015/05/capture-record-android-screen-using-mediaprojection-apis/
+
+    private MediaProjectionManager mProjectionManager;
+    private MediaProjection mMediaProjection;
+    private VirtualDisplay mVirtualDisplay;
+    private MediaProjectionCallback mMediaProjectionCallback;
+    private MediaRecorder mMediaRecorder;
+
+    private static final int REQUEST_CODE = 1000;
+    private static final int REQUEST_PERMISSIONS = 10;
+
+    private static final String label_permissions = "label_permissions";
+
+    private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
+    static {
+        ORIENTATIONS.append(Surface.ROTATION_0, 90);
+        ORIENTATIONS.append(Surface.ROTATION_90, 0);
+        ORIENTATIONS.append(Surface.ROTATION_180, 270);
+        ORIENTATIONS.append(Surface.ROTATION_270, 180);
+    }
+
+    private int mScreenDensity;
+
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != REQUEST_CODE) {
+            Log.e(TAG, "Unknown request code: " + requestCode);
+            return;
+        }
+        if (resultCode != RESULT_OK) {
+            Toast.makeText(this,
+                    "Screen Cast Permission Denied", Toast.LENGTH_SHORT).show();
+            toggleButtonRecord.setChecked(false);
+            return;
+        }
+        mMediaProjectionCallback = new MediaProjectionCallback();
+        mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
+        mMediaProjection.registerCallback(mMediaProjectionCallback, null);
+        mVirtualDisplay = createVirtualDisplay();
+        mMediaRecorder.start();
+    }
+
+    public void onToggleScreenShare(View view) {
+        if (((ToggleButton) view).isChecked()) {
+            initRecorder();
+            shareScreen();
+        } else {
+            mMediaRecorder.stop();
+            mMediaRecorder.reset();
+            Log.v(TAG, "Stopping Recording");
+            stopScreenSharing();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void shareScreen() {
+        if (mMediaProjection == null) {
+            startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
+            return;
+        }
+        mVirtualDisplay = createVirtualDisplay();
+        mMediaRecorder.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private VirtualDisplay createVirtualDisplay() {
+        return mMediaProjection.createVirtualDisplay("MainActivity",
+                MAX_X, MAX_Y, mScreenDensity,
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                mMediaRecorder.getSurface(), null /*Callbacks*/, null
+                /*Handler*/);
+    }
+
+    private void initRecorder() {
+        try {
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mMediaRecorder.setOutputFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/video.mp4");
+            mMediaRecorder.setVideoSize(MAX_X, MAX_Y);
+            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mMediaRecorder.setVideoEncodingBitRate(3000000);
+            mMediaRecorder.setVideoFrameRate(30);
+            int rotation = getWindowManager().getDefaultDisplay().getRotation();
+            int orientation = ORIENTATIONS.get(rotation + 90);
+            mMediaRecorder.setOrientationHint(orientation);
+            mMediaRecorder.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private class MediaProjectionCallback extends MediaProjection.Callback {
+        @Override
+        public void onStop() {
+            if (toggleButtonRecord.isChecked()) {
+                toggleButtonRecord.setChecked(false);
+                mMediaRecorder.stop();
+                mMediaRecorder.reset();
+                Log.v(TAG, "Recording Stopped");
+            }
+            mMediaProjection = null;
+            stopScreenSharing();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void stopScreenSharing() {
+        if (mVirtualDisplay == null) {
+            return;
+        }
+        mVirtualDisplay.release();
+        //mMediaRecorder.release(); //If used: mMediaRecorder object cannot
+        // be reused again
+        destroyMediaProjection();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void destroyMediaProjection() {
+        if (mMediaProjection != null) {
+            mMediaProjection.unregisterCallback(mMediaProjectionCallback);
+            mMediaProjection.stop();
+            mMediaProjection = null;
+        }
+        Log.i(TAG, "MediaProjection Stopped");
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSIONS: {
+                if ((grantResults.length > 0) && (grantResults[0] +
+                        grantResults[1]) == PackageManager.PERMISSION_GRANTED) {
+                    onToggleScreenShare(toggleButtonRecord);
+                } else {
+                    toggleButtonRecord.setChecked(false);
+                    Snackbar.make(findViewById(android.R.id.content), label_permissions,
+                            Snackbar.LENGTH_INDEFINITE).setAction("ENABLE",
+                            new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent();
+                                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.addCategory(Intent.CATEGORY_DEFAULT);
+                                    intent.setData(Uri.parse("package:" + getPackageName()));
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                                    startActivity(intent);
+                                }
+                            }).show();
+                }
+                return;
+            }
+        }
+
+
+        // old
+        if (requestCode != RC_HANDLE_CAMERA_PERM) {
+            Log.d(TAG, "Got unexpected permission result: " + requestCode);
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            return;
+        }
+
+        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Camera permission granted - initialize the camera source");
+            // we have permission, so create the camerasource
+            createCameraSource();
+            return;
+        }
+
+        Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
+                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
+
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                finish();
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Face Tracker sample")
+                .setMessage(R.string.no_camera_permission)
+                .setPositiveButton(R.string.ok, listener)
+                .show();
+    }
+
 }

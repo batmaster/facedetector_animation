@@ -3,6 +3,8 @@ package com.google.android.gms.samples.vision.face.facetracker;
 import android.content.Context;
 import android.media.MediaPlayer;
 
+import java.util.Random;
+
 /**
  * Created by batmaster on 11/21/2016 AD.
  */
@@ -41,9 +43,23 @@ public class Face {
 
     }
 
-    public void initSound(Context context) {
-        mp = MediaPlayer.create(context, R.raw.beam);
-        mp.setLooping(true);
+    public void initSound(final Context context) {
+        mp = MediaPlayer.create(context, randomSound());
+        mp.seekTo(1000);
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                mp.reset();
+                mp = MediaPlayer.create(context, randomSound());
+                mp.seekTo(1000);
+                mp.start();
+            }
+        });
+    }
+
+    private int randomSound() {
+        Random r = new Random();
+        return r.nextDouble() > 0.7 ? R.raw.sound1 : R.raw.sound2;
     }
 
     public void playSound() {
