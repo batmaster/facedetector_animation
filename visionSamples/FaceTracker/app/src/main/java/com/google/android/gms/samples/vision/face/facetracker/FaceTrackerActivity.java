@@ -31,7 +31,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.hardware.Camera;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaRecorder;
@@ -52,19 +51,12 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -86,7 +78,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
@@ -238,6 +229,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private ArrayList<ImageView> cheeks = new ArrayList<ImageView>();
     private ArrayList<ImageView> lights = new ArrayList<ImageView>();
+    private ArrayList<ImageView> sparks = new ArrayList<ImageView>();
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
@@ -379,12 +371,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
 
-                mHandler0.postDelayed(this, (250 / volume1));
+                mHandler0.postDelayed(this, 16);
             }
         });
 
-        final Handler mHandlerLights = new Handler();
-        mHandlerLights.post(new Runnable() {
+        final Handler handlerLightsMouth = new Handler();
+        handlerLightsMouth.post(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
@@ -393,6 +385,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     layoutUnderSakura.removeView(lights.get(i));
                     lights.get(i).setVisibility(View.GONE);
                     lights.remove(i);
+
+                    sparks.get(i).setVisibility(View.GONE);
+                    sparks.remove(i);
                 }
 
                 if (toggleButtonMouth.isChecked()) {
@@ -405,13 +400,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
 
-                mHandlerLights.postDelayed(this, 16);
+                handlerLightsMouth.postDelayed(this, 16);
             }
         });
 
 
-        final Handler mHandler = new Handler();
-        mHandler.post(new Runnable() {
+        final Handler handlerSakuraMouth = new Handler();
+        handlerSakuraMouth.post(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
@@ -435,7 +430,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
 
-                mHandler.postDelayed(this, (500 / volume1));
+                handlerSakuraMouth.postDelayed(this, (500 / volume1));
             }
         });
 
@@ -737,6 +732,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
+    private static final int[][] cheek = {
+            {R.drawable.cheek1_left, R.drawable.cheek1_right},
+            {R.drawable.cheek2_left, R.drawable.cheek2_right},
+            {R.drawable.cheek3_left, R.drawable.cheek3_right},
+    };
+
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createCheek(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
@@ -753,8 +754,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsLeft.leftMargin -= (size / 2);
         paramsLeft.topMargin = (int) face.leftCheekY - (size / 2);
 
+
         ImageView cheekLeft = new ImageView(getApplicationContext());
-        cheekLeft.setImageResource(R.drawable.check1_left);
+        cheekLeft.setImageResource(cheek[face.randomCheek][0]);
 //        cheekLeft.setRotation(face.eulerY * 2 + face.eulerZ * 2);
 
         // TODO do (check) inverse for BACK CAM
@@ -772,7 +774,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsRight.topMargin = (int) face.rightCheekY - (size / 2);
 
         ImageView cheekRight = new ImageView(getApplicationContext());
-        cheekRight.setImageResource(R.drawable.check1_right);
+        cheekRight.setImageResource(cheek[face.randomCheek][1]);
 //        cheekRight.setRotation(face.eulerY * 2 + face.eulerZ * 2);
 
         // TODO do (check) inverse for BACK CAM
@@ -784,10 +786,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLight(com.google.android.gms.samples.vision.face.facetracker.Face face) {
-
-        final ImageView light = new ImageView(getApplicationContext());
-        light.setImageResource(R.drawable.light_pink);
-        light.setScaleType(ImageView.ScaleType.FIT_XY);
 
         float x = 0;
         float y = 0;
@@ -801,8 +799,32 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.mouthY;
         }
 
-        final int sizeX = (int) (MAX_X / 1.2);
+        final int sizeSpark = (int) com.google.android.gms.samples.vision.face.facetracker.Face.getDistance(face.rightEyeX, face.rightEyeY, face.leftEyeX, face.leftEyeY);
+
+        final ImageView spark = new ImageView(getApplicationContext());
+        spark.setImageResource(R.drawable.img_light_spark);
+        spark.setScaleType(ImageView.ScaleType.FIT_XY);
+
+        FrameLayout.LayoutParams paramsSpark = new FrameLayout.LayoutParams(sizeSpark, sizeSpark);
+        paramsSpark.leftMargin = (int) x;
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            paramsSpark.leftMargin = MAX_X - paramsSpark.leftMargin;
+        }
+        paramsSpark.leftMargin -= (sizeSpark / 2);
+        paramsSpark.topMargin = (int) y - (sizeSpark / 2);
+
+        spark.setLayoutParams(paramsSpark);
+        layoutUnderSakura.addView(spark);
+        sparks.add(spark);
+
+
+
+        final int sizeX = (int) (MAX_X / 1.5);
         final int sizeY = (int) (MAX_Y);
+
+        final ImageView light = new ImageView(getApplicationContext());
+        light.setImageResource(R.drawable.light_pink);
+        light.setScaleType(ImageView.ScaleType.FIT_XY);
 
 //        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int) Math.abs(face.leftCheekX - face.rightCheekX), (int) Math.abs(face.leftCheekY - face.rightCheekY));
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(sizeX, sizeY);
@@ -811,7 +833,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             params.leftMargin = MAX_X - params.leftMargin;
         }
         params.leftMargin -= (sizeX / 2);
-
         params.topMargin = (int) y;
 
         // TODO do (check) inverse for BACK CAM
@@ -827,26 +848,25 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         light.setPivotY(0);
         light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
 
-        Log.d("finddegree", "light " + x + " " + leftX + " " + y + " " + leftY + " " + triangle + (((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90)));
+        light.setAlpha(0.8f);
+
+        Log.d("finddegree", "light " + x + " " + leftX + " " + y + " " + leftY + " " + triangle + " " + (((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90)));
 
         light.setLayoutParams(params);
-
-
         layoutUnderSakura.addView(light);
         lights.add(light);
-
-        light.post(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("lghtt", light.getWidth() + " " + light.getHeight() + " " + sizeX + " " + sizeY);
-            }
-        });
     }
 
 
-
-
-
+    int[] sa = {
+            R.drawable.sakura_pink1,
+            R.drawable.sakura_pink2,
+            R.drawable.sakura_white1,
+            R.drawable.sakura_white2,
+            R.drawable.sakura3,
+            R.drawable.sakura4,
+            R.drawable.sakura5,
+    };
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakura(com.google.android.gms.samples.vision.face.facetracker.Face face) {
@@ -888,15 +908,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         Log.d("xyy", "sakur " + (params.leftMargin + size/2) + " " + params.topMargin);
 
-        int[] sa = {
-                R.drawable.sakura,
-                R.drawable.sakura2,
-                R.drawable.sakura3,
-                R.drawable.sakura4,
-                R.drawable.sakura5,
-                R.drawable.sakura6,
-                R.drawable.sakura7
-        };
 
         final ImageView sakura = new ImageView(getApplicationContext());
         sakura.setImageResource(sa[im]);
@@ -913,23 +924,23 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int endD = sign ? r.nextInt(60) + 300 : r.nextInt(60);
         long duration = (long) (((r.nextDouble() * 500.0 * facespeedx1) + 8000) / (speedx1/10.0));
 
-        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
-        rotationX.setRepeatCount(ValueAnimator.INFINITE);
-        rotationX.setRepeatMode(ValueAnimator.RESTART);
-        rotationX.setInterpolator(new LinearInterpolator());
-        rotationX.setDuration(duration);
-
-
-        sign = r.nextDouble() > 0.5 ? true : false;
-        startD = sign ? 0 : 359;
-        endD = sign ? 359 : 0;
-        duration = (long) (((r.nextDouble() * 500.0 * facespeedy1) + 8000) / (speedy1/10.0));
-
-        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
-        rotationY.setRepeatCount(ValueAnimator.INFINITE);
-        rotationY.setRepeatMode(ValueAnimator.RESTART);
-        rotationY.setInterpolator(new LinearInterpolator());
-        rotationY.setDuration(duration);
+//        ObjectAnimator rotationX = ObjectAnimator.ofFloat(sakura, View.ROTATION_X, startD, endD);
+//        rotationX.setRepeatCount(ValueAnimator.INFINITE);
+//        rotationX.setRepeatMode(ValueAnimator.RESTART);
+//        rotationX.setInterpolator(new LinearInterpolator());
+//        rotationX.setDuration(duration);
+//
+//
+//        sign = r.nextDouble() > 0.5 ? true : false;
+//        startD = sign ? 0 : 359;
+//        endD = sign ? 359 : 0;
+//        duration = (long) (((r.nextDouble() * 500.0 * facespeedy1) + 8000) / (speedy1/10.0));
+//
+//        ObjectAnimator rotationY = ObjectAnimator.ofFloat(sakura, View.ROTATION_Y, startD, endD);
+//        rotationY.setRepeatCount(ValueAnimator.INFINITE);
+//        rotationY.setRepeatMode(ValueAnimator.RESTART);
+//        rotationY.setInterpolator(new LinearInterpolator());
+//        rotationY.setDuration(duration);
 
 
         sign = r.nextDouble() > 0.5 ? true : false;
@@ -946,7 +957,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/10.0));
-        duration *= 3;
+        duration *= 2;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -961,23 +972,24 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float ang = face.eulerY * 2 + face.eulerZ * 2;
         float leftX = ang > 0 ? x : MAX_X - x;
-        float leftY = y;
+        float leftY = MAX_Y - y + (size / 2);
         float triangle = (float) Math.sqrt(Math.pow(leftX, 2) + Math.pow(leftY, 2));
         float realX = (float) Math.sin(Math.toRadians(ang)) * triangle;
         final float realY = (float) Math.cos(Math.toRadians(ang)) * triangle;
 
-        float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
-        posX = 0;
+        float posX = (float) (r.nextDouble() * (MAX_X/2.5) * (sign ? 1 : -1));
+//        posX = 0;
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
+        duration /= 1.5;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX - (size / 2));
         translationX.setInterpolator(new DecelerateInterpolator());
         translationX.setDuration(duration);
 
-        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, y + realY - (size / 2));
-        double angs = Math.toDegrees(Math.atan2((y + realY - (0)), (toX - (0)))) - 90;
-        Log.d("finddegree", "sakura " + x + " " + leftX + " " + y + " " + leftY + " " + triangle + (angs));
+        ObjectAnimator translationY = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_Y, 0, realY - (size / 2));
+        double angs = Math.toDegrees(Math.atan2(realY - (size / 2), (toX - (size / 2)))) - 90;
+        Log.d("finddegree", "sakura " + x + " " + leftX + " " + y + " " + leftY + " " + triangle + " " + (angs));
         translationY.setInterpolator(new DecelerateInterpolator());
         translationY.setDuration(duration);
         translationY.addListener(new Animator.AnimatorListener() {
@@ -1007,7 +1019,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             }
         });
 
-        animatorSet.playTogether(rotationX, rotationY, rotationZ, scaleX, scaleY, translationX, translationY/*, alpha*/);
+        animatorSet.playTogether(/*rotationX, rotationY, */rotationZ, scaleX, scaleY, translationX, translationY/*, alpha*/);
         animatorSet.start();
 
 
@@ -1262,15 +1274,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
         params.topMargin = (int) y - (size / 2) + size;
 
-        int[] sa = {
-                R.drawable.sakura,
-                R.drawable.sakura2,
-                R.drawable.sakura3,
-                R.drawable.sakura4,
-                R.drawable.sakura5,
-                R.drawable.sakura6,
-                R.drawable.sakura7
-        };
 
         final ImageView sakura = new ImageView(getApplicationContext());
         sakura.setImageResource(sa[im]);
@@ -1427,15 +1430,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
         params.topMargin = (int) y - (size / 2) + size;
 
-        int[] sa = {
-                R.drawable.sakura,
-                R.drawable.sakura2,
-                R.drawable.sakura3,
-                R.drawable.sakura4,
-                R.drawable.sakura5,
-                R.drawable.sakura6,
-                R.drawable.sakura7
-        };
 
         final ImageView sakura = new ImageView(getApplicationContext());
         sakura.setImageResource(sa[im]);
@@ -1574,15 +1568,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
         params.topMargin = (int) y - (size / 2);
 
-        int[] sa = {
-                R.drawable.sakura,
-                R.drawable.sakura2,
-                R.drawable.sakura3,
-                R.drawable.sakura4,
-                R.drawable.sakura5,
-                R.drawable.sakura6,
-                R.drawable.sakura7
-        };
 
         final ImageView sakura = new ImageView(getApplicationContext());
         sakura.setImageResource(sa[im]);
@@ -1719,15 +1704,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
         params.topMargin = (int) y - (size / 2);
 
-        int[] sa = {
-                R.drawable.sakura,
-                R.drawable.sakura2,
-                R.drawable.sakura3,
-                R.drawable.sakura4,
-                R.drawable.sakura5,
-                R.drawable.sakura6,
-                R.drawable.sakura7
-        };
 
         final ImageView sakura = new ImageView(getApplicationContext());
         sakura.setImageResource(sa[im]);

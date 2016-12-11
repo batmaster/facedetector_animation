@@ -33,6 +33,8 @@ public class Face {
     public float rightCheekX = -1;
     public float rightCheekY = -1;
 
+    public int randomCheek = 0;
+
     public int count;
 
     public static int MAX_COUNT = 5;
@@ -40,7 +42,8 @@ public class Face {
     private MediaPlayer mp;
 
     public Face() {
-
+        Random r = new Random();
+        randomCheek = r.nextInt(3);
     }
 
     public void initSound(final Context context) {
@@ -89,5 +92,9 @@ public class Face {
         }
 
         return this.id == ((Face) obj).id;
+    }
+
+    public static float getDistance(float x1, float y1, float x2, float y2) {
+        return (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 }

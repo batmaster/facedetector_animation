@@ -44,8 +44,6 @@
             </intent-filter>
 
         </activity>
-        <activity android:name=".ui.camera.TestPureAnimationActivity"></activity>
-        <activity android:name=".RotateActivity"></activity>
         <activity android:name=".MainActivity">
 
 
