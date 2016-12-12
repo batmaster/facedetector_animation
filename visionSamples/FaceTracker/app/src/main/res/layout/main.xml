@@ -31,7 +31,13 @@
         android:src="@drawable/frame"/>
 
     <FrameLayout
-        android:id="@+id/layoutUnderSakura"
+        android:id="@+id/layoutCheek"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/layoutLight"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </FrameLayout>
@@ -61,7 +67,15 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="10"></RelativeLayout>
+            android:layout_weight="10">
+
+            <ImageView
+                android:id="@+id/imageViewSwapCamera"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/swap_camera_button"/>
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"

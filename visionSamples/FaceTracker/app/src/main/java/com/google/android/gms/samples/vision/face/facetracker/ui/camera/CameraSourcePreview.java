@@ -25,6 +25,7 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 
 import com.google.android.gms.common.images.Size;
+import com.google.android.gms.samples.vision.face.facetracker.Singleton;
 import com.google.android.gms.vision.CameraSource;
 
 import java.io.IOException;
@@ -157,8 +158,9 @@ public class CameraSourcePreview extends ViewGroup {
             childWidth = (int)(((float) layoutHeight / (float) height) * width);
         }
 
+        // TODO FORCE OVERRIDE SIZR TO FULL SCREEN
         for (int i = 0; i < getChildCount(); ++i) {
-            getChildAt(i).layout(0, 0, childWidth, childHeight);
+            getChildAt(i).layout(0, 0, Singleton.activity.MAX_X, Singleton.activity.MAX_Y);
         }
 
         try {

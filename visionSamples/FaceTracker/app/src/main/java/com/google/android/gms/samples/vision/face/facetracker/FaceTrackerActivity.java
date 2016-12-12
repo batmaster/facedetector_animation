@@ -90,7 +90,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private ClonableRelativeLayout topLayout;
     private RelativeLayout layoutSakura;
-    private FrameLayout layoutUnderSakura;
+    private FrameLayout layoutCheek;
+    private FrameLayout layoutLight;
     private CanvasView canvasView;
 
     private ToggleButton toggleButtonRecord;
@@ -141,18 +142,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         topLayout = (ClonableRelativeLayout) findViewById(R.id.topLayout);
         layoutSakura = (RelativeLayout) findViewById(R.id.layoutSakura);
-        layoutUnderSakura = (FrameLayout) findViewById(R.id.layoutUnderSakura);
+        layoutCheek = (FrameLayout) findViewById(R.id.layoutCheek);
+        layoutLight = (FrameLayout) findViewById(R.id.layoutLight);
         canvasView = (CanvasView) findViewById(R.id.canvasView);
 
         toggleButtonRecord = (ToggleButton) findViewById(R.id.toggleButtonRecord);
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
-        mPreview.post(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("mPreview", mPreview.getWidth() + " " + mPreview.getHeight());
-            }
-        });
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
 
         // Check for the camera permission before accessing the camera.  If the
@@ -215,12 +211,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private int finalSize2 = 17;
 
     //private int SIZE = 0;
-    private static int MAX_X = 1080;
-    private static int MAX_Y = 1920;
+    public static int MAX_X = 1080;
+    public static int MAX_Y = 1920;
     public static int PREVIEW_CAM_X = 0;
     public static int PREVIEW_CAM_Y = 0;
     private static int TRIANGLE = 0;
 
+    private ImageView imageViewSwapCamera;
     private ToggleButton toggleButtonEars;
     private ToggleButton toggleButtonEyes;
     private ToggleButton toggleButtonMouth;
@@ -234,6 +231,31 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
 
+
+        imageViewSwapCamera = (ImageView) findViewById(R.id.imageViewSwapCamera);
+        imageViewSwapCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                toggleButtonEars.setChecked(false);
+                toggleButtonEyes.setChecked(false);
+                toggleButtonMouth.setChecked(false);
+
+                if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+                    CAMERA_FACING = CameraSource.CAMERA_FACING_BACK;
+                }
+                else {
+                    CAMERA_FACING = CameraSource.CAMERA_FACING_FRONT;
+                }
+
+                mPreview.stop();
+                if (mCameraSource != null) {
+                    mCameraSource.release();
+                }
+                createCameraSource();
+                startCameraSource();
+            }
+        });
 
         toggleButtonEars = (ToggleButton) findViewById(R.id.toggleButtonEars);
         toggleButtonEyes = (ToggleButton) findViewById(R.id.toggleButtonEyes);
@@ -313,38 +335,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
 
 
-//                if (b) {
-//                    cloning = true;
-//
-//                    final Handler mHandler0 = new Handler();
-//                    mHandler0.post(new Runnable() {
-//                        @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
-//                        @Override
-//                        public void run() {
-//                            if (cloning) {
-//                                views.add(FaceTrackerActivity.this.clone());
-//                                Log.d("viewss", views.size() + " " + new Date());
-//
-//                                mHandler0.postDelayed(this, 1000 / 25);
-//                            }
-//                        }
-//                    });
-//                }
-//                else {
-//                    cloning = false;
-//
-//                    for (int i = 0; i < views.size(); i++) {
-//
-//                        final int finalI = i;
-//                        new Handler().post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                FaceTrackerActivity activity = (FaceTrackerActivity) views.get(finalI);
-//                                getBitmapFromView(activity.topLayout);
-//                            }
-//                        });
-//                    }
-//                }
             }
         });
 
@@ -358,7 +348,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             public void run() {
 
                 for (int i = 0; i < cheeks.size(); i++) {
-                    layoutSakura.removeView(cheeks.get(i));
+                    layoutCheek.removeView(cheeks.get(i));
                     cheeks.get(i).setVisibility(View.GONE);
                     cheeks.remove(i);
                 }
@@ -382,7 +372,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             public void run() {
 
                 for (int i = 0; i < lights.size(); i++) {
-                    layoutUnderSakura.removeView(lights.get(i));
+                    layoutLight.removeView(lights.get(i));
                     lights.get(i).setVisibility(View.GONE);
                     lights.remove(i);
 
@@ -578,11 +568,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Handles the requesting of the camera permission.  This includes
-     * showing a "Snackbar" message of why the permission is needed then
-     * sending the request.
-     */
+
+
+
+
+
+
     private void requestCameraPermission() {
         Log.w(TAG, "Camera permission is not granted. Requesting permission");
 
@@ -610,11 +601,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .show();
     }
 
-    /**
-     * Creates and starts the camera.  Note that this uses a higher resolution in comparison
-     * to other detection examples to enable the barcode detector to detect small barcodes
-     * at long distances.
-     */
+
     private void createCameraSource() {
 
         Context context = getApplicationContext();
@@ -772,7 +759,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         // TODO do (check) inverse for BACK CAM
         cheekLeft.setLayoutParams(paramsLeft);
-        layoutUnderSakura.addView(cheekLeft);
+        layoutCheek.addView(cheekLeft);
         cheeks.add(cheekLeft);
 
 
@@ -790,13 +777,20 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         // TODO do (check) inverse for BACK CAM
         cheekRight.setLayoutParams(paramsRight);
-        layoutUnderSakura.addView(cheekRight);
+        layoutCheek.addView(cheekRight);
         cheeks.add(cheekRight);
     }
 
 
+    private static int lightFrame = 0;
+
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightMouth(com.google.android.gms.samples.vision.face.facetracker.Face face) {
+
+        lightFrame++;
+        if (lightFrame == 8) {
+            lightFrame = 0;
+        }
 
         float x = 0;
         float y = 0;
@@ -824,9 +818,14 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsSpark.leftMargin -= (sizeSpark / 2);
         paramsSpark.topMargin = (int) y - (sizeSpark / 2);
 
+        if (lightFrame > 4) {
+            spark.setVisibility(View.INVISIBLE);
+        }
+
         spark.setLayoutParams(paramsSpark);
-        layoutUnderSakura.addView(spark);
+        layoutLight.addView(spark);
         sparks.add(spark);
+
 
 
 
@@ -861,12 +860,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         light.setAlpha(0.8f);
 
         light.setLayoutParams(params);
-        layoutUnderSakura.addView(light);
+        layoutLight.addView(light);
         lights.add(light);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEyesLeft(com.google.android.gms.samples.vision.face.facetracker.Face face) {
+
+        lightFrame++;
+        if (lightFrame == 8) {
+            lightFrame = 0;
+        }
 
         float x = face.leftEyeX;
         float y = face.leftEyeY;
@@ -885,8 +889,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsSpark.leftMargin -= (sizeSpark / 2);
         paramsSpark.topMargin = (int) y - (sizeSpark / 2);
 
+        if (lightFrame > 4) {
+            spark.setVisibility(View.INVISIBLE);
+        }
+
         spark.setLayoutParams(paramsSpark);
-        layoutUnderSakura.addView(spark);
+        layoutLight.addView(spark);
         sparks.add(spark);
 
 
@@ -922,12 +930,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         light.setAlpha(0.8f);
 
         light.setLayoutParams(params);
-        layoutUnderSakura.addView(light);
+        layoutLight.addView(light);
         lights.add(light);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEyesRight(com.google.android.gms.samples.vision.face.facetracker.Face face) {
+
+        lightFrame++;
+        if (lightFrame == 8) {
+            lightFrame = 0;
+        }
 
         float x = face.rightEyeX;
         float y = face.rightEyeY;
@@ -946,8 +959,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsSpark.leftMargin -= (sizeSpark / 2);
         paramsSpark.topMargin = (int) y - (sizeSpark / 2);
 
+        if (lightFrame > 4) {
+            spark.setVisibility(View.INVISIBLE);
+        }
+
         spark.setLayoutParams(paramsSpark);
-        layoutUnderSakura.addView(spark);
+        layoutLight.addView(spark);
         sparks.add(spark);
 
 
@@ -983,12 +1000,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         light.setAlpha(0.8f);
 
         light.setLayoutParams(params);
-        layoutUnderSakura.addView(light);
+        layoutLight.addView(light);
         lights.add(light);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEarsLeft(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
+
+        lightFrame++;
+        if (lightFrame == 8) {
+            lightFrame = 0;
+        }
 
         float x = 0;
         float y = 0;
@@ -1025,8 +1047,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsSpark.leftMargin -= (sizeSpark / 2);
         paramsSpark.topMargin = (int) y;
 
+        if (lightFrame > 4) {
+            spark.setVisibility(View.INVISIBLE);
+        }
+
         spark.setLayoutParams(paramsSpark);
-        layoutUnderSakura.addView(spark);
+        layoutLight.addView(spark);
         sparks.add(spark);
 
 
@@ -1062,12 +1088,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         light.setAlpha(0.8f);
 
         light.setLayoutParams(params);
-        layoutUnderSakura.addView(light);
+        layoutLight.addView(light);
         lights.add(light);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEarsRight(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
+
+        lightFrame++;
+        if (lightFrame == 8) {
+            lightFrame = 0;
+        }
 
         float x = 0;
         float y = 0;
@@ -1104,8 +1135,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsSpark.leftMargin -= (sizeSpark / 2);
         paramsSpark.topMargin = (int) y;
 
+        if (lightFrame > 4) {
+            spark.setVisibility(View.INVISIBLE);
+        }
+
         spark.setLayoutParams(paramsSpark);
-        layoutUnderSakura.addView(spark);
+        layoutLight.addView(spark);
         sparks.add(spark);
 
 
@@ -1141,7 +1176,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         light.setAlpha(0.8f);
 
         light.setLayoutParams(params);
-        layoutUnderSakura.addView(light);
+        layoutLight.addView(light);
         lights.add(light);
     }
 
@@ -1360,7 +1395,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int startD = sign ? 0 : 359;
         int endD = sign ? 359 : 0;
         long duration = (long) (r.nextDouble() * 5000) + 2000;
-        duration *= 5;
+        duration *= 3;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
@@ -1371,7 +1406,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/5.0));
-        duration *= 5;
+        duration *= 3;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1392,7 +1427,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float posX = (float) (r.nextDouble() * (MAX_X/2.5) * (sign ? 1 : -1));
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
-        duration /= 1.5;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX - (size / 2));
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -1475,7 +1509,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int startD = sign ? 0 : 359;
         int endD = sign ? 359 : 0;
         long duration = (long) (r.nextDouble() * 5000) + 2000;
-        duration *= 5;
+        duration *= 3;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
@@ -1486,7 +1520,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/5.0));
-        duration *= 5;
+        duration *= 3;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1504,7 +1538,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float posX = (float) (r.nextDouble() * (MAX_Y/4.0) * (sign ? 1 : -1));
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
-        duration /= 1.5;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX - (size / 2));
         translationX.setInterpolator(new DecelerateInterpolator());
