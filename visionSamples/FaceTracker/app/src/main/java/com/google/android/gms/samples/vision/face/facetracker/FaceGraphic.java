@@ -137,11 +137,21 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         if (landmarks.size() == 0) {
             for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
                 if (Singleton.activity.getFaces().get(i).id == face.getId()) {
-                    Singleton.activity.removeFace(i);
+                    Singleton.activity.getFaces().get(i).count++;
+                    if (Singleton.activity.getFaces().get(i).count == 3) {
+                        Singleton.activity.removeFace(i);
+                    }
                     return;
                 }
             }
 
+        }
+        else {
+            for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
+                if (Singleton.activity.getFaces().get(i).id == face.getId()) {
+                    Singleton.activity.getFaces().get(i).count = 0;
+                }
+            }
         }
 
 
