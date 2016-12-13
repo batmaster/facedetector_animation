@@ -95,7 +95,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private RelativeLayout layoutSakura;
     private FrameLayout layoutCheek;
     private FrameLayout layoutLight;
-    private CanvasView canvasView;
 
     private ToggleButton toggleButtonRecord;
 
@@ -149,7 +148,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         layoutSakura = (RelativeLayout) findViewById(R.id.layoutSakura);
         layoutCheek = (FrameLayout) findViewById(R.id.layoutCheek);
         layoutLight = (FrameLayout) findViewById(R.id.layoutLight);
-        canvasView = (CanvasView) findViewById(R.id.canvasView);
 
         toggleButtonRecord = (ToggleButton) findViewById(R.id.toggleButtonRecord);
 
@@ -206,7 +204,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     public void removeFace(int index) {
         faces.get(index).stopSound();
         faces.remove(index);
-        canvasView.clear();
+        Log.d("fffa", "fffafffafffafffafffafffafffafffafffafffa");
     }
 
 
@@ -720,6 +718,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     }
 
     private class GraphicFaceTracker extends Tracker<Face> {
+
+        private int faceId;
         private GraphicOverlay mOverlay;
         private FaceGraphic mFaceGraphic;
 
@@ -730,6 +730,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         @Override
         public void onNewItem(int faceId, Face item) {
+            Log.d("fffa", "new  " + faceId);
+
+            this.faceId = faceId;
+
             mFaceGraphic.setId(faceId);
         }
 
@@ -746,9 +750,19 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         @Override
         public void onDone() {
+            Log.d("fffa", "done " + faceId);
+
+            for (int i = 0; i < faces.size(); i++) {
+                if (faces.get(i).id == faceId) {
+                    Singleton.activity.removeFace(i);
+                }
+            }
+
             mOverlay.remove(mFaceGraphic);
         }
     }
+
+    public static ArrayList<Integer> requestRemoveIds = new ArrayList<Integer>();
 
 
 

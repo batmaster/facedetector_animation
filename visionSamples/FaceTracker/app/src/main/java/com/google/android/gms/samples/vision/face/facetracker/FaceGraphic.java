@@ -104,6 +104,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     @Override
     public void draw(Canvas canvas) {
         Face face = mFace;
+        Log.d("faceface", face.getId() + "");
         if (face == null) {
             return;
         }
@@ -141,32 +142,27 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float y1 = -1;
         float y2 = -1;
 
-        if (landmarks.size() == 0) {
-            for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
-                if (Singleton.activity.getFaces().get(i).id == face.getId()) {
-                    Singleton.activity.removeFace(i);
-                    return;
-                }
-            }
+        Log.d("fffa", landmarks.size() + "");
 
+//        if (landmarks.size() == 0) {
 //            for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
 //                if (Singleton.activity.getFaces().get(i).id == face.getId()) {
-//                    Singleton.activity.getFaces().get(i).count++;
-//                    if (Singleton.activity.getFaces().get(i).count == 3) {
-//                        Singleton.activity.removeFace(i);
-//                    }
+//                    Singleton.activity.removeFace(i);
 //                    return;
 //                }
 //            }
-
-        }
-        else {
-            for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
-                if (Singleton.activity.getFaces().get(i).id == face.getId()) {
-                    Singleton.activity.getFaces().get(i).count = 0;
-                }
-            }
-        }
+//
+////            for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
+////                if (Singleton.activity.getFaces().get(i).id == face.getId()) {
+////                    Singleton.activity.getFaces().get(i).count++;
+////                    if (Singleton.activity.getFaces().get(i).count == 3) {
+////                        Singleton.activity.removeFace(i);
+////                    }
+////                    return;
+////                }
+////            }
+//
+//        }
 
 
 

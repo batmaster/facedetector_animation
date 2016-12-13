@@ -2,6 +2,7 @@ package com.google.android.gms.samples.vision.face.facetracker;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.util.Log;
 
 import java.util.Random;
 
@@ -47,14 +48,19 @@ public class Face {
     }
 
     public void initSound(final Context context) {
-        mp = MediaPlayer.create(context, randomSound());
+        Log.d("sounddd", "initSound " + id);
+        int sid = randomSound();
+        mp = MediaPlayer.create(context, sid);
         mp.seekTo(1000);
+        mp.setLooping(false);
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
+                int sid = randomSound();
                 mp.reset();
-                mp = MediaPlayer.create(context, randomSound());
+                mp = MediaPlayer.create(context, sid);
                 mp.seekTo(1000);
+                mp.setLooping(false);
                 mp.start();
             }
         });
@@ -66,22 +72,26 @@ public class Face {
     }
 
     public void playSound() {
+        Log.d("sounddd", "playSound " + id);
         mp.start();
     }
 
     public void pauseSound() {
+        Log.d("sounddd", "pauseSound " + id);
         if (mp.isPlaying()) {
             mp.pause();
         }
     }
 
     public void stopSound() {
+        Log.d("sounddd", "stopSound " + id);
         mp.stop();
         mp.reset();
         mp.release();
     }
 
     public boolean isPlayingSound() {
+        Log.d("sounddd", "isPlayingSound " + id);
         return mp.isPlaying();
     }
 
