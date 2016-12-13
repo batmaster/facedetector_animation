@@ -23,12 +23,16 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.common.images.Size;
+import com.google.android.gms.samples.vision.face.facetracker.FaceTrackerActivity;
 import com.google.android.gms.samples.vision.face.facetracker.Singleton;
 import com.google.android.gms.vision.CameraSource;
 
 import java.io.IOException;
+
+import static com.google.android.gms.samples.vision.face.facetracker.FaceTrackerActivity.PREVIEW_CAM_Y;
 
 public class CameraSourcePreview extends ViewGroup {
     private static final String TAG = "CameraSourcePreview";
@@ -135,6 +139,11 @@ public class CameraSourcePreview extends ViewGroup {
             if (size != null) {
                 width = size.getWidth();
                 height = size.getHeight();
+
+//                Log.d("getPreviewSize", width + " " + height);
+//                Singleton.activity.PREFERED_CAM_HEIGHT = height;
+//                Singleton.activity.PREFERED_CAM_WIDTH = width;
+//                Singleton.activity.makeThreadSakura();
             }
         }
 
@@ -159,8 +168,13 @@ public class CameraSourcePreview extends ViewGroup {
         }
 
         // TODO FORCE OVERRIDE SIZR TO FULL SCREEN
+
+
+        float h = PREVIEW_CAM_Y / FaceTrackerActivity.PREFERED_CAM_HEIGHT;
+        float newW = FaceTrackerActivity.PREFERED_CAM_WIDTH * h;
+
         for (int i = 0; i < getChildCount(); ++i) {
-            getChildAt(i).layout(0, 0, Singleton.activity.MAX_X, Singleton.activity.MAX_Y);
+            getChildAt(i).layout(0, 0, (int) newW, Singleton.activity.MAX_Y);
         }
 
         try {

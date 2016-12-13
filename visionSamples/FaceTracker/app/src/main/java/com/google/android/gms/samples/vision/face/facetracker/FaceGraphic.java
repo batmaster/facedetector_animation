@@ -28,7 +28,11 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static com.google.android.gms.samples.vision.face.facetracker.FaceTrackerActivity.PREVIEW_CAM_X;
+import static com.google.android.gms.samples.vision.face.facetracker.FaceTrackerActivity.PREVIEW_CAM_Y;
 
 /**
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
@@ -127,6 +131,9 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         double imageWidth = Singleton.activity.PREVIEW_CAM_X;
         double imageHeight = Singleton.activity.PREVIEW_CAM_Y;
         float scale = (float) Math.min(viewWidth / imageWidth, viewHeight / imageHeight);
+        
+        
+        float scaleCam = PREVIEW_CAM_Y / FaceTrackerActivity.PREFERED_CAM_HEIGHT;
 
         List<Landmark> landmarks = face.getLandmarks();
         float x1 = -1;
@@ -137,13 +144,20 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         if (landmarks.size() == 0) {
             for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
                 if (Singleton.activity.getFaces().get(i).id == face.getId()) {
-                    Singleton.activity.getFaces().get(i).count++;
-                    if (Singleton.activity.getFaces().get(i).count == 3) {
-                        Singleton.activity.removeFace(i);
-                    }
+                    Singleton.activity.removeFace(i);
                     return;
                 }
             }
+
+//            for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
+//                if (Singleton.activity.getFaces().get(i).id == face.getId()) {
+//                    Singleton.activity.getFaces().get(i).count++;
+//                    if (Singleton.activity.getFaces().get(i).count == 3) {
+//                        Singleton.activity.removeFace(i);
+//                    }
+//                    return;
+//                }
+//            }
 
         }
         else {
@@ -172,56 +186,61 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             existFace.id = face.getId();
         }
 
+        Log.d("camupdate", new Date().getTime() + "");
 
+
+        float h = PREVIEW_CAM_Y / FaceTrackerActivity.PREFERED_CAM_HEIGHT;
+        float newW = FaceTrackerActivity.PREFERED_CAM_WIDTH * h;
+        float minusX = (newW - PREVIEW_CAM_X);
 
         Log.d("landmarkkk", "======");
 
         for (int i = 0; i < landmarks.size(); i++) {
-
             Log.d("landmarkkk", getLandmarkType(landmarks.get(i).getType()));
 
-            float whereX = landmarks.get(i).getPosition().x * scale;
+            float whereX = landmarks.get(i).getPosition().x * scale * scaleCam;
             if (Singleton.activity.CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
                 whereX = Singleton.activity.PREVIEW_CAM_X - whereX;
             }
-            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+            whereX += minusX;
+            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale * scaleCam, FACE_POSITION_RADIUS, mFacePositionPaint);
 
 
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {
-                x1 = landmarks.get(i).getPosition().x  * scale;
-                y1 = landmarks.get(i).getPosition().y  * scale;
+                x1 = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                y1 = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_MOUTH) {
-                x2 = landmarks.get(i).getPosition().x  * scale;
-                y2 = landmarks.get(i).getPosition().y  * scale;
+                x2 = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                y2 = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
             else if (landmarks.get(i).getType() == Landmark.LEFT_EAR_TIP) {
-                existFace.leftEarX = landmarks.get(i).getPosition().x  * scale;
-                existFace.leftEarY = landmarks.get(i).getPosition().y  * scale;
+                existFace.leftEarX = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                existFace.leftEarY = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EAR_TIP) {
-                existFace.rightEarX = landmarks.get(i).getPosition().x  * scale;
-                existFace.rightEarY = landmarks.get(i).getPosition().y  * scale;
+                existFace.rightEarX = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                existFace.rightEarY = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
             else if (landmarks.get(i).getType() == Landmark.LEFT_EYE) {
-                existFace.leftEyeX = landmarks.get(i).getPosition().x  * scale;
-                existFace.leftEyeY = landmarks.get(i).getPosition().y  * scale;
+                existFace.leftEyeX = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                existFace.leftEyeY = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_EYE) {
-                existFace.rightEyeX = landmarks.get(i).getPosition().x  * scale;
-                existFace.rightEyeY = landmarks.get(i).getPosition().y  * scale;
+                existFace.rightEyeX = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                existFace.rightEyeY = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
             else if (landmarks.get(i).getType() == Landmark.BOTTOM_MOUTH) {
-                existFace.bottomMouthX = landmarks.get(i).getPosition().x  * scale;
-                existFace.bottomMouthY = landmarks.get(i).getPosition().y  * scale;
+                existFace.bottomMouthX = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                existFace.bottomMouthY = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
             else if (landmarks.get(i).getType() == Landmark.LEFT_CHEEK) {
-                existFace.leftCheekX = landmarks.get(i).getPosition().x  * scale;
-                existFace.leftCheekY = landmarks.get(i).getPosition().y  * scale;
+                existFace.leftCheekX = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                existFace.leftCheekY = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
             else if (landmarks.get(i).getType() == Landmark.RIGHT_CHEEK) {
-                existFace.rightCheekX = landmarks.get(i).getPosition().x  * scale;
-                existFace.rightCheekY = landmarks.get(i).getPosition().y  * scale;
+                existFace.rightCheekX = landmarks.get(i).getPosition().x  * scale * scaleCam;
+                existFace.rightCheekY = landmarks.get(i).getPosition().y  * scale * scaleCam;
             }
 
         }

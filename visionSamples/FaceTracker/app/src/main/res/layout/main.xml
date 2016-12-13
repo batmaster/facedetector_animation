@@ -43,8 +43,24 @@
     </FrameLayout>
 
     <ImageView
-        android:visibility="invisible"
-        android:id="@+id/imageFrameIce"
+        android:alpha="0"
+        android:id="@+id/imageFrameIce1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/frame_ice"/>
+
+    <ImageView
+        android:alpha="0"
+        android:id="@+id/imageFrameIce2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/frame_ice"/>
+
+    <ImageView
+        android:alpha="0"
+        android:id="@+id/imageFrameIce3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
