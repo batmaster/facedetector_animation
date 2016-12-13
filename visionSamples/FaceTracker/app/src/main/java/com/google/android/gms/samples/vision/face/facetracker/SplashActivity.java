@@ -17,7 +17,14 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 Intent intent = new Intent(getApplicationContext(), FaceTrackerActivity.class);
                 startActivity(intent);
+
+                finish();
             }
         }, 4000);
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 }

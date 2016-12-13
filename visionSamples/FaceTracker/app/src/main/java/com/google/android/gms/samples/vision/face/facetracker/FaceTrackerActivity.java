@@ -756,6 +756,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             {R.drawable.cheek1_left, R.drawable.cheek1_right},
             {R.drawable.cheek2_left, R.drawable.cheek2_right},
             {R.drawable.cheek3_left, R.drawable.cheek3_right},
+            {R.drawable.cheek4_left, R.drawable.cheek4_right},
     };
 
     @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
@@ -1993,11 +1994,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
                                                                     Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
-//                                                                    intent.putExtra("videoFileName", videoFileName);
+                                                                    intent.putExtra("videoFileName", videoFileName);
                                                                     startActivity(intent);
 
-                                                                    dialog.dismiss();
-                                                                    finish();
+                                                                    new Handler().postDelayed(new Runnable() {
+                                                                        @Override
+                                                                        public void run() {
+                                                                            finish();
+
+                                                                            dialog.dismiss();
+                                                                        }
+                                                                    }, 1000);
                                                                 }
                                                             }
                                                         }, 1000);
@@ -2043,7 +2050,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mMediaRecorder.setOutputFile(Environment.getDataDirectory() + videoFileName);
+            mMediaRecorder.setOutputFile(getFilesDir() + "/" + videoFileName);
             mMediaRecorder.setVideoSize(MAX_X, MAX_Y);
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);

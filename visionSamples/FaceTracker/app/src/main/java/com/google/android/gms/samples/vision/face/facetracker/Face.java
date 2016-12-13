@@ -43,7 +43,7 @@ public class Face {
 
     public Face() {
         Random r = new Random();
-        randomCheek = r.nextInt(3);
+        randomCheek = r.nextInt(4);
     }
 
     public void initSound(final Context context) {

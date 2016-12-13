@@ -34,15 +34,15 @@
                 android:layout_height="64dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
-                android:src="@drawable/btn_review_home"/>
+                android:src="@drawable/btn_review_home" />
 
         </RelativeLayout>
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:layout_weight="50"
+            android:orientation="vertical"
             android:weightSum="100">
 
             <RelativeLayout
@@ -72,6 +72,7 @@
                 android:id="@+id/imageViewDelete"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:layout_weight="33"
                 android:src="@drawable/btn_review_delete" />
 
@@ -79,6 +80,7 @@
                 android:id="@+id/imageViewSave"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:layout_weight="33"
                 android:src="@drawable/btn_review_save" />
 
@@ -86,6 +88,7 @@
                 android:id="@+id/imageViewShare"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
+                android:layout_margin="4dp"
                 android:layout_weight="33"
                 android:src="@drawable/btn_review_share" />
 
