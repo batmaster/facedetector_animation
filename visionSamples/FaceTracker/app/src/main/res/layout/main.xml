@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
-        android:src="@drawable/frame_ice"/>
+        android:src="@drawable/img_frame_ice1"/>
 
     <ImageView
         android:alpha="0"
@@ -56,7 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
-        android:src="@drawable/frame_ice"/>
+        android:src="@drawable/img_frame_ice2"/>
 
     <ImageView
         android:alpha="0"
@@ -64,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
-        android:src="@drawable/frame_ice"/>
+        android:src="@drawable/img_frame_ice3"/>
 
     <RelativeLayout
         android:id="@+id/layoutSakura"

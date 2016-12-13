@@ -61,6 +61,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -79,6 +80,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
@@ -240,6 +242,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private ToggleButton toggleButtonEyes;
     private ToggleButton toggleButtonMouth;
 
+    private LinearLayout selector;
+
     public static int CAMERA_FACING = CameraSource.CAMERA_FACING_FRONT;
 
     private float minusX;
@@ -250,6 +254,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
+
+        selector = (LinearLayout) findViewById(R.id.selector);
 
         float h = PREVIEW_CAM_Y / FaceTrackerActivity.PREFERED_CAM_HEIGHT;
         float newW = FaceTrackerActivity.PREFERED_CAM_WIDTH * h;
@@ -280,6 +286,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             }
         });
 
+
+
         toggleButtonEars = (ToggleButton) findViewById(R.id.toggleButtonEars);
         toggleButtonEyes = (ToggleButton) findViewById(R.id.toggleButtonEyes);
         toggleButtonMouth = (ToggleButton) findViewById(R.id.toggleButtonMouth);
@@ -308,6 +316,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 } else {
                     onToggleScreenShare(compoundButton);
+                }
+
+                if (b) {
+                    selector.setVisibility(View.INVISIBLE);
+                }
+                else {
+                    selector.setVisibility(View.VISIBLE);
                 }
 
 
@@ -1976,7 +1991,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                 if (recording) {
                                                                     toggleButtonRecord.setChecked(false);
 
+
+                                                                    Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
+//                                                                    intent.putExtra("videoFileName", videoFileName);
+                                                                    startActivity(intent);
+
                                                                     dialog.dismiss();
+                                                                    finish();
                                                                 }
                                                             }
                                                         }, 1000);
@@ -2013,12 +2034,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 /*Handler*/);
     }
 
+    private String videoFileName;
+
     private void initRecorder() {
+        videoFileName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".mp4";
+
         try {
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mMediaRecorder.setOutputFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/video.mp4");
+            mMediaRecorder.setOutputFile(Environment.getDataDirectory() + videoFileName);
             mMediaRecorder.setVideoSize(MAX_X, MAX_Y);
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);

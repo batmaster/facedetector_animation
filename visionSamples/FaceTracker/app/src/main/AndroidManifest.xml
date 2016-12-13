@@ -41,8 +41,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"></activity>
-        <activity android:name=".FinishRecordActivity"></activity>
+        <activity android:name=".MainActivity" />
+        <activity android:name=".FinishRecordActivity" />
+        <activity android:name=".SplashActivity"></activity>
     </application>
 
 </manifest>

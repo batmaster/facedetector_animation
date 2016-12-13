@@ -4,10 +4,93 @@
     android:id="@+id/activity_finish_record"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.google.android.gms.samples.vision.face.facetracker.FinishRecordActivity">
+
+    <VideoView
+        android:id="@+id/videoView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/bg_review" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="100">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="28">
+
+            <ImageView
+                android:id="@+id/imageViewHome"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/btn_review_home"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="50"
+            android:weightSum="100">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0px"
+                android:layout_weight="30">
+
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/imageViewPlay"
+                android:layout_width="match_parent"
+                android:layout_height="0px"
+                android:layout_weight="40"
+                android:src="@drawable/btn_review_play" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="22"
+            android:orientation="horizontal"
+            android:weightSum="99">
+
+            <ImageView
+                android:id="@+id/imageViewDelete"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="33"
+                android:src="@drawable/btn_review_delete" />
+
+            <ImageView
+                android:id="@+id/imageViewSave"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="33"
+                android:src="@drawable/btn_review_save" />
+
+            <ImageView
+                android:id="@+id/imageViewShare"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="33"
+                android:src="@drawable/btn_review_share" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>
