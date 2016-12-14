@@ -290,8 +290,48 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
         toggleButtonEars = (ToggleButton) findViewById(R.id.toggleButtonEars);
+        toggleButtonEars.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    toggleButtonEyes.setChecked(false);
+                    toggleButtonMouth.setChecked(false);
+                }
+            }
+        });
         toggleButtonEyes = (ToggleButton) findViewById(R.id.toggleButtonEyes);
+        toggleButtonEyes.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    toggleButtonEars.setChecked(false);
+                    toggleButtonMouth.setChecked(false);
+                }
+            }
+        });
         toggleButtonMouth = (ToggleButton) findViewById(R.id.toggleButtonMouth);
+        toggleButtonMouth.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    toggleButtonEars.setChecked(false);
+                    toggleButtonEyes.setChecked(false);
+                }
+            }
+        });
+
+
+        Random r = new Random();
+        double d = r.nextDouble();
+        if (d < 0.4) {
+            toggleButtonEyes.setChecked(true);
+        }
+        else if (d < 0.8) {
+            toggleButtonMouth.setChecked(true);
+        }
+        else {
+            toggleButtonEars.setChecked(true);
+        }
 
         toggleButtonRecord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -356,7 +396,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
 
-                handlerCheek.postDelayed(this, 16);
+                if (appRuning) {
+                    handlerCheek.postDelayed(this, 16);
+                }
             }
         });
 
@@ -435,7 +477,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
 
-                handlerLight.postDelayed(this, 16);
+                if (appRuning) {
+                    handlerLight.postDelayed(this, 16);
+                }
             }
         });
 
@@ -456,6 +500,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     for (int i = 0; i < faces.size(); i++) {
                         int key = faces.keyAt(i);
                         com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
+
+                        f.count++;
+                        if (f.count > 3) {
+                            faces.remove(f.id);
+                        }
                         
                         if ((f.bottomMouthX != -1 && f.bottomMouthY != -1) ||
                                 (f.mouthX != -1 && f.mouthY != -1)) {
@@ -483,8 +532,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         }
                     }
                 }
-
-                handlerSakuraMouth.postDelayed(this, (500 / volume1));
+                if (appRuning) {
+                    handlerSakuraMouth.postDelayed(this, (500 / volume1));
+                }
             }
         });
 
@@ -505,6 +555,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         int key = faces.keyAt(i);
                         com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
                         int sakuring = 0;
+
+                        f.count++;
+                        if (f.count > 3) {
+                            faces.remove(f.id);
+                        }
 
                         if (f.leftEyeX != -1 && f.leftEyeY != -1) {
                             createSakuraEyesLeft(f);
@@ -535,8 +590,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                     }
                 }
-
-                handlerSakuraEyes.postDelayed(this, (long) (1.5 * 500 / volume1));
+                if (appRuning) {
+                    handlerSakuraEyes.postDelayed(this, (long) (1.5 * 500 / volume1));
+                }
             }
         });
 
@@ -557,6 +613,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         int key = faces.keyAt(i);
                         com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
                         int sakuring = 0;
+
+                        f.count++;
+                        if (f.count > 3) {
+                            faces.remove(f.id);
+                        }
 
                         // left ear
                         if (f.leftEarX != -1 && f.leftEarY != -1) {
@@ -608,7 +669,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
 
-                handlerSakuraEars.postDelayed(this, (long) (1.5 * 500 / volume1));
+                if (appRuning) {
+                    handlerSakuraEars.postDelayed(this, (long) (1.5 * 500 / volume1));
+                }
             }
         });
 
@@ -697,20 +760,38 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        appRuning = true;
+
         startCameraSource();
 
         for (int i = 0; i < faces.size(); i++) {
-            faces.get(i).playSound();
+            int key = faces.keyAt(i);
+            faces.get(key).playSound();
         }
     }
+
+    boolean appRuning = true;
 
     @Override
     protected void onPause() {
         super.onPause();
         mPreview.stop();
 
+        Log.d("pauseeee", "ppp");
+
         for (int i = 0; i < faces.size(); i++) {
-            faces.get(i).pauseSound();
+            int key = faces.keyAt(i);
+            try {
+                faces.get(key).pauseSound();
+            }
+            catch (Exception e) {
+
+            }
+        }
+
+        if (!waitingForResult) {
+            appRuning = false;
+            finish();
         }
     }
 
@@ -1244,7 +1325,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         light.setPivotX(sizeX / 2);
         light.setPivotY(0);
-        light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) + 90));
+        light.setRotation(((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
 
         light.setAlpha(0.8f);
 
@@ -1955,6 +2036,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        waitingForResult = false;
+
         if (requestCode != REQUEST_CODE) {
             Log.e(TAG, "Unknown request code: " + requestCode);
             return;
@@ -1982,12 +2065,14 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
         } else {
-            mMediaRecorder.stop();
-            mMediaRecorder.reset();
-            Log.v(TAG, "Stopping Recording");
-            stopScreenSharing();
+            if (recording) {
+                mMediaRecorder.stop();
+                mMediaRecorder.reset();
+                Log.v(TAG, "Stopping Recording");
+                stopScreenSharing();
 
-            recording = false;
+                recording = false;
+            }
         }
     }
 
@@ -2035,6 +2120,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                         // show endPopup
                                                         dialog.show();
 
+                                                        for (int i = 0; i < faces.size(); i++) {
+                                                            int key = faces.keyAt(i);
+                                                            faces.get(key).pauseSound();
+                                                        }
+
                                                         new Handler().postDelayed(new Runnable() {
 
                                                             @Override
@@ -2051,9 +2141,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                     new Handler().postDelayed(new Runnable() {
                                                                         @Override
                                                                         public void run() {
-                                                                            finish();
 
-                                                                            dialog.dismiss();
+                                                                            try {
+                                                                                dialog.dismiss();
+                                                                            }
+                                                                            catch (IllegalArgumentException e) {
+                                                                                e.printStackTrace();
+                                                                            }
+
+                                                                            finish();
                                                                         }
                                                                     }, 1000);
                                                                 }
@@ -2073,10 +2169,14 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }, 2000);
     }
 
+    private boolean waitingForResult;
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void shareScreen() {
         if (mMediaProjection == null) {
             startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
+            waitingForResult = true;
+
             return;
         }
         mVirtualDisplay = createVirtualDisplay();
@@ -2212,4 +2312,14 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .show();
     }
 
+
+    @Override
+    public void onBackPressed() {
+        if (recording) {
+
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
 }

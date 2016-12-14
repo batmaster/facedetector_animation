@@ -125,7 +125,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float top = y - yOffset;
         float right = x + xOffset;
         float bottom = y + yOffset;
-        canvas.drawRect(left, top, right, bottom, mBoxPaint);
+//        canvas.drawRect(left, top, right, bottom, mBoxPaint);
 
         double viewWidth = canvas.getWidth();
         double viewHeight = canvas.getHeight();
@@ -196,7 +196,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
                 whereX = Singleton.activity.PREVIEW_CAM_X - whereX;
             }
             whereX += minusX;
-            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale * scaleCam, FACE_POSITION_RADIUS, mFacePositionPaint);
+//            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale * scaleCam, FACE_POSITION_RADIUS, mFacePositionPaint);
 
 
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {
@@ -248,7 +248,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         existFace.eulerY = face.getEulerY();
         existFace.eulerZ = face.getEulerZ();
 
-
+        existFace.count = 0;
 
         if (!foundFace) {
             Singleton.activity.addFace(existFace);

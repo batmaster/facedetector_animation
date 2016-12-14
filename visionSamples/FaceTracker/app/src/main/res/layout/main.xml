@@ -81,6 +81,7 @@
             android:layout_weight="10">
 
             <ImageView
+                android:visibility="invisible"
                 android:id="@+id/imageViewSwapCamera"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
