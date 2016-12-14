@@ -51,6 +51,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.Surface;
@@ -122,7 +123,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         super.onCreate(icicle);
         setContentView(R.layout.main);
 
-        faces = new ArrayList<com.google.android.gms.samples.vision.face.facetracker.Face>();
+        faces = new SparseArray<com.google.android.gms.samples.vision.face.facetracker.Face>();
 
         Singleton.activity = this;
 
@@ -190,21 +191,23 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private boolean recording = false;
     private boolean cool = false;
 
-    private static ArrayList<com.google.android.gms.samples.vision.face.facetracker.Face> faces;
+    private static SparseArray<com.google.android.gms.samples.vision.face.facetracker.Face> faces;
 
-    public ArrayList<com.google.android.gms.samples.vision.face.facetracker.Face> getFaces() {
+    public SparseArray<com.google.android.gms.samples.vision.face.facetracker.Face> getFaces() {
         return faces;
     }
 
     public void addFace(com.google.android.gms.samples.vision.face.facetracker.Face face) {
         face.initSound(getApplicationContext());
-        faces.add(face);
+        faces.append(face.id, face);
     }
 
-    public void removeFace(int index) {
-        faces.get(index).stopSound();
-        faces.remove(index);
-        Log.d("fffa", "fffafffafffafffafffafffafffafffafffafffa");
+    public void removeFace(int id) {
+        if (faces.get(id) != null) {
+
+            faces.get(id).stopSound();
+            faces.remove(id);
+        }
     }
 
 
@@ -343,10 +346,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
 
                 for (int i = 0; i < faces.size(); i++) {
-                    if ((faces.get(i).leftCheekX != -1 && faces.get(i).leftCheekY != -1) &&
-                            (faces.get(i).rightCheekX != -1 && faces.get(i).rightCheekY != -1)) {
+                    int key = faces.keyAt(i);
+                    com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
+                    
+                    if ((f.leftCheekX != -1 && f.leftCheekY != -1) &&
+                            (f.rightCheekX != -1 && f.rightCheekY != -1)) {
 
-                        createCheek(faces.get(i));
+                        createCheek(f);
                     }
                 }
 
@@ -372,51 +378,59 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                 if (toggleButtonMouth.isChecked()) {
                     for (int i = 0; i < faces.size(); i++) {
-                        if ((faces.get(i).bottomMouthX != -1 && faces.get(i).bottomMouthY != -1) ||
-                                (faces.get(i).mouthX != -1 && faces.get(i).mouthY != -1)) {
+                        int key = faces.keyAt(i);
+                        com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
+                        
+                        if ((f.bottomMouthX != -1 && f.bottomMouthY != -1) ||
+                                (f.mouthX != -1 && f.mouthY != -1)) {
 
-                            createLightMouth(faces.get(i));
+                            createLightMouth(f);
                         }
                     }
                 }
                 else if (toggleButtonEyes.isChecked()) {
                     for (int i = 0; i < faces.size(); i++) {
-                        if (faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1) {
-                            createLightEyesLeft(faces.get(i));
+                        int key = faces.keyAt(i);
+                        com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
+                        
+                        if (f.leftEyeX != -1 && f.leftEyeY != -1) {
+                            createLightEyesLeft(f);
                         }
 
-                        if (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1) {
-                            createLightEyesRight(faces.get(i));
+                        if (f.rightEyeX != -1 && f.rightEyeY != -1) {
+                            createLightEyesRight(f);
                         }
                     }
                 }
                 else if (toggleButtonEars.isChecked()) {
                     for (int i = 0; i < faces.size(); i++) {
+                        int key = faces.keyAt(i);
+                        com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
 
                         // left ear
-                        if (faces.get(i).leftEarX != -1 && faces.get(i).leftEarY != -1) {
-                            createLightEarsLeft(faces.get(i), 2);
+                        if (f.leftEarX != -1 && f.leftEarY != -1) {
+                            createLightEarsLeft(f, 2);
                         }
-                        else if ((faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) &&
-                                (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1)) {
-                            createLightEarsLeft(faces.get(i), 2);
+                        else if ((f.rightEarX != -1 && f.rightEarY != -1) &&
+                                (f.rightEyeX != -1 && f.rightEyeY != -1)) {
+                            createLightEarsLeft(f, 2);
                         }
-                        else if ((faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1) &&
-                                (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1)) {
-                            createLightEarsLeft(faces.get(i), 2);
+                        else if ((f.leftEyeX != -1 && f.leftEyeY != -1) &&
+                                (f.rightEyeX != -1 && f.rightEyeY != -1)) {
+                            createLightEarsLeft(f, 2);
                         }
 
                         // right ear
-                        if (faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) {
-                            createLightEarsRight(faces.get(i), 2); //0
+                        if (f.rightEarX != -1 && f.rightEarY != -1) {
+                            createLightEarsRight(f, 2); //0
                         }
-                        else if ((faces.get(i).leftEarX != -1 && faces.get(i).leftEarY != -1) &&
-                                (faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1)) {
-                            createLightEarsRight(faces.get(i), 2); //1
+                        else if ((f.leftEarX != -1 && f.leftEarY != -1) &&
+                                (f.leftEyeX != -1 && f.leftEyeY != -1)) {
+                            createLightEarsRight(f, 2); //1
                         }
-                        else if ((faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1) &&
-                                (faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1)) {
-                            createLightEarsRight(faces.get(i), 2); //2
+                        else if ((f.rightEyeX != -1 && f.rightEyeY != -1) &&
+                                (f.leftEyeX != -1 && f.leftEyeY != -1)) {
+                            createLightEarsRight(f, 2); //2
                         }
                     }
                 }
@@ -440,18 +454,31 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
 
                     for (int i = 0; i < faces.size(); i++) {
-                        if ((faces.get(i).bottomMouthX != -1 && faces.get(i).bottomMouthY != -1) ||
-                                (faces.get(i).mouthX != -1 && faces.get(i).mouthY != -1)) {
-                            createSakuraMouth(faces.get(i));
-                            createSakuraMouth(faces.get(i));
+                        int key = faces.keyAt(i);
+                        com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
+                        
+                        if ((f.bottomMouthX != -1 && f.bottomMouthY != -1) ||
+                                (f.mouthX != -1 && f.mouthY != -1)) {
+                            createSakuraMouth(f);
+                            createSakuraMouth(f);
 
-                            if (!faces.get(i).isPlayingSound()) {
-                                faces.get(i).playSound();
+                            try {
+                                if (!f.isPlayingSound()) {
+                                    f.playSound();
+                                }
+                            }
+                            catch (IllegalStateException e) {
+                                e.printStackTrace();
                             }
                         }
                         else {
-                            if (faces.get(i).isPlayingSound()) {
-                                faces.get(i).pauseSound();
+                            try {
+                                if (f.isPlayingSound()) {
+                                    f.pauseSound();
+                                }
+                            }
+                            catch (IllegalStateException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
@@ -475,29 +502,35 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
 
                     for (int i = 0; i < faces.size(); i++) {
+                        int key = faces.keyAt(i);
+                        com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
                         int sakuring = 0;
 
-                        if (faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1) {
-                            createSakuraEyesLeft(faces.get(i));
-                            createSakuraEyesLeft(faces.get(i));
+                        if (f.leftEyeX != -1 && f.leftEyeY != -1) {
+                            createSakuraEyesLeft(f);
+                            createSakuraEyesLeft(f);
                             sakuring++;
                         }
 
-                        if (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1) {
-                            createSakuraEyesRight(faces.get(i));
-                            createSakuraEyesRight(faces.get(i));
+                        if (f.rightEyeX != -1 && f.rightEyeY != -1) {
+                            createSakuraEyesRight(f);
+                            createSakuraEyesRight(f);
                             sakuring++;
                         }
 
-                        if (sakuring >= 0) {
-                            if (!faces.get(i).isPlayingSound()) {
-                                faces.get(i).playSound();
+                        try {
+                            if (sakuring >= 0) {
+                                if (!f.isPlayingSound()) {
+                                    f.playSound();
+                                }
+                            } else {
+                                if (f.isPlayingSound()) {
+                                    f.pauseSound();
+                                }
                             }
                         }
-                        else {
-                            if (faces.get(i).isPlayingSound()) {
-                                faces.get(i).pauseSound();
-                            }
+                        catch (IllegalStateException e) {
+                            e.printStackTrace();
                         }
 
                     }
@@ -521,49 +554,55 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
 
                     for (int i = 0; i < faces.size(); i++) {
+                        int key = faces.keyAt(i);
+                        com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
                         int sakuring = 0;
 
                         // left ear
-                        if (faces.get(i).leftEarX != -1 && faces.get(i).leftEarY != -1) {
-                            createSakuraEarsLeft(faces.get(i), 2);
+                        if (f.leftEarX != -1 && f.leftEarY != -1) {
+                            createSakuraEarsLeft(f, 2);
                             sakuring++;
                         }
-                        else if ((faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) &&
-                                (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1)) {
-                            createSakuraEarsLeft(faces.get(i), 2);
+                        else if ((f.rightEarX != -1 && f.rightEarY != -1) &&
+                                (f.rightEyeX != -1 && f.rightEyeY != -1)) {
+                            createSakuraEarsLeft(f, 2);
                             sakuring++;
                         }
-                        else if ((faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1) &&
-                                (faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1)) {
-                            createSakuraEarsLeft(faces.get(i), 2);
+                        else if ((f.leftEyeX != -1 && f.leftEyeY != -1) &&
+                                (f.rightEyeX != -1 && f.rightEyeY != -1)) {
+                            createSakuraEarsLeft(f, 2);
                             sakuring++;
                         }
 
                         // right ear
-                        if (faces.get(i).rightEarX != -1 && faces.get(i).rightEarY != -1) {
-                            createSakuraEarsRight(faces.get(i), 2);
+                        if (f.rightEarX != -1 && f.rightEarY != -1) {
+                            createSakuraEarsRight(f, 2);
                             sakuring++;
                         }
-                        else if ((faces.get(i).leftEarX != -1 && faces.get(i).leftEarY != -1) &&
-                                (faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1)) {
-                            createSakuraEarsRight(faces.get(i), 2);
+                        else if ((f.leftEarX != -1 && f.leftEarY != -1) &&
+                                (f.leftEyeX != -1 && f.leftEyeY != -1)) {
+                            createSakuraEarsRight(f, 2);
                             sakuring++;
                         }
-                        else if ((faces.get(i).rightEyeX != -1 && faces.get(i).rightEyeY != -1) &&
-                                (faces.get(i).leftEyeX != -1 && faces.get(i).leftEyeY != -1)) {
-                            createSakuraEarsRight(faces.get(i), 2);
+                        else if ((f.rightEyeX != -1 && f.rightEyeY != -1) &&
+                                (f.leftEyeX != -1 && f.leftEyeY != -1)) {
+                            createSakuraEarsRight(f, 2);
                             sakuring++;
                         }
 
-                        if (sakuring >= 0) {
-                            if (!faces.get(i).isPlayingSound()) {
-                                faces.get(i).playSound();
+                        try {
+                            if (sakuring >= 0) {
+                                if (!f.isPlayingSound()) {
+                                    f.playSound();
+                                }
+                            } else {
+                                if (f.isPlayingSound()) {
+                                    f.pauseSound();
+                                }
                             }
                         }
-                        else {
-                            if (faces.get(i).isPlayingSound()) {
-                                faces.get(i).pauseSound();
-                            }
+                        catch (IllegalStateException e) {
+                            e.printStackTrace();
                         }
 
                     }
@@ -752,11 +791,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         public void onDone() {
             Log.d("fffa", "done " + faceId);
 
-            for (int i = 0; i < faces.size(); i++) {
-                if (faces.get(i).id == faceId) {
-                    Singleton.activity.removeFace(i);
-                }
-            }
+            Singleton.activity.removeFace(faceId);
 
             mOverlay.remove(mFaceGraphic);
         }
@@ -790,6 +825,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
         paramsLeft.leftMargin -= (size / 2);
         paramsLeft.topMargin = (int) y1 - (size / 2);
+
+        Log.d("cheekk", face.randomCheek + " " + face.id);
 
 
         ImageView cheekLeft = new ImageView(getApplicationContext());

@@ -166,21 +166,18 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
 
 
+        boolean foundFace = true;
+        com.google.android.gms.samples.vision.face.facetracker.Face existFace = Singleton.activity.getFaces().get(face.getId());
 
-        int existIndex = -1;
-        com.google.android.gms.samples.vision.face.facetracker.Face existFace = null;
-        for (int i = 0; i < Singleton.activity.getFaces().size(); i++) {
-            if (Singleton.activity.getFaces().get(i).id == face.getId()) {
-                existFace = Singleton.activity.getFaces().get(i);
-                existIndex = i;
-                break;
-            }
-        }
+        if (Singleton.activity.getFaces().get(face.getId()) == null) {
+            foundFace = false;
 
-        if (existIndex == -1) {
             existFace = new com.google.android.gms.samples.vision.face.facetracker.Face();
             existFace.id = face.getId();
         }
+
+        new com.google.android.gms.samples.vision.face.facetracker.Face();
+
 
         Log.d("camupdate", new Date().getTime() + "");
 
@@ -253,7 +250,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
 
 
-        if (existIndex == -1) {
+        if (!foundFace) {
             Singleton.activity.addFace(existFace);
         }
     }
