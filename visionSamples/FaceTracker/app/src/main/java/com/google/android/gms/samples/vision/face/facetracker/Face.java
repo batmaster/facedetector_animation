@@ -36,6 +36,7 @@ public class Face {
 
     public int randomCheek = 0;
 
+    public boolean waitForStop;
     public int count;
 
     public static int MAX_COUNT = 5;
@@ -107,4 +108,5 @@ public class Face {
     public static float getDistance(float x1, float y1, float x2, float y2) {
         return (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
+
 }

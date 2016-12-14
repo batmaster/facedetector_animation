@@ -169,93 +169,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
 
 
-
-
-
-        makeThreadSakura();
-
-        dialog = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_finish_record);
-        dialog.setCancelable(false);
-
-
-
-
-        // mediaProjection
-
-        mMediaRecorder = new MediaRecorder();
-        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-    }
-
-    private boolean recording = false;
-    private boolean cool = false;
-
-    private static SparseArray<com.google.android.gms.samples.vision.face.facetracker.Face> faces;
-
-    public SparseArray<com.google.android.gms.samples.vision.face.facetracker.Face> getFaces() {
-        return faces;
-    }
-
-    public void addFace(com.google.android.gms.samples.vision.face.facetracker.Face face) {
-        face.initSound(getApplicationContext());
-        faces.append(face.id, face);
-    }
-
-    public void removeFace(int id) {
-        if (faces.get(id) != null) {
-
-            faces.get(id).stopSound();
-            faces.remove(id);
-        }
-    }
-
-
-    private int volume1 = 10;
-    private int speed1 = 10;
-    private int facespeed1 = 14;
-    private int speedx1 = 1;
-    private int facespeedx1 = 3;
-    private int speedy1 = 5;
-    private int facespeedy1 = 10;
-    private int startSize1 = 0;
-    private int finalSize1 = 15;
-
-    private int volume2 = 2;
-    private int speed2 = 19;
-    private int facespeed2 = 19;
-    private int speedx2 = 2;
-    private int facespeedx2 = 3;
-    private int speedy2 = 2;
-    private int facespeedy2 = 3;
-    private int startSize2 = 1;
-    private int finalSize2 = 17;
-
-    //private int SIZE = 0;
-    public static int MAX_X = 1080;
-    public static int MAX_Y = 1920;
-    public static int PREVIEW_CAM_X = 0;
-    public static int PREVIEW_CAM_Y = 0;
-    private static int TRIANGLE = 0;
-
-    private ImageView imageViewSwapCamera;
-    private ToggleButton toggleButtonEars;
-    private ToggleButton toggleButtonEyes;
-    private ToggleButton toggleButtonMouth;
-
-    private LinearLayout selector;
-
-    public static int CAMERA_FACING = CameraSource.CAMERA_FACING_FRONT;
-
-    private float minusX;
-
-    private ArrayList<ImageView> cheeks = new ArrayList<ImageView>();
-    private ArrayList<ImageView> lights = new ArrayList<ImageView>();
-    private ArrayList<ImageView> sparks = new ArrayList<ImageView>();
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void makeThreadSakura() {
-
         selector = (LinearLayout) findViewById(R.id.selector);
 
         float h = PREVIEW_CAM_Y / FaceTrackerActivity.PREFERED_CAM_HEIGHT;
@@ -321,18 +234,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         });
 
 
-        Random r = new Random();
-        double d = r.nextDouble();
-        if (d < 0.4) {
-            toggleButtonEyes.setChecked(true);
-        }
-        else if (d < 0.8) {
-            toggleButtonMouth.setChecked(true);
-        }
-        else {
-            toggleButtonEars.setChecked(true);
-        }
-
         toggleButtonRecord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -346,12 +247,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                         Snackbar.make(findViewById(android.R.id.content), label_permissions,
                                 Snackbar.LENGTH_INDEFINITE).setAction("ENABLE", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        ActivityCompat.requestPermissions(FaceTrackerActivity.this,
-                                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
-                                    }
-                                }).show();
+                            @Override
+                            public void onClick(View v) {
+                                ActivityCompat.requestPermissions(FaceTrackerActivity.this,
+                                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
+                            }
+                        }).show();
                     } else {
                         ActivityCompat.requestPermissions(FaceTrackerActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
                     }
@@ -371,6 +272,100 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         });
 
 
+        makeThreadSakura();
+
+        dialog = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_finish_record);
+        dialog.setCancelable(false);
+
+
+
+
+        // mediaProjection
+
+        mMediaRecorder = new MediaRecorder();
+        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+    }
+
+    private boolean recording = false;
+    private boolean cool = false;
+
+    private static SparseArray<com.google.android.gms.samples.vision.face.facetracker.Face> faces;
+
+    public SparseArray<com.google.android.gms.samples.vision.face.facetracker.Face> getFaces() {
+        return faces;
+    }
+
+    public void addFace(com.google.android.gms.samples.vision.face.facetracker.Face face) {
+        face.initSound(getApplicationContext());
+        faces.append(face.id, face);
+    }
+
+    public void removeFace(int id) {
+        Log.d("sound", "remove face " + id);
+        if (faces.get(id) != null && faces.get(id).waitForStop) {
+            faces.get(id).waitForStop = true;
+        }
+    }
+
+
+    private int volume1 = 10;
+    private int speed1 = 10;
+    private int facespeed1 = 14;
+    private int speedx1 = 1;
+    private int facespeedx1 = 3;
+    private int speedy1 = 5;
+    private int facespeedy1 = 10;
+    private int startSize1 = 0;
+    private int finalSize1 = 15;
+
+    private int volume2 = 2;
+    private int speed2 = 19;
+    private int facespeed2 = 19;
+    private int speedx2 = 2;
+    private int facespeedx2 = 3;
+    private int speedy2 = 2;
+    private int facespeedy2 = 3;
+    private int startSize2 = 1;
+    private int finalSize2 = 17;
+
+    //private int SIZE = 0;
+    public static int MAX_X = 1080;
+    public static int MAX_Y = 1920;
+    public static int PREVIEW_CAM_X = 0;
+    public static int PREVIEW_CAM_Y = 0;
+    private static int TRIANGLE = 0;
+
+    private ImageView imageViewSwapCamera;
+    private ToggleButton toggleButtonEars;
+    private ToggleButton toggleButtonEyes;
+    private ToggleButton toggleButtonMouth;
+
+    private LinearLayout selector;
+
+    public static int CAMERA_FACING = CameraSource.CAMERA_FACING_FRONT;
+
+    private float minusX;
+
+    private ArrayList<ImageView> cheeks = new ArrayList<ImageView>();
+    private ArrayList<ImageView> lights = new ArrayList<ImageView>();
+    private ArrayList<ImageView> sparks = new ArrayList<ImageView>();
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public void makeThreadSakura() {
+
+        Random r = new Random();
+        double d = r.nextDouble();
+        if (d < 0.4) {
+            toggleButtonEyes.setChecked(true);
+        }
+        else if (d < 0.8) {
+            toggleButtonMouth.setChecked(true);
+        }
+        else {
+            toggleButtonEars.setChecked(true);
+        }
 
 
         final Handler handlerCheek = new Handler();
@@ -497,43 +492,42 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         lightFrame = 0;
                     }
 
+                    Log.d("handlerSakuraMouth", faces.toString());
                     for (int i = 0; i < faces.size(); i++) {
                         int key = faces.keyAt(i);
                         com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
 
                         f.count++;
-                        if (f.count > 3) {
-                            faces.remove(f.id);
+                        if (f.count > 5) {
+                            faces.get(f.id).waitForStop = true;
                         }
-                        
+
                         if ((f.bottomMouthX != -1 && f.bottomMouthY != -1) ||
                                 (f.mouthX != -1 && f.mouthY != -1)) {
                             createSakuraMouth(f);
                             createSakuraMouth(f);
+                            createSakuraMouth(f);
+                            createSakuraMouth(f);
 
-                            try {
-                                if (!f.isPlayingSound()) {
-                                    f.playSound();
-                                }
+                            if (f.waitForStop && f.isPlayingSound()) {
+                                f.stopSound();
+                                faces.remove(f.id);
                             }
-                            catch (IllegalStateException e) {
-                                e.printStackTrace();
+                            else if (!f.waitForStop && !f.isPlayingSound()) {
+                                f.playSound();
                             }
+
                         }
                         else {
-                            try {
-                                if (f.isPlayingSound()) {
-                                    f.pauseSound();
-                                }
-                            }
-                            catch (IllegalStateException e) {
-                                e.printStackTrace();
+                            if (f.isPlayingSound()) {
+                                f.stopSound();
+                                faces.remove(f.id);
                             }
                         }
                     }
                 }
                 if (appRuning) {
-                    handlerSakuraMouth.postDelayed(this, (500 / volume1));
+                    handlerSakuraMouth.postDelayed(this, 16);
                 }
             }
         });
@@ -557,11 +551,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         int sakuring = 0;
 
                         f.count++;
-                        if (f.count > 3) {
-                            faces.remove(f.id);
+                        if (f.count > 5) {
+                            faces.get(f.id).waitForStop = true;
                         }
 
                         if (f.leftEyeX != -1 && f.leftEyeY != -1) {
+                            createSakuraEyesLeft(f);
+                            createSakuraEyesLeft(f);
                             createSakuraEyesLeft(f);
                             createSakuraEyesLeft(f);
                             sakuring++;
@@ -570,28 +566,22 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         if (f.rightEyeX != -1 && f.rightEyeY != -1) {
                             createSakuraEyesRight(f);
                             createSakuraEyesRight(f);
+                            createSakuraEyesRight(f);
+                            createSakuraEyesRight(f);
                             sakuring++;
                         }
 
-                        try {
-                            if (sakuring >= 0) {
-                                if (!f.isPlayingSound()) {
-                                    f.playSound();
-                                }
-                            } else {
-                                if (f.isPlayingSound()) {
-                                    f.pauseSound();
-                                }
-                            }
+                        if (sakuring >= 0 && !f.waitForStop && !f.isPlayingSound()) {
+                            f.playSound();
                         }
-                        catch (IllegalStateException e) {
-                            e.printStackTrace();
+                        else if (f.waitForStop && f.isPlayingSound()) {
+                            f.stopSound();
+                            faces.remove(f.id);
                         }
-
                     }
                 }
                 if (appRuning) {
-                    handlerSakuraEyes.postDelayed(this, (long) (1.5 * 500 / volume1));
+                    handlerSakuraEyes.postDelayed(this, 16);
                 }
             }
         });
@@ -615,22 +605,25 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         int sakuring = 0;
 
                         f.count++;
-                        if (f.count > 3) {
-                            faces.remove(f.id);
+                        if (f.count > 5) {
+                            faces.get(f.id).waitForStop = true;
                         }
 
                         // left ear
                         if (f.leftEarX != -1 && f.leftEarY != -1) {
+                            createSakuraEarsLeft(f, 2);
                             createSakuraEarsLeft(f, 2);
                             sakuring++;
                         }
                         else if ((f.rightEarX != -1 && f.rightEarY != -1) &&
                                 (f.rightEyeX != -1 && f.rightEyeY != -1)) {
                             createSakuraEarsLeft(f, 2);
+                            createSakuraEarsLeft(f, 2);
                             sakuring++;
                         }
                         else if ((f.leftEyeX != -1 && f.leftEyeY != -1) &&
                                 (f.rightEyeX != -1 && f.rightEyeY != -1)) {
+                            createSakuraEarsLeft(f, 2);
                             createSakuraEarsLeft(f, 2);
                             sakuring++;
                         }
@@ -638,39 +631,35 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         // right ear
                         if (f.rightEarX != -1 && f.rightEarY != -1) {
                             createSakuraEarsRight(f, 2);
+                            createSakuraEarsRight(f, 2);
                             sakuring++;
                         }
                         else if ((f.leftEarX != -1 && f.leftEarY != -1) &&
                                 (f.leftEyeX != -1 && f.leftEyeY != -1)) {
+                            createSakuraEarsRight(f, 2);
                             createSakuraEarsRight(f, 2);
                             sakuring++;
                         }
                         else if ((f.rightEyeX != -1 && f.rightEyeY != -1) &&
                                 (f.leftEyeX != -1 && f.leftEyeY != -1)) {
                             createSakuraEarsRight(f, 2);
+                            createSakuraEarsRight(f, 2);
                             sakuring++;
                         }
 
-                        try {
-                            if (sakuring >= 0) {
-                                if (!f.isPlayingSound()) {
-                                    f.playSound();
-                                }
-                            } else {
-                                if (f.isPlayingSound()) {
-                                    f.pauseSound();
-                                }
-                            }
+                        if (sakuring >= 0 && !f.waitForStop && !f.isPlayingSound()) {
+                            f.playSound();
                         }
-                        catch (IllegalStateException e) {
-                            e.printStackTrace();
+                        else if (f.waitForStop && f.isPlayingSound()) {
+                            f.stopSound();
+                            faces.remove(f.id);
                         }
 
                     }
                 }
 
                 if (appRuning) {
-                    handlerSakuraEars.postDelayed(this, (long) (1.5 * 500 / volume1));
+                    handlerSakuraEars.postDelayed(this, 16);
                 }
             }
         });
@@ -764,10 +753,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         startCameraSource();
 
-        for (int i = 0; i < faces.size(); i++) {
-            int key = faces.keyAt(i);
-            faces.get(key).playSound();
-        }
+//        for (int i = 0; i < faces.size(); i++) {
+//            int key = faces.keyAt(i);
+//            faces.get(key).playSound();
+//        }
     }
 
     boolean appRuning = true;
@@ -777,16 +766,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         super.onPause();
         mPreview.stop();
 
-        Log.d("pauseeee", "ppp");
-
         for (int i = 0; i < faces.size(); i++) {
             int key = faces.keyAt(i);
-            try {
-                faces.get(key).pauseSound();
-            }
-            catch (Exception e) {
-
-            }
+            faces.get(key).waitForStop = true;
         }
 
         if (!waitingForResult) {
@@ -870,16 +852,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         @Override
         public void onDone() {
-            Log.d("fffa", "done " + faceId);
+            Log.d("sound", "done " + faceId);
 
-            Singleton.activity.removeFace(faceId);
+            com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(faceId);
+            if (f != null) {
+                f.waitForStop = true;
+            }
 
             mOverlay.remove(mFaceGraphic);
         }
     }
-
-    public static ArrayList<Integer> requestRemoveIds = new ArrayList<Integer>();
-
 
 
     private static final int[][] cheek = {
@@ -1418,7 +1400,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/10.0));
-        duration *= 2;
+        duration *= 1.5;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1441,7 +1423,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float posX = (float) (r.nextDouble() * (MAX_X/2.5) * (sign ? 1 : -1));
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
-        duration /= 1.5;
+//        duration /= ;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX - (size / 2));
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -1565,7 +1547,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/5.0));
-        duration *= 3;
+        duration *= 2.5;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1674,7 +1656,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/5.0));
-        duration *= 3;
+        duration *= 2.5;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1800,6 +1782,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/7.0));
+        duration *= 1.2;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1819,7 +1802,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX - (size / 2)) : (realX + (size / 2));
 
-        duration *= 2;
+        duration *= 1.8;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -1930,6 +1913,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/7.0));
+        duration *= 1.2;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1949,7 +1933,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? (realX - (size / 2)) : -1 * (realX + (size / 2));
 
-        duration *= 2;
+        duration *= 1.8;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
