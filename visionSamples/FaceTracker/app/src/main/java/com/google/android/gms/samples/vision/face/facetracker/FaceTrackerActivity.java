@@ -1007,7 +1007,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         light.setPivotX(sizeX / 2);
         light.setPivotY(0);
-        light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
+        else {
+            light.setRotation(((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
+
 
         light.setAlpha(0.8f);
 
@@ -1072,7 +1078,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         light.setPivotX(sizeX / 2);
         light.setPivotY(0);
-        light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
+        else {
+            light.setRotation(((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
 
         light.setAlpha(0.8f);
 
@@ -1137,7 +1148,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         light.setPivotX(sizeX / 2);
         light.setPivotY(0);
-        light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
+        else {
+            light.setRotation(((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
 
         light.setAlpha(0.8f);
 
@@ -1221,7 +1237,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         light.setPivotX(sizeX / 2);
         light.setPivotY(0);
-        light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
+        else {
+            light.setRotation(((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
 
         light.setAlpha(0.8f);
 
@@ -1309,7 +1330,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         light.setPivotX(sizeX / 2);
         light.setPivotY(0);
-        light.setRotation(((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            light.setRotation(((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
+        else {
+            light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
+        }
 
         light.setAlpha(0.8f);
 

@@ -135,10 +135,7 @@ public class CameraSourcePreview extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Log.d("onLayout", "ltrb " + left + " " + top + " " + right + " " + bottom);
-        
-        Singleton.activity.IMAGE_WIDTH = right;
-        Singleton.activity.IMAGE_HEIGHT = bottom;
+        Log.d("onLayout", "1 " + left + " " + top + " " + right + " " + bottom);
 
         int width = 360;
         int height = 240;
@@ -170,6 +167,11 @@ public class CameraSourcePreview extends ViewGroup {
             childWidth = (int)(((float) layoutHeight / (float) height) * width);
         }
 
+        Log.d("onLayout", "2 " + layoutWidth + " " + layoutHeight + " " + width + " " + height);
+
+        Singleton.activity.IMAGE_WIDTH = width;
+        Singleton.activity.IMAGE_HEIGHT = height;
+
         for (int i = 0; i < getChildCount(); ++i) {
             getChildAt(i).layout(0, 0, childWidth, childHeight);
         }
@@ -180,7 +182,7 @@ public class CameraSourcePreview extends ViewGroup {
             Log.e(TAG, "Could not start camera source.", e);
         }
 
-        Log.d("onLayout", layoutWidth + " " + layoutHeight + " " + Singleton.activity.IMAGE_WIDTH + " " + Singleton.activity.IMAGE_HEIGHT);
+        Log.d("onLayout", "3 " + layoutWidth + " " + layoutHeight + " " + childWidth + " " + childHeight);
     }
 
     private boolean isPortraitMode() {

@@ -104,7 +104,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     @Override
     public void draw(Canvas canvas) {
         Face face = mFace;
-        Log.d("faceface", face.getId() + "");
         if (face == null) {
             return;
         }
