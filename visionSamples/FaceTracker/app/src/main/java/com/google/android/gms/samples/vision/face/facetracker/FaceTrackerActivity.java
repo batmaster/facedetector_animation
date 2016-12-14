@@ -180,9 +180,26 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                for (int i = 0; i < faces.size(); i++) {
+                    int key = faces.keyAt(i);
+                    faces.get(key).waitForStop = true;
+                }
+
                 toggleButtonEars.setChecked(false);
                 toggleButtonEyes.setChecked(false);
                 toggleButtonMouth.setChecked(false);
+
+                Random r = new Random();
+                double d = r.nextDouble();
+                if (d < 0.4) {
+                    toggleButtonEyes.setChecked(true);
+                }
+                else if (d < 0.8) {
+                    toggleButtonMouth.setChecked(true);
+                }
+                else {
+                    toggleButtonEars.setChecked(true);
+                }
 
                 if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
                     CAMERA_FACING = CameraSource.CAMERA_FACING_BACK;

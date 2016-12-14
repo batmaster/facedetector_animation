@@ -78,10 +78,9 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="10">
+            android:layout_weight="15">
 
             <ImageView
-                android:visibility="invisible"
                 android:id="@+id/imageViewSwapCamera"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
@@ -92,7 +91,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="90">
+            android:layout_weight="85">
 
             <ToggleButton
                 android:id="@+id/toggleButtonEyes"
