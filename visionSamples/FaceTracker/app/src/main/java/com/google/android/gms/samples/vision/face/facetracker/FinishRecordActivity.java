@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -18,12 +19,25 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.ShareVideo;
+import com.facebook.share.model.ShareVideoContent;
+import com.facebook.share.widget.ShareDialog;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class FinishRecordActivity extends AppCompatActivity {
 
@@ -38,17 +52,39 @@ public class FinishRecordActivity extends AppCompatActivity {
     private static File VIDEO_FILE_PATH_TEMP;
     private static String VIDEO_FILE_PATH;
     private String videoFileName;
-    private Bitmap thumbnail;
 
     private Boolean hasSaved = false;
 
     private Dialog dialogNoInternet;
     private Dialog dialogConfirmNoSave;
 
+    private CallbackManager callbackManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_finish_record);
+
+        callbackManager = CallbackManager.Factory.create();
+        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.d("FBLogin", "onSuccess" + loginResult.toString());
+
+                share();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d("FBLogin", "onError" + error.getMessage());
+//                Crashlytics.logException(error);
+            }
+        });
 
         VIDEO_FILE_PATH = Environment.getExternalStorageDirectory() + "/oishi";
         VIDEO_FILE_PATH_TEMP = getFilesDir();
@@ -75,15 +111,6 @@ public class FinishRecordActivity extends AppCompatActivity {
                 dialogConfirmNoSave.dismiss();
             }
         });
-
-
-
-
-
-
-
-
-        thumbnail = ThumbnailUtils.createVideoThumbnail(videoFileName, MediaStore.Images.Thumbnails.MINI_KIND);
 
         imageViewHome = (ImageView) findViewById(R.id.imageViewHome);
         imageViewHome.setOnClickListener(new View.OnClickListener() {
@@ -134,7 +161,7 @@ public class FinishRecordActivity extends AppCompatActivity {
         imageViewShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                share();
             }
         });
 
@@ -200,17 +227,29 @@ public class FinishRecordActivity extends AppCompatActivity {
             // delete the original file
             new File(VIDEO_FILE_PATH_TEMP + "/" + videoFileName).delete();
 
+            hasSaved = true;
+            Toast.makeText(getApplicationContext(), "บันทึกไฟล์ " + videoFileName + " เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                File f = new File("file://" + Environment.getExternalStorageDirectory());
+                Uri contentUri = Uri.fromFile(f);
+                mediaScanIntent.setData(contentUri);
+                this.sendBroadcast(mediaScanIntent);
+            }
+            else {
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+            }
 
         }
         catch (FileNotFoundException e) {
             Log.e("tag", e.getMessage());
+            Toast.makeText(getApplicationContext(), "บันทึกไฟล์ " + videoFileName + " ไม่สำเร็จ", Toast.LENGTH_SHORT).show();
         }
         catch (Exception e) {
             Log.e("tag", e.getMessage());
+            Toast.makeText(getApplicationContext(), "บันทึกไฟล์ " + videoFileName + " ไม่สำเร็จ", Toast.LENGTH_SHORT).show();
         }
-
-        hasSaved = true;
-        Toast.makeText(getApplicationContext(), "บันทึกไฟล์ " + videoFileName + " เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
     }
 
     private void deleteTempVideo() {
@@ -231,5 +270,69 @@ public class FinishRecordActivity extends AppCompatActivity {
 
             finish();
         }
+    }
+
+    private void share() {
+        if (AccessToken.getCurrentAccessToken() == null) {
+            String[] permissions = {"public_profile", "email", "user_videos"};
+
+            LoginManager.getInstance().logInWithReadPermissions(FinishRecordActivity.this, Arrays.asList(permissions));
+        }
+        else {
+
+            File f = new File(VIDEO_FILE_PATH_TEMP + "/" + videoFileName);
+            Log.d("FBShare", f.isFile() + " " + f.exists());
+
+            Uri videoFileUri = Uri.fromFile(f);
+
+            Log.d("FBShare", videoFileUri.toString());
+
+            ShareVideo video = new ShareVideo.Builder()
+                    .setLocalUrl(videoFileUri)
+                    .build();
+            ShareVideoContent content = new ShareVideoContent.Builder()
+                    .setContentTitle("ลองกดดิ")
+                    .setContentDescription("อย่ากดเลย")
+                    .setVideo(video)
+                    .build();
+
+            Log.d("FBShare", "dialog ok");
+
+            ShareDialog dialog = new ShareDialog(FinishRecordActivity.this);
+            dialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+                @Override
+                public void onSuccess(Sharer.Result result) {
+                    Log.d("FBShare", "onSuccess " + result);
+
+                }
+
+                @Override
+                public void onCancel() {
+                    Log.d("FBShare", "onCancel()");
+
+                }
+
+                @Override
+                public void onError(FacebookException error) {
+                    error.printStackTrace();
+
+                    Log.d("FBShare", "onError" + error.getMessage());
+//                    Crashlytics.logException(error);
+
+                }
+            });
+
+            if (dialog.canShow(ShareVideoContent.class)) {
+                dialog.show(content, ShareDialog.Mode.AUTOMATIC);
+            } else {
+                Log.d("FBShare", "you cannot share :(");
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

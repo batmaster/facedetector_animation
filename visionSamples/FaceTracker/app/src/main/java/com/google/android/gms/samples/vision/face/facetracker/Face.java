@@ -50,26 +50,8 @@ public class Face {
 
     public void initSound(final Context context) {
         Log.d("sounddd", "initSound " + id);
-        int sid = randomSound();
-        mp = MediaPlayer.create(context, sid);
-        mp.seekTo(1000);
-        mp.setLooping(false);
-        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                int sid = randomSound();
-                mp.reset();
-                mp = MediaPlayer.create(context, sid);
-                mp.seekTo(1000);
-                mp.setLooping(false);
-                mp.start();
-            }
-        });
-    }
-
-    private int randomSound() {
-        Random r = new Random();
-        return r.nextDouble() > 0.7 ? R.raw.sound1 : R.raw.sound2;
+        mp = MediaPlayer.create(context, R.raw.sfx);
+        mp.setLooping(true);
     }
 
     public void playSound() {
@@ -109,4 +91,41 @@ public class Face {
         return (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
+//    @Override
+//    public String toString() {
+//        return "Face{" +
+//                "id=" + id +
+//                ", mouthX=" + mouthX +
+//                ", mouthY=" + mouthY +
+//                ", leftEarX=" + leftEarX +
+//                ", leftEarY=" + leftEarY +
+//                ", rightEarX=" + rightEarX +
+//                ", rightEarY=" + rightEarY +
+//                ", leftEyeX=" + leftEyeX +
+//                ", leftEyeY=" + leftEyeY +
+//                ", rightEyeX=" + rightEyeX +
+//                ", rightEyeY=" + rightEyeY +
+//                ", eulerY=" + eulerY +
+//                ", eulerZ=" + eulerZ +
+//                ", bottomMouthX=" + bottomMouthX +
+//                ", bottomMouthY=" + bottomMouthY +
+//                ", leftCheekX=" + leftCheekX +
+//                ", leftCheekY=" + leftCheekY +
+//                ", rightCheekX=" + rightCheekX +
+//                ", rightCheekY=" + rightCheekY +
+//                ", randomCheek=" + randomCheek +
+//                ", waitForStop=" + waitForStop +
+//                ", count=" + count +
+//                ", mp=" + mp +
+//                '}';
+//    }
+
+
+    @Override
+    public String toString() {
+        return "Face{" +
+                "id=" + id +
+                ", count=" + count +
+                '}';
+    }
 }

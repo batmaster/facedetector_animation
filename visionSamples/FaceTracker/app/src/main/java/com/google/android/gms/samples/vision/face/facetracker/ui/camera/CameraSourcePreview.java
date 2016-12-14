@@ -17,11 +17,13 @@ package com.google.android.gms.samples.vision.face.facetracker.ui.camera;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.hardware.Camera;
 import android.media.MediaRecorder;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
@@ -46,6 +48,7 @@ public class CameraSourcePreview extends ViewGroup {
     private GraphicOverlay mOverlay;
 
     public CameraSourcePreview(Context context, AttributeSet attrs) {
+
         super(context, attrs);
         mContext = context;
         mStartRequested = false;
@@ -132,18 +135,18 @@ public class CameraSourcePreview extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        int width = 320;
+        Log.d("onLayout", "ltrb " + left + " " + top + " " + right + " " + bottom);
+        
+        Singleton.activity.IMAGE_WIDTH = right;
+        Singleton.activity.IMAGE_HEIGHT = bottom;
+
+        int width = 360;
         int height = 240;
         if (mCameraSource != null) {
             Size size = mCameraSource.getPreviewSize();
             if (size != null) {
                 width = size.getWidth();
                 height = size.getHeight();
-
-//                Log.d("getPreviewSize", width + " " + height);
-//                Singleton.activity.PREFERED_CAM_HEIGHT = height;
-//                Singleton.activity.PREFERED_CAM_WIDTH = width;
-//                Singleton.activity.makeThreadSakura();
             }
         }
 
@@ -167,14 +170,8 @@ public class CameraSourcePreview extends ViewGroup {
             childWidth = (int)(((float) layoutHeight / (float) height) * width);
         }
 
-        // TODO FORCE OVERRIDE SIZR TO FULL SCREEN
-
-
-        float h = PREVIEW_CAM_Y / FaceTrackerActivity.PREFERED_CAM_HEIGHT;
-        float newW = FaceTrackerActivity.PREFERED_CAM_WIDTH * h;
-
         for (int i = 0; i < getChildCount(); ++i) {
-            getChildAt(i).layout(0, 0, (int) newW, Singleton.activity.MAX_Y);
+            getChildAt(i).layout(0, 0, childWidth, childHeight);
         }
 
         try {
@@ -183,7 +180,7 @@ public class CameraSourcePreview extends ViewGroup {
             Log.e(TAG, "Could not start camera source.", e);
         }
 
-        Log.d("mPreview", "onLayout " + layoutWidth + " " + layoutHeight + " " + childWidth + " " + childHeight);
+        Log.d("onLayout", layoutWidth + " " + layoutHeight + " " + Singleton.activity.IMAGE_WIDTH + " " + Singleton.activity.IMAGE_HEIGHT);
     }
 
     private boolean isPortraitMode() {
