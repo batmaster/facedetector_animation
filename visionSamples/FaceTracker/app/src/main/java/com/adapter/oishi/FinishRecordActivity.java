@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -100,7 +101,7 @@ public class FinishRecordActivity extends AppCompatActivity {
             @Override
             public void onError(FacebookException error) {
                 Log.d("FBLogin", "onError" + error.getMessage());
-//                Crashlytics.logException(error);
+                Crashlytics.logException(error);
                 sharing = false;
             }
         });
@@ -367,7 +368,7 @@ public class FinishRecordActivity extends AppCompatActivity {
 
                             sharing = false;
                             Log.d("FBShare", "onError" + error.getMessage());
-                            //                    Crashlytics.logException(error);
+                            Crashlytics.logException(error);
 
                         }
                     });
