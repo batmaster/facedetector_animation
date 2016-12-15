@@ -142,7 +142,6 @@ public class FinishRecordActivity extends AppCompatActivity {
 
         imageViewPlay = (ImageView) findViewById(R.id.imageViewPlay);
         imageViewPlay.setOnClickListener(new View.OnClickListener() {
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View view) {
                 imageViewPlay.setVisibility(View.INVISIBLE);
@@ -187,7 +186,6 @@ public class FinishRecordActivity extends AppCompatActivity {
 //        videoView.setMediaController(new MediaController(this));
 //        videoView.requestFocus();
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 imageViewPlay.setVisibility(View.VISIBLE);
@@ -200,7 +198,6 @@ public class FinishRecordActivity extends AppCompatActivity {
             }
         });
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
                 videoView.start();

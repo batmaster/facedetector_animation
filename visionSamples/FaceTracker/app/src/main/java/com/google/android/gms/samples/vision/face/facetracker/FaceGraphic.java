@@ -100,7 +100,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     /**
      * Draws the face annotations for position on the supplied canvas.
      */
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void draw(Canvas canvas) {
         Face face = mFace;

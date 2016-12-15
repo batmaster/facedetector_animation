@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     private int angle = 0;
 
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

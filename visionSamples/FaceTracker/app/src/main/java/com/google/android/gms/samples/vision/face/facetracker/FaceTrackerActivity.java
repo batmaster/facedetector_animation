@@ -118,7 +118,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     /**
      * Initializes the UI and initiates the creation of a face detector.
      */
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB_MR2)
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -418,7 +417,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private ArrayList<ImageView> lights = new ArrayList<ImageView>();
     private ArrayList<ImageView> sparks = new ArrayList<ImageView>();
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
 
         Random r = new Random();
@@ -435,7 +433,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         final Handler handlerCheek = new Handler();
         handlerCheek.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
 
@@ -464,7 +461,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         final Handler handlerLight = new Handler();
         handlerLight.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
 
@@ -547,7 +543,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         final int CHECKING_DELAY = 50;
         final Handler handlerRemover = new Handler();
         handlerRemover.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
 
@@ -602,7 +597,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         final Handler handlerSakuraMouth = new Handler();
         handlerSakuraMouth.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
 
@@ -638,7 +632,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         final Handler handlerSakuraEyes = new Handler();
         handlerSakuraEyes.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
 
@@ -680,7 +673,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         final Handler handlerSakuraEars = new Handler();
         handlerSakuraEars.post(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
 
@@ -912,7 +904,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             {R.drawable.cheek4_left, R.drawable.cheek4_right},
     };
 
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createCheek(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         int x1 = (int) face.leftCheekX;
@@ -964,7 +955,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private static int lightFrame = 0;
 
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightMouth(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = 0;
@@ -1045,7 +1035,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         lights.add(light);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEyesLeft(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = face.leftEyeX;
@@ -1115,7 +1104,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         lights.add(light);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEyesRight(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = face.rightEyeX;
@@ -1185,7 +1173,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         lights.add(light);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEarsLeft(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
 
         float x = 0;
@@ -1277,7 +1264,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Log.d("anglee", "lig " + (-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90)));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEarsRight(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
 
         float x = 0;
@@ -1393,7 +1379,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         return im;
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraMouth(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = 0;
@@ -1548,7 +1533,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraEyesLeft(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = face.leftEyeX;
@@ -1655,7 +1639,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         animatorSet.start();
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraEyesRight(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = face.rightEyeX;
@@ -1761,7 +1744,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraEarsLeft(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
 
         float x = 0;
@@ -1891,7 +1873,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         animatorSet.start();
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraEarsRight(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
 
         float x = 0;
@@ -2058,7 +2039,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private int mScreenDensity;
 
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         waitingForResult = false;
@@ -2104,7 +2084,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Log.d("counting", "1 " + new Date().toString());
         new Handler().postDelayed(new Runnable() {
 
-            @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
             @Override
             public void run() {
                 Log.d("counting", "2 " + new Date().toString());
@@ -2198,7 +2177,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private boolean waitingForResult;
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void shareScreen() {
         cool = false;
         ((ImageView) findViewById(R.id.imageFrameIce1)).setAlpha(0f);
@@ -2213,7 +2191,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         mMediaRecorder.start();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private VirtualDisplay createVirtualDisplay() {
         return mMediaProjection.createVirtualDisplay("MainActivity",
                 MAX_X, MAX_Y, mScreenDensity,
@@ -2247,7 +2224,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private class MediaProjectionCallback extends MediaProjection.Callback {
         @Override
         public void onStop() {
@@ -2262,7 +2238,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     private void stopScreenSharing() {
         if (mVirtualDisplay == null) {
             return;
@@ -2274,7 +2249,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         destroyMediaProjection();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void destroyMediaProjection() {
         if (mMediaProjection != null) {
             mMediaProjection.unregisterCallback(mMediaProjectionCallback);
