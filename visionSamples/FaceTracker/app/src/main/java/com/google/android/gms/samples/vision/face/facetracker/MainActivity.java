@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         activity_main = (FrameLayout) findViewById(R.id.activity_main);
 
         final ImageView light = new ImageView(getApplicationContext());

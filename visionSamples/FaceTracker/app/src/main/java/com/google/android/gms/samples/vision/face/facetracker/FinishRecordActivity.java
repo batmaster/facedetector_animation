@@ -34,6 +34,8 @@ import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
 import com.facebook.share.widget.ShareDialog;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -44,6 +46,8 @@ import java.util.Arrays;
 
 public class FinishRecordActivity extends AppCompatActivity {
 
+    private OishiApplication app;
+
     private ImageView imageViewHome;
     private ImageView imageViewPlay;
     private ImageView imageViewDelete;
@@ -52,7 +56,7 @@ public class FinishRecordActivity extends AppCompatActivity {
 
     private VideoView videoView;
 
-    private static File VIDEO_FILE_PATH_TEMP;
+    private static String VIDEO_FILE_PATH_TEMP;
     private static String VIDEO_FILE_PATH;
     private String videoFileName;
 
@@ -63,10 +67,24 @@ public class FinishRecordActivity extends AppCompatActivity {
 
     private CallbackManager callbackManager;
 
+    private String gid;
+    private String where;
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_finish_record);
+
+        app = (OishiApplication) getApplicationContext();
+        gid = getIntent().getStringExtra("gid");
+        where = getIntent().getStringExtra("where");
+        app.getHttpService().goToPreview(gid, where, new HTTPService.OnResponseCallback<JSONObject>() {
+            @Override
+            public void onResponse(boolean success, Throwable error, JSONObject data) {
+
+            }
+        });
 
         callbackManager = CallbackManager.Factory.create();
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -74,23 +92,25 @@ public class FinishRecordActivity extends AppCompatActivity {
             public void onSuccess(LoginResult loginResult) {
                 Log.d("FBLogin", "onSuccess" + loginResult.toString());
 
+                sharing = false;
                 share();
             }
 
             @Override
             public void onCancel() {
-
+                sharing = false;
             }
 
             @Override
             public void onError(FacebookException error) {
                 Log.d("FBLogin", "onError" + error.getMessage());
 //                Crashlytics.logException(error);
+                sharing = false;
             }
         });
 
         VIDEO_FILE_PATH = Environment.getExternalStorageDirectory() + "/oishi";
-        VIDEO_FILE_PATH_TEMP = getFilesDir();
+        VIDEO_FILE_PATH_TEMP = getFilesDir().getAbsolutePath() + "/tmp";
 
         videoFileName = getIntent().getStringExtra("videoFileName");
 
@@ -147,7 +167,6 @@ public class FinishRecordActivity extends AppCompatActivity {
                 imageViewPlay.setVisibility(View.INVISIBLE);
                 videoView.setZ(10f);
 
-                videoView.seekTo(1000);
                 videoView.start();
             }
         });
@@ -170,6 +189,8 @@ public class FinishRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 saveVideoToPublic();
+
+                app.getHttpService().sendStat(HTTPService.SAVERESULT);
             }
         });
 
@@ -288,7 +309,7 @@ public class FinishRecordActivity extends AppCompatActivity {
 
     private boolean sharing = false;
     private void share() {
-        if (isNetworkConnected()) {
+        if (app.isNetworkConnected()) {
             if (!sharing) {
                 sharing = true;
 
@@ -311,6 +332,27 @@ public class FinishRecordActivity extends AppCompatActivity {
                         public void onSuccess(Sharer.Result result) {
                             sharing = false;
                             Log.d("FBShare", "onSuccess " + result);
+
+                            app.getHttpService().sendStat(HTTPService.SHARERESULT);
+                            app.getHttpService().saveShare(gid, result.getPostId(), new HTTPService.OnResponseCallback<JSONObject>() {
+                                @Override
+                                public void onResponse(boolean success, Throwable error, JSONObject data) {
+
+                                }
+                            });
+
+                            final PreferenceService pref = new PreferenceService(getApplicationContext());
+                            if (AccessToken.getCurrentAccessToken() != null && (pref.getBoolean(PreferenceService.KEY_BOOLEAN_HAS_UPDATE_FB_INFO) == false)) {
+
+                                app.getHttpService().updateToken(new HTTPService.OnResponseCallback<JSONObject>() {
+                                    @Override
+                                    public void onResponse(boolean success, Throwable error, JSONObject data) {
+                                        pref.putBoolean(PreferenceService.KEY_BOOLEAN_HAS_UPDATE_FB_INFO, true);
+
+                                        Log.d("httpapi", "API 5 Save FB Info OK!!");
+                                    }
+                                });
+                            }
 
                         }
 
@@ -352,9 +394,4 @@ public class FinishRecordActivity extends AppCompatActivity {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        return cm.getActiveNetworkInfo() != null;
-    }
 }

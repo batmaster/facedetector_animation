@@ -21,31 +21,25 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -78,6 +72,9 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -92,6 +89,8 @@ import java.util.Random;
  * overlay graphics to indicate the position, size, and ID of each face.
  */
 public final class FaceTrackerActivity extends AppCompatActivity {
+
+    private OishiApplication app;
 
     private ClonableRelativeLayout topLayout;
     private RelativeLayout layoutSakura;
@@ -111,17 +110,27 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
-    //==============================================================================================
-    // Activity Methods
-    //==============================================================================================
-
-    /**
-     * Initializes the UI and initiates the creation of a face detector.
-     */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.main);
+
+        app = (OishiApplication) getApplicationContext();
+        app.getHttpService().sendStat(HTTPService.SAVERESULT);
+
+
+
+        File dir = new File(getFilesDir().getAbsolutePath() + "/tmp/");
+        if (dir.isDirectory())
+        {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++)
+            {
+                new File(dir, children[i]).delete();
+            }
+        }
+
+
 
         faces = new SparseArray<com.google.android.gms.samples.vision.face.facetracker.Face>();
 
@@ -216,6 +225,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b) {
+                    where = "ear";
+
                     toggleButtonEyes.setChecked(false);
                     toggleButtonMouth.setChecked(false);
                 }
@@ -236,6 +247,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b) {
+                    where = "eye";
+
                     toggleButtonEars.setChecked(false);
                     toggleButtonMouth.setChecked(false);
                 }
@@ -256,6 +269,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b) {
+                    where = "mouth";
+
                     toggleButtonEars.setChecked(false);
                     toggleButtonEyes.setChecked(false);
                 }
@@ -265,28 +280,47 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         toggleButtonRecord.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                final String[] permissions = new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO};
+                if (!app.isNetworkConnected()) {
 
-                if (ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.CAMERA) +
-                        ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) +
-                        ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                    final Dialog dialogNoInternet = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+                    dialogNoInternet.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                    dialogNoInternet.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    dialogNoInternet.setContentView(R.layout.dialog_no_internet);
+                    dialogNoInternet.setCancelable(false);
 
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.CAMERA) ||
-                            ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
-                            ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO)) {
+                    ((ImageView) dialogNoInternet.findViewById(R.id.imageViewClose)).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialogNoInternet.dismiss();
+                        }
+                    });
+
+                    return true;
+                }
+                else {
+                    final String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO};
+
+                    if (ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.CAMERA) +
+                            ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) +
+                            ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.CAMERA) ||
+                                ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
+                                ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO)) {
 //                        toggleButtonRecord.setChecked(false);
 
-                        waitingForResult = true;
-                        ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
-                        return true;
-                    } else {
-                        waitingForResult = true;
-                        ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
-                        return true;
+                            waitingForResult = true;
+                            ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
+                            return true;
+                        } else {
+                            waitingForResult = true;
+                            ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
+                            return true;
+                        }
                     }
-                }
 
-                return false;
+                    return false;
+                }
             }
         });
         toggleButtonRecord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -318,6 +352,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         mMediaRecorder = new MediaRecorder();
         mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+
+        Log.d("c511", "new MediaRecorder()");
 
 
         // permission
@@ -417,6 +453,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private ArrayList<ImageView> lights = new ArrayList<ImageView>();
     private ArrayList<ImageView> sparks = new ArrayList<ImageView>();
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
 
         Random r = new Random();
@@ -744,7 +781,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
     private void createCameraSource() {
-        Log.d("surfacee", "createCameraSource");
+        Log.d("c511", "createCameraSource");
 
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
@@ -771,12 +808,21 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             Log.w(TAG, "Face detector dependencies are not yet available.");
         }
 
+        int pW = MAX_X;
+        int pH = MAX_Y;
+        if (MAX_Y / MAX_X * 1.0 == 4 / 3.0) {
+            pW = 480;
+            pH = 640;
+        }
         mCameraSource = new CameraSource.Builder(context, detector)
-                .setRequestedPreviewSize(MAX_Y, MAX_X)
+                .setRequestedPreviewSize(pH, pW)
                 .setFacing(CAMERA_FACING)
                 .setAutoFocusEnabled(true)
                 .setRequestedFps(15f)
                 .build();
+
+        // 4:3 a8 640 480
+        // note4 720 480
 
 
 
@@ -1264,6 +1310,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Log.d("anglee", "lig " + (-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90)));
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
     private void createLightEarsRight(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
 
         float x = 0;
@@ -1379,6 +1426,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         return im;
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraMouth(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = 0;
@@ -1498,41 +1546,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     }
 
-    int fr = 0;
-    private void getBitmapFromView(View view) {
-        long l = SystemClock.currentThreadTimeMillis();
-        Log.d("bitmaps", "Frame: " + fr + " start at " + new Date());
-        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.RGB_565);
-        Canvas canvas = new Canvas(bitmap);
-//        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
-        view.draw(canvas);
-
-        File file;
-        File f = null;
-        if (android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
-            file = new File(android.os.Environment.getExternalStorageDirectory(), "frame");
-            if (!file.exists()) {
-                file.mkdirs();
-
-            }
-            f = new File(file.getAbsolutePath() + "/frameX" + fr + ".png");
-        }
-
-        try {
-            FileOutputStream ostream = new FileOutputStream(f);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 10, ostream);
-            ostream.close();
-            Log.d("bitmaps", "Frame: " + fr + " take" + (SystemClock.currentThreadTimeMillis() - l) + " ms");
-            fr++;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraEyesLeft(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = face.leftEyeX;
@@ -1639,6 +1653,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         animatorSet.start();
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraEyesRight(com.google.android.gms.samples.vision.face.facetracker.Face face) {
 
         float x = face.rightEyeX;
@@ -1744,6 +1759,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraEarsLeft(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
 
         float x = 0;
@@ -1873,6 +1889,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         animatorSet.start();
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     private void createSakuraEarsRight(com.google.android.gms.samples.vision.face.facetracker.Face face, int type) {
 
         float x = 0;
@@ -2052,24 +2069,44 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             toggleButtonRecord.setChecked(false);
             return;
         }
-        mMediaProjectionCallback = new MediaProjectionCallback();
-        mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
-        mMediaProjection.registerCallback(mMediaProjectionCallback, null);
-        mVirtualDisplay = createVirtualDisplay();
-        mMediaRecorder.start();
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mMediaProjectionCallback = new MediaProjectionCallback();
+            mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
+            mMediaProjection.registerCallback(mMediaProjectionCallback, null);
+            mVirtualDisplay = createVirtualDisplay();
+            mMediaRecorder.start();
+        }
 
         startCountDownRecording();
     }
 
+    private String gid;
+    private String where;
     public void onToggleScreenShare(View view) {
         if (((ToggleButton) view).isChecked()) {
-            shareScreen();
+            app.getHttpService().saveGame(new HTTPService.OnResponseCallback<JSONObject>() {
+                @Override
+                public void onResponse(boolean success, Throwable error, JSONObject data) {
+
+                    try {
+
+                        gid = data.getString("gid");
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        gid = "JSONException";
+                    }
+
+                    shareScreen();
+                }
+            });
         } else {
             if (recording) {
                 mMediaRecorder.stop();
                 mMediaRecorder.reset();
                 stopScreenSharing();
+
+                Log.d("c511", "mMediaRecorder.stop mMediaRecorder.reset");
 
                 recording = false;
             }
@@ -2084,6 +2121,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Log.d("counting", "1 " + new Date().toString());
         new Handler().postDelayed(new Runnable() {
 
+            @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
             @Override
             public void run() {
                 Log.d("counting", "2 " + new Date().toString());
@@ -2132,14 +2170,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                 if (recording) {
                                                                     toggleButtonRecord.setChecked(false);
 
+                                                                    dialog.dismiss();
+
                                                                     for (int i = 0; i < faces.size(); i++) {
                                                                         int key = faces.keyAt(i);
                                                                         faces.get(key).waitForStop = true;
                                                                     }
-
-                                                                    Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
-                                                                    intent.putExtra("videoFileName", videoFileName);
-                                                                    startActivity(intent);
 
 
                                                                     new Handler().postDelayed(new Runnable() {
@@ -2155,9 +2191,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                                 e.printStackTrace();
                                                                             }
 
-                                                                            finish();
+
+                                                                            Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
+                                                                            intent.putExtra("videoFileName", videoFileName);
+                                                                            intent.putExtra("gid", gid);
+                                                                            intent.putExtra("where", where);
+                                                                            startActivity(intent);
+
+
+
                                                                         }
-                                                                    }, 2000);
+                                                                    }, 1000);
                                                                 }
                                                             }
                                                         }, 1500);
@@ -2177,7 +2221,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private boolean waitingForResult;
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void shareScreen() {
+        app.getHttpService().sendStat(HTTPService.STARTGAME);
+
         cool = false;
         ((ImageView) findViewById(R.id.imageFrameIce1)).setAlpha(0f);
 
@@ -2189,10 +2236,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
         mVirtualDisplay = createVirtualDisplay();
         mMediaRecorder.start();
+
+        Log.d("c511", "shareScreen");
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private VirtualDisplay createVirtualDisplay() {
-        return mMediaProjection.createVirtualDisplay("MainActivity",
+        return mMediaProjection.createVirtualDisplay("FaceTrackerActivity",
                 MAX_X, MAX_Y, mScreenDensity,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                 mMediaRecorder.getSurface(), null /*Callbacks*/, null
@@ -2202,14 +2252,14 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private String videoFileName;
 
     private void initRecorder() {
-        Log.d("surfacee", "initRecorder");
+        Log.d("c511", "initRecorder");
         videoFileName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".mp4";
 
         try {
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mMediaRecorder.setOutputFile(getFilesDir() + "/" + videoFileName);
+            mMediaRecorder.setOutputFile(getFilesDir() + "/tmp/" + videoFileName);
             mMediaRecorder.setVideoSize(MAX_X, MAX_Y);
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
@@ -2224,6 +2274,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private class MediaProjectionCallback extends MediaProjection.Callback {
         @Override
         public void onStop() {
@@ -2231,13 +2282,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 toggleButtonRecord.setChecked(false);
                 mMediaRecorder.stop();
                 mMediaRecorder.reset();
-                Log.v(TAG, "Recording Stopped");
             }
             mMediaProjection = null;
             stopScreenSharing();
+
+            Log.d("c511", "MediaProjectionCallback onStop");
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void stopScreenSharing() {
         if (mVirtualDisplay == null) {
             return;
@@ -2245,17 +2298,18 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         mVirtualDisplay.release();
         //mMediaRecorder.release(); //If used: mMediaRecorder object cannot
         // be reused again
-        Log.d("surfacee", "stopScreenSharing");
+        Log.d("c511", "MediaProjectionCallback stopScreenSharing");
         destroyMediaProjection();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void destroyMediaProjection() {
         if (mMediaProjection != null) {
             mMediaProjection.unregisterCallback(mMediaProjectionCallback);
             mMediaProjection.stop();
             mMediaProjection = null;
         }
-        Log.i(TAG, "MediaProjection Stopped");
+        Log.d("c511", "MediaProjectionCallback stopScreenSharing");
     }
 
     private boolean hasPermissions = false;
@@ -2285,35 +2339,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         }
 
-
-//        // old
-//        if (requestCode != RC_HANDLE_CAMERA_PERM) {
-//            Log.d(TAG, "Got unexpected permission result: " + requestCode);
-//            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//            return;
-//        }
-//
-//        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//            Log.d(TAG, "Camera permission granted - initialize the camera source");
-//            // we have permission, so create the camerasource
-//            createCameraSource();
-//            return;
-//        }
-//
-//        Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
-//                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
-//
-//        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//                finish();
-//            }
-//        };
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setTitle("Face Tracker sample")
-//                .setMessage(R.string.no_camera_permission)
-//                .setPositiveButton(R.string.ok, listener)
-//                .show();
     }
 
 

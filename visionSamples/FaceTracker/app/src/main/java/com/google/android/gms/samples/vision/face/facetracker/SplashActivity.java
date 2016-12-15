@@ -16,6 +16,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import com.facebook.AccessToken;
+
+import java.util.UUID;
+
 public class SplashActivity extends AppCompatActivity {
 
     private static final int REQUEST_PERMISSIONS = 10;
@@ -24,6 +28,10 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        if (AccessToken.getCurrentAccessToken() == null && SharePref.getStringRid(getApplicationContext()) == null) {
+            SharePref.setStringRid(getApplicationContext(), "fbid_" + UUID.randomUUID().toString());
+        }
 
         new Handler().postDelayed(new Runnable() {
             @Override

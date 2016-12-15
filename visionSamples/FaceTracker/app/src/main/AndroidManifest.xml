@@ -36,8 +36,6 @@
 
         <activity
             android:name=".FaceTrackerActivity"
-            android:icon="@drawable/icon"
-            android:label="OISHI"
             android:screenOrientation="portrait">
         </activity>
         <activity android:name=".MainActivity"
