@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.google.android.gms.samples.vision.face.facetracker"
+    package="com.adapter.oishi"
     android:installLocation="auto"
     android:versionCode="1"
     android:versionName="1">
@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
-        android:name=".OishiApplication"
+        android:name="com.adapter.oishi.OishiApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_logo"
@@ -35,14 +35,14 @@
             android:value="face" />
 
         <activity
-            android:name=".FaceTrackerActivity"
+            android:name="com.adapter.oishi.FaceTrackerActivity"
             android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".MainActivity"
+        <activity android:name="com.adapter.oishi.MainActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".FinishRecordActivity"
+        <activity android:name="com.adapter.oishi.FinishRecordActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".SplashActivity"
+        <activity android:name="com.adapter.oishi.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

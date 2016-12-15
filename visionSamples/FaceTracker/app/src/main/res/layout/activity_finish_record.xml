@@ -4,7 +4,7 @@
     android:id="@+id/activity_finish_record"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.google.android.gms.samples.vision.face.facetracker.FinishRecordActivity">
+    tools:context="com.google.android.gms.samples.vision.face.facetracker.com.adapter.android.gms.samples.vision.face.facetracker.FinishRecordActivity">
 
     <VideoView
         android:id="@+id/videoView"
