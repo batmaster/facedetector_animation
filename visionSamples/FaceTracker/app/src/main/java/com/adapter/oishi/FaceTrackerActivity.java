@@ -118,8 +118,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
         File dir = new File(getFilesDir().getAbsolutePath() + "/tmp/");
-        if (dir.isDirectory())
-        {
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        if (dir.isDirectory()) {
             String[] children = dir.list();
             for (int i = 0; i < children.length; i++)
             {
@@ -947,6 +949,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             {R.drawable.cheek4_left, R.drawable.cheek4_right},
     };
 
+    int[] sa = {
+            R.drawable.sakura_white1,
+            R.drawable.sakura_white2,
+            R.drawable.sakura_pink1,
+            R.drawable.sakura_pink2,
+            R.drawable.sakura3,
+            R.drawable.sakura4,
+            R.drawable.sakura5,
+    };
+
     private void createCheek(com.adapter.oishi.Face face) {
 
         int x1 = (int) face.leftCheekX;
@@ -994,7 +1006,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         layoutCheek.addView(cheekRight);
         cheeks.add(cheekRight);
     }
-
 
     private static int lightFrame = 0;
 
@@ -1396,17 +1407,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         layoutLight.addView(light);
         lights.add(light);
     }
-
-
-    int[] sa = {
-            R.drawable.sakura_white1,
-            R.drawable.sakura_white2,
-            R.drawable.sakura_pink1,
-            R.drawable.sakura_pink2,
-            R.drawable.sakura3,
-            R.drawable.sakura4,
-            R.drawable.sakura5,
-    };
 
     private int randomSakura() {
         Random r = new Random();
@@ -2053,6 +2053,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private int mScreenDensity;
 
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         waitingForResult = false;
@@ -2066,13 +2067,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             toggleButtonRecord.setChecked(false);
             return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mMediaProjectionCallback = new MediaProjectionCallback();
             mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
             mMediaProjection.registerCallback(mMediaProjectionCallback, null);
             mVirtualDisplay = createVirtualDisplay();
             mMediaRecorder.start();
-        }
+//        }
 
         startCountDownRecording();
     }
@@ -2084,11 +2085,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             app.getHttpService().saveGame(new HTTPService.OnResponseCallback<JSONObject>() {
                 @Override
                 public void onResponse(boolean success, Throwable error, JSONObject data) {
-
                     try {
-
                         gid = data.getString("gid");
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                         gid = "JSONException";
@@ -2227,8 +2225,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         ((ImageView) findViewById(R.id.imageFrameIce1)).setAlpha(0f);
 
         if (mMediaProjection == null) {
-            startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
             waitingForResult = true;
+            startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
 
             return;
         }

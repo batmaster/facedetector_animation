@@ -85,6 +85,8 @@ public class HTTPService {
 
         if (AccessToken.getCurrentAccessToken() == null) {
             params.put("fbuid", SharePref.getStringRid(context));
+            request.setParams(params);
+            queue.add(request);
         } else {
             GraphRequest graph = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
                 @Override
