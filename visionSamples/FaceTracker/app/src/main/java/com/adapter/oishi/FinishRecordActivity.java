@@ -71,6 +71,8 @@ public class FinishRecordActivity extends AppCompatActivity {
         setContentView(R.layout.activity_finish_record);
 
         app = (OishiApplication) getApplicationContext();
+        app.sendPageStat("finish");
+
         gid = getIntent().getStringExtra("gid");
         where = getIntent().getStringExtra("where");
         app.getHttpService().goToPreview(gid, where, new HTTPService.OnResponseCallback<JSONObject>() {
@@ -162,6 +164,7 @@ public class FinishRecordActivity extends AppCompatActivity {
                 videoView.setZ(10f);
 
                 videoView.start();
+                app.sendPageStat("preview");
             }
         });
 
@@ -290,6 +293,7 @@ public class FinishRecordActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (!hasSaved) {
             dialogConfirmNoSave.show();
+            app.sendPageStat("unrecorded");
         }
         else {
             deleteTempVideo();

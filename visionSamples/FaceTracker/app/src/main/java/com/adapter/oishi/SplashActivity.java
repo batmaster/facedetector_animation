@@ -16,12 +16,16 @@ import java.util.UUID;
 
 public class SplashActivity extends AppCompatActivity {
 
+    private OishiApplication app;
     private static final int REQUEST_PERMISSIONS = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        app = (OishiApplication) getApplicationContext();
+        app.sendPageStat("splash_page");
 
         if (AccessToken.getCurrentAccessToken() == null && SharePref.getStringRid(getApplicationContext()) == null) {
             SharePref.setStringRid(getApplicationContext(), "fbid_" + UUID.randomUUID().toString());

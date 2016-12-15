@@ -113,6 +113,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         app = (OishiApplication) getApplicationContext();
         app.getHttpService().sendStat(HTTPService.SAVERESULT);
+        app.sendPageStat("home");
 
 
 
@@ -2220,6 +2221,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void shareScreen() {
         app.getHttpService().sendStat(HTTPService.STARTGAME);
+        app.sendPageStat("recording");
 
         cool = false;
         ((ImageView) findViewById(R.id.imageFrameIce1)).setAlpha(0f);

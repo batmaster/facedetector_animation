@@ -10,8 +10,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.samples.vision.face.facetracker.R;
-import com.google.android.gms.vision.Tracker;
+import com.google.android.gms.analytics.Tracker;
 
 /**
  * Created by batmaster on 12/14/2016 AD.
