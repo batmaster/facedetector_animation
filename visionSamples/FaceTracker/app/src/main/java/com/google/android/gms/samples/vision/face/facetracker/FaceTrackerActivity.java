@@ -54,6 +54,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.Window;
@@ -135,11 +136,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int SIZE = size.x/10;
         TRIANGLE = (int) Math.sqrt((MAX_X * MAX_X + MAX_Y * MAX_Y)) + SIZE / 2;
 
-        PREVIEW_CAM_X = (int)(MAX_X);
-        PREVIEW_CAM_Y = (int)(MAX_Y);
-
-        Log.d("sizecr", PREVIEW_CAM_X + " " + PREVIEW_CAM_Y);
-
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mScreenDensity = metrics.densityDpi;
@@ -152,74 +148,71 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         toggleButtonRecord = (ToggleButton) findViewById(R.id.toggleButtonRecord);
 
-        mPreview = (CameraSourcePreview) findViewById(R.id.preview);
-//        RelativeLayout.LayoutParams mPreviewParam = (RelativeLayout.LayoutParams) mPreview.getLayoutParams();
-//        mPreviewParam.leftMargin = (int) (-1 * (minusX / 2));
-//        mPreview.setLayoutParams(mPreviewParam);
-
-        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
-
-        // Check for the camera permission before accessing the camera.  If the
-        // permission is not granted yet, request permission.
-        int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if (rc == PackageManager.PERMISSION_GRANTED) {
-            createCameraSource();
-        } else {
-            requestCameraPermission();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            toggleButtonRecord.setVisibility(View.GONE);
         }
+
+        mPreview = (CameraSourcePreview) findViewById(R.id.preview);
+        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
 
 
         selector = (LinearLayout) findViewById(R.id.selector);
-
-        float h = PREVIEW_CAM_Y / FaceTrackerActivity.PREFERED_CAM_HEIGHT;
-        float newW = FaceTrackerActivity.PREFERED_CAM_WIDTH * h;
-        minusX = (newW - PREVIEW_CAM_X);
 
         imageViewSwapCamera = (ImageView) findViewById(R.id.imageViewSwapCamera);
         imageViewSwapCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                for (int i = 0; i < faces.size(); i++) {
-                    int key = faces.keyAt(i);
-                    faces.get(key).waitForStop = true;
-                }
+                if (hasPermissions) {
+                    for (int i = 0; i < faces.size(); i++) {
+                        int key = faces.keyAt(i);
+                        faces.get(key).waitForStop = true;
+                    }
 
-                toggleButtonEars.setChecked(false);
-                toggleButtonEyes.setChecked(false);
-                toggleButtonMouth.setChecked(false);
+                    toggleButtonEars.setChecked(false);
+                    toggleButtonEyes.setChecked(false);
+                    toggleButtonMouth.setChecked(false);
 
-                Random r = new Random();
-                double d = r.nextDouble();
-                if (d < 0.4) {
-                    toggleButtonEyes.setChecked(true);
-                }
-                else if (d < 0.8) {
-                    toggleButtonMouth.setChecked(true);
-                }
-                else {
-                    toggleButtonEars.setChecked(true);
-                }
+                    Random r = new Random();
+                    double d = r.nextDouble();
+                    if (d < 0.4) {
+                        toggleButtonEyes.setChecked(true);
+                    } else if (d < 0.8) {
+                        toggleButtonMouth.setChecked(true);
+                    } else {
+                        toggleButtonEars.setChecked(true);
+                    }
 
-                if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-                    CAMERA_FACING = CameraSource.CAMERA_FACING_BACK;
-                }
-                else {
-                    CAMERA_FACING = CameraSource.CAMERA_FACING_FRONT;
-                }
+                    if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+                        CAMERA_FACING = CameraSource.CAMERA_FACING_BACK;
+                    } else {
+                        CAMERA_FACING = CameraSource.CAMERA_FACING_FRONT;
+                    }
 
-                mPreview.stop();
-                if (mCameraSource != null) {
-                    mCameraSource.release();
+                    mPreview.stop();
+                    if (mCameraSource != null) {
+                        mCameraSource.release();
+                    }
+
+                    createCameraSource();
+                    startCameraSource();
+                    mPreview.requestLayout();
                 }
-                createCameraSource();
-                startCameraSource();
             }
         });
 
 
 
         toggleButtonEars = (ToggleButton) findViewById(R.id.toggleButtonEars);
+        toggleButtonEars.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (toggleButtonEars.isChecked() && !toggleButtonEyes.isChecked() && !toggleButtonMouth.isChecked()) {
+                    return true;
+                }
+                return false;
+            }
+        });
         toggleButtonEars.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -229,7 +222,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
             }
         });
+
         toggleButtonEyes = (ToggleButton) findViewById(R.id.toggleButtonEyes);
+        toggleButtonEyes.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (!toggleButtonEars.isChecked() && toggleButtonEyes.isChecked() && !toggleButtonMouth.isChecked()) {
+                    return true;
+                }
+                return false;
+            }
+        });
         toggleButtonEyes.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -239,7 +242,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
             }
         });
+
         toggleButtonMouth = (ToggleButton) findViewById(R.id.toggleButtonMouth);
+        toggleButtonMouth.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (!toggleButtonEars.isChecked() && !toggleButtonEyes.isChecked() && toggleButtonMouth.isChecked()) {
+                    return true;
+                }
+                return false;
+            }
+        });
         toggleButtonMouth.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -250,32 +263,38 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             }
         });
 
+        toggleButtonRecord.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                final String[] permissions = new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO};
 
+                if (ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.CAMERA) +
+                        ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) +
+                        ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.CAMERA) ||
+                            ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
+                            ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO)) {
+//                        toggleButtonRecord.setChecked(false);
+
+                        waitingForResult = true;
+                        ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
+                        return true;
+                    } else {
+                        waitingForResult = true;
+                        ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        });
         toggleButtonRecord.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
-                if (ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) +
-                        ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
-                            ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO)) {
-                        toggleButtonRecord.setChecked(false);
-
-                        Snackbar.make(findViewById(android.R.id.content), label_permissions,
-                                Snackbar.LENGTH_INDEFINITE).setAction("ENABLE", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                ActivityCompat.requestPermissions(FaceTrackerActivity.this,
-                                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
-                            }
-                        }).show();
-                    } else {
-                        ActivityCompat.requestPermissions(FaceTrackerActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
-                    }
-                } else {
-                    onToggleScreenShare(compoundButton);
-                }
+                onToggleScreenShare(compoundButton);
 
                 if (b) {
                     selector.setVisibility(View.INVISIBLE);
@@ -289,13 +308,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         });
 
 
-        makeThreadSakura();
-
         dialog = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_finish_record);
         dialog.setCancelable(false);
-
 
 
 
@@ -305,7 +321,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
 
-        initRecorder();
+        // permission
+        if (getIntent().getBooleanExtra("pass", true)) {
+            hasPermissions = true;
+
+            createCameraSource();
+            initRecorder();
+
+            makeThreadSakura();
+        }
+
+
     }
 
     private boolean recording = false;
@@ -320,14 +346,30 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     public void addFace(com.google.android.gms.samples.vision.face.facetracker.Face face) {
         face.initSound(getApplicationContext());
         faces.append(face.id, face);
-    }
 
-    public void removeFace(int id) {
-        Log.d("sound", "remove face " + id);
-        if (faces.get(id) != null && faces.get(id).waitForStop) {
-            faces.get(id).waitForStop = true;
+
+        Log.d("remover", "add " + face.id + " " + SystemClock.currentThreadTimeMillis());
+
+        if (!recording) {
+            Random r = new Random();
+            if (r.nextBoolean()) {
+                cool = !cool;
+
+                if (cool) {
+                    ObjectAnimator.ofFloat((ImageView) findViewById(R.id.imageFrameIce1), View.ALPHA, 0f, 1f).setDuration(300).start();
+                } else {
+                    ObjectAnimator.ofFloat((ImageView) findViewById(R.id.imageFrameIce1), View.ALPHA, 1f, 0f).setDuration(300).start();
+                }
+            }
         }
     }
+
+//    public void removeFace(int id) {
+//        Log.d("sound", "remove face " + id);
+//        if (faces.get(id) != null && faces.get(id).waitForStop) {
+//            faces.get(id).waitForStop = true;
+//        }
+//    }
 
 
     private int volume1 = 10;
@@ -390,7 +432,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         else {
             toggleButtonEars.setChecked(true);
         }
-
 
         final Handler handlerCheek = new Handler();
         handlerCheek.post(new Runnable() {
@@ -502,30 +543,57 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             }
         });
 
-
+        final int lastChecking = 0;
+        final int CHECKING_DELAY = 50;
         final Handler handlerRemover = new Handler();
         handlerRemover.post(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void run() {
 
+                // prevent handler not accurate
+                if (SystemClock.currentThreadTimeMillis() - lastChecking < CHECKING_DELAY) {
+                    return;
+                }
+
                 for (int i = 0; i < faces.size(); i++) {
                     int key = faces.keyAt(i);
                     com.google.android.gms.samples.vision.face.facetracker.Face f = faces.get(key);
 
                     f.count++;
-                    if (f.count > 5) {
+                    Log.d("remover", f.id + " f++ " + f.count + " " + SystemClock.currentThreadTimeMillis());
+                    if (f.count > 3) {
                         faces.get(f.id).waitForStop = true;
+                    }
 
+                    if (f.waitForStop) {
+                        Log.d("remover", f.id + " " + faces.size());
                         if (f.isPlayingSound()) {
                             f.stopSound();
                         }
+
                         faces.remove(f.id);
+                        Log.d("remover", f.id + " " + faces.size());
+
+                        if (!recording && faces.size() == 0) {
+                            cool = false;
+                            ((ImageView) findViewById(R.id.imageFrameIce1)).setAlpha(0f);
+                        }
+                    }
+
+                    if (!toggleButtonEyes.isChecked() && !toggleButtonEars.isChecked() && !toggleButtonMouth.isChecked()) {
+                        try {
+                            if (f.isPlayingSound()) {
+                                f.pauseSound();
+                            }
+                        } catch (IllegalStateException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 
                 if (appRuning) {
-                    handlerRemover.postDelayed(this, 16);
+                    handlerRemover.postDelayed(this, CHECKING_DELAY);
                 }
             }
         });
@@ -683,40 +751,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     }
 
 
-
-
-
-
-
-    private void requestCameraPermission() {
-        Log.w(TAG, "Camera permission is not granted. Requesting permission");
-
-        final String[] permissions = new String[]{Manifest.permission.CAMERA};
-
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
-            return;
-        }
-
-        final Activity thisActivity = this;
-
-        View.OnClickListener listener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ActivityCompat.requestPermissions(thisActivity, permissions,
-                        RC_HANDLE_CAMERA_PERM);
-            }
-        };
-
-        Snackbar.make(mGraphicOverlay, R.string.permission_camera_rationale,
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.ok, listener)
-                .show();
-    }
-
-
     private void createCameraSource() {
+        Log.d("surfacee", "createCameraSource");
 
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
@@ -755,28 +791,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     }
 
-    public static final int PREFERED_CAM_HEIGHT = 720/2;
-    public static final int PREFERED_CAM_WIDTH = 480/2;
 
-    /**
-     * Restarts the camera.
-     */
     @Override
     protected void onResume() {
         super.onResume();
 
-        appRuning = true;
-
         startCameraSource();
 
-//        for (int i = 0; i < faces.size(); i++) {
-//            int key = faces.keyAt(i);
-//            faces.get(key).playSound();
-//        }
+        appRuning = true;
     }
 
     boolean appRuning = true;
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -800,12 +825,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             mCameraSource.release();
         }
 
-
         destroyMediaProjection();
     }
 
 
     private void startCameraSource() {
+        Log.d("surfacee", "startCameraSource");
 
         // check that the device has play services available.
         int code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
@@ -903,11 +928,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsLeft.leftMargin -= (size / 2);
         paramsLeft.topMargin = (int) y1 - (size / 2);
 
-        Log.d("cheekk", face.randomCheek + " " + face.id);
-
 
         ImageView cheekLeft = new ImageView(getApplicationContext());
-        cheekLeft.setImageResource(cheek[face.randomCheek][0]);
+        cheekLeft.setImageResource(cheek[face.id % 4][0]);
 //        cheekLeft.setRotation(face.eulerY * 2 + face.eulerZ * 2);
 
         // TODO do (check) inverse for BACK CAM
@@ -929,7 +952,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsRight.topMargin = (int) y2 - (size / 2);
 
         ImageView cheekRight = new ImageView(getApplicationContext());
-        cheekRight.setImageResource(cheek[face.randomCheek][1]);
+        cheekRight.setImageResource(cheek[face.id % 4][1]);
 //        cheekRight.setRotation(face.eulerY * 2 + face.eulerZ * 2);
 
         // TODO do (check) inverse for BACK CAM
@@ -2045,8 +2068,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             return;
         }
         if (resultCode != RESULT_OK) {
-            Toast.makeText(this,
-                    "Screen Cast Permission Denied", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "ไม่สามารถบันทึกวิดีโอได้", Toast.LENGTH_SHORT).show();
             toggleButtonRecord.setChecked(false);
             return;
         }
@@ -2131,14 +2153,21 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                 if (recording) {
                                                                     toggleButtonRecord.setChecked(false);
 
+                                                                    for (int i = 0; i < faces.size(); i++) {
+                                                                        int key = faces.keyAt(i);
+                                                                        faces.get(key).waitForStop = true;
+                                                                    }
 
                                                                     Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
                                                                     intent.putExtra("videoFileName", videoFileName);
                                                                     startActivity(intent);
 
+
                                                                     new Handler().postDelayed(new Runnable() {
                                                                         @Override
                                                                         public void run() {
+
+                                                                            appRuning = false;
 
                                                                             try {
                                                                                 dialog.dismiss();
@@ -2149,13 +2178,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                                                                             finish();
                                                                         }
-                                                                    }, 1000);
+                                                                    }, 2000);
                                                                 }
                                                             }
-                                                        }, 1000);
+                                                        }, 1500);
                                                     }
                                                 }
-                                            }, 1000);
+                                            }, 1500);
                                         }
                                     }
                                 }, 1500);
@@ -2164,13 +2193,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }, 1500);
                 }
             }
-        }, 2000);
+        }, 3000);
     }
 
     private boolean waitingForResult;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void shareScreen() {
+        cool = false;
+        ((ImageView) findViewById(R.id.imageFrameIce1)).setAlpha(0f);
+
         if (mMediaProjection == null) {
             startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
             waitingForResult = true;
@@ -2193,6 +2225,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private String videoFileName;
 
     private void initRecorder() {
+        Log.d("surfacee", "initRecorder");
         videoFileName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".mp4";
 
         try {
@@ -2203,7 +2236,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             mMediaRecorder.setVideoSize(MAX_X, MAX_Y);
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mMediaRecorder.setVideoEncodingBitRate(3000000);
+            mMediaRecorder.setVideoEncodingBitRate(6000000);
             mMediaRecorder.setVideoFrameRate(30);
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             int orientation = ORIENTATIONS.get(rotation + 90);
@@ -2237,6 +2270,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         mVirtualDisplay.release();
         //mMediaRecorder.release(); //If used: mMediaRecorder object cannot
         // be reused again
+        Log.d("surfacee", "stopScreenSharing");
         destroyMediaProjection();
     }
 
@@ -2250,64 +2284,62 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Log.i(TAG, "MediaProjection Stopped");
     }
 
+    private boolean hasPermissions = false;
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        waitingForResult = false;
         switch (requestCode) {
             case REQUEST_PERMISSIONS: {
-                if ((grantResults.length > 0) && (grantResults[0] +
-                        grantResults[1]) == PackageManager.PERMISSION_GRANTED) {
+                if ((grantResults.length > 0) && (grantResults[0] + grantResults[1] + grantResults[2]) == PackageManager.PERMISSION_GRANTED) {
+                    hasPermissions = true;
+
+                    createCameraSource();
+                    initRecorder();
+
+                    mPreview.requestLayout();
+
+                    makeThreadSakura();
+
                     onToggleScreenShare(toggleButtonRecord);
                 } else {
                     toggleButtonRecord.setChecked(false);
-                    Snackbar.make(findViewById(android.R.id.content), label_permissions,
-                            Snackbar.LENGTH_INDEFINITE).setAction("ENABLE",
-                            new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent();
-                                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                    intent.addCategory(Intent.CATEGORY_DEFAULT);
-                                    intent.setData(Uri.parse("package:" + getPackageName()));
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                                    startActivity(intent);
-                                }
-                            }).show();
+
                 }
                 return;
             }
+
         }
 
 
-        // old
-        if (requestCode != RC_HANDLE_CAMERA_PERM) {
-            Log.d(TAG, "Got unexpected permission result: " + requestCode);
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            return;
-        }
-
-        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Camera permission granted - initialize the camera source");
-            // we have permission, so create the camerasource
-            createCameraSource();
-            return;
-        }
-
-        Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
-                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
-
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                finish();
-            }
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Face Tracker sample")
-                .setMessage(R.string.no_camera_permission)
-                .setPositiveButton(R.string.ok, listener)
-                .show();
+//        // old
+//        if (requestCode != RC_HANDLE_CAMERA_PERM) {
+//            Log.d(TAG, "Got unexpected permission result: " + requestCode);
+//            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//            return;
+//        }
+//
+//        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//            Log.d(TAG, "Camera permission granted - initialize the camera source");
+//            // we have permission, so create the camerasource
+//            createCameraSource();
+//            return;
+//        }
+//
+//        Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
+//                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
+//
+//        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int id) {
+//                finish();
+//            }
+//        };
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Face Tracker sample")
+//                .setMessage(R.string.no_camera_permission)
+//                .setPositiveButton(R.string.ok, listener)
+//                .show();
     }
 
 

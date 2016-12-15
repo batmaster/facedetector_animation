@@ -6,7 +6,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/bg_review_popup2"
+        android:src="@drawable/bg_review_popup1"
         android:scaleType="fitXY" />
 
     <LinearLayout
@@ -42,29 +42,6 @@
                 android:src="@drawable/btn_review_popup1_close"/>
 
         </LinearLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="21">
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:gravity="center"
-            android:layout_weight="8"
-            android:weightSum="100">
-
-                <ImageView
-                    android:id="@+id/imageViewOk"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:adjustViewBounds="true"
-                    android:src="@drawable/btn_review_save"/>
-
-        </RelativeLayout>
 
     </LinearLayout>
 

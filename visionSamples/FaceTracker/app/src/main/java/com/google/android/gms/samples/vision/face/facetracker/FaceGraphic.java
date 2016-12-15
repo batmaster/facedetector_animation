@@ -108,6 +108,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             return;
         }
 
+        if (!Singleton.activity.appRuning) {
+            return;
+        }
+
         // Draws a circle at the position of the detected face, with the face's track id below.
         float x = translateX(face.getPosition().x + face.getWidth() / 2);
         float y = translateY(face.getPosition().y + face.getHeight() / 2);
@@ -155,9 +159,11 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         for (int i = 0; i < landmarks.size(); i++) {
             float whereX = landmarks.get(i).getPosition().x * scale;
             if (Singleton.activity.CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-                whereX = Singleton.activity.PREVIEW_CAM_X - whereX;
+                whereX = Singleton.activity.MAX_X - whereX;
             }
             canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+
+            Log.d("drawCircle", whereX + " " + (landmarks.get(i).getPosition().y * scale));
 
 
             if (landmarks.get(i).getType() == Landmark.LEFT_MOUTH) {

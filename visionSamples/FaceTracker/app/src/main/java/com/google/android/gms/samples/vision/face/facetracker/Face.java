@@ -34,8 +34,6 @@ public class Face {
     public float rightCheekX = -1;
     public float rightCheekY = -1;
 
-    public int randomCheek = 0;
-
     public boolean waitForStop;
     public int count;
 
@@ -45,12 +43,11 @@ public class Face {
 
     public Face() {
         Random r = new Random();
-        randomCheek = r.nextInt(4);
     }
 
     public void initSound(final Context context) {
         Log.d("sounddd", "initSound " + id);
-        mp = MediaPlayer.create(context, R.raw.sfx);
+        mp = MediaPlayer.create(context, id % 2 == 0 ? R.raw.sfx : R.raw.beam);
         mp.setLooping(true);
     }
 

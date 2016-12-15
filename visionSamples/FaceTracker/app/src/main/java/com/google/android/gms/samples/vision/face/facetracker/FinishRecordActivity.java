@@ -2,10 +2,13 @@ package com.google.android.gms.samples.vision.face.facetracker;
 
 import android.annotation.TargetApi;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -93,6 +96,7 @@ public class FinishRecordActivity extends AppCompatActivity {
 
         dialogConfirmNoSave = new Dialog(FinishRecordActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         dialogConfirmNoSave.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogConfirmNoSave.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         dialogConfirmNoSave.setContentView(R.layout.dialog_confirm_unsave);
         dialogConfirmNoSave.setCancelable(false);
 
@@ -109,6 +113,19 @@ public class FinishRecordActivity extends AppCompatActivity {
                 saveVideoToPublic();
 
                 dialogConfirmNoSave.dismiss();
+            }
+        });
+
+        dialogNoInternet = new Dialog(FinishRecordActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialogNoInternet.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogNoInternet.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialogNoInternet.setContentView(R.layout.dialog_no_internet);
+        dialogNoInternet.setCancelable(false);
+
+        ((ImageView) dialogNoInternet.findViewById(R.id.imageViewClose)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogNoInternet.dismiss();
             }
         });
 
@@ -223,9 +240,9 @@ public class FinishRecordActivity extends AppCompatActivity {
             out.flush();
             out.close();
             out = null;
-
-            // delete the original file
-            new File(VIDEO_FILE_PATH_TEMP + "/" + videoFileName).delete();
+//
+//            // delete the original file
+//            new File(VIDEO_FILE_PATH_TEMP + "/" + videoFileName).delete();
 
             hasSaved = true;
             Toast.makeText(getApplicationContext(), "บันทึกไฟล์ " + videoFileName + " เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
@@ -272,61 +289,63 @@ public class FinishRecordActivity extends AppCompatActivity {
         }
     }
 
+    private boolean sharing = false;
     private void share() {
-        if (AccessToken.getCurrentAccessToken() == null) {
-            String[] permissions = {"public_profile", "email", "user_videos"};
+        if (isNetworkConnected()) {
+            if (!sharing) {
+                sharing = true;
 
-            LoginManager.getInstance().logInWithReadPermissions(FinishRecordActivity.this, Arrays.asList(permissions));
+                if (AccessToken.getCurrentAccessToken() == null) {
+                    String[] permissions = {"public_profile", "email"};
+                    LoginManager.getInstance().logInWithReadPermissions(FinishRecordActivity.this, Arrays.asList(permissions));
+                } else {
+                    File f = new File(VIDEO_FILE_PATH_TEMP + "/" + videoFileName);
+                    Uri videoFileUri = Uri.fromFile(f);
+                    ShareVideo video = new ShareVideo.Builder()
+                            .setLocalUrl(videoFileUri)
+                            .build();
+                    ShareVideoContent content = new ShareVideoContent.Builder()
+                            .setVideo(video)
+                            .build();
+
+                    ShareDialog dialog = new ShareDialog(FinishRecordActivity.this);
+                    dialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+                        @Override
+                        public void onSuccess(Sharer.Result result) {
+                            sharing = false;
+                            Log.d("FBShare", "onSuccess " + result);
+
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            sharing = false;
+                            Log.d("FBShare", "onCancel()");
+
+                        }
+
+                        @Override
+                        public void onError(FacebookException error) {
+                            error.printStackTrace();
+
+                            sharing = false;
+                            Log.d("FBShare", "onError" + error.getMessage());
+                            //                    Crashlytics.logException(error);
+
+                        }
+                    });
+
+                    if (dialog.canShow(ShareVideoContent.class)) {
+                        dialog.show(content, ShareDialog.Mode.AUTOMATIC);
+                    } else {
+                        Log.d("FBShare", "you cannot share :(");
+                    }
+                }
+            }
         }
         else {
-
-            File f = new File(VIDEO_FILE_PATH_TEMP + "/" + videoFileName);
-            Log.d("FBShare", f.isFile() + " " + f.exists());
-
-            Uri videoFileUri = Uri.fromFile(f);
-
-            Log.d("FBShare", videoFileUri.toString());
-
-            ShareVideo video = new ShareVideo.Builder()
-                    .setLocalUrl(videoFileUri)
-                    .build();
-            ShareVideoContent content = new ShareVideoContent.Builder()
-                    .setContentTitle("ลองกดดิ")
-                    .setContentDescription("อย่ากดเลย")
-                    .setVideo(video)
-                    .build();
-
-            Log.d("FBShare", "dialog ok");
-
-            ShareDialog dialog = new ShareDialog(FinishRecordActivity.this);
-            dialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
-                @Override
-                public void onSuccess(Sharer.Result result) {
-                    Log.d("FBShare", "onSuccess " + result);
-
-                }
-
-                @Override
-                public void onCancel() {
-                    Log.d("FBShare", "onCancel()");
-
-                }
-
-                @Override
-                public void onError(FacebookException error) {
-                    error.printStackTrace();
-
-                    Log.d("FBShare", "onError" + error.getMessage());
-//                    Crashlytics.logException(error);
-
-                }
-            });
-
-            if (dialog.canShow(ShareVideoContent.class)) {
-                dialog.show(content, ShareDialog.Mode.AUTOMATIC);
-            } else {
-                Log.d("FBShare", "you cannot share :(");
-            }
+            Log.d("FBShare", "no net");
+            dialogNoInternet.show();
         }
     }
 
@@ -334,5 +353,11 @@ public class FinishRecordActivity extends AppCompatActivity {
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
     }
 }

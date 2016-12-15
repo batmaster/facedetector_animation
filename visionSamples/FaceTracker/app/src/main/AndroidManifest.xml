@@ -17,7 +17,6 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
@@ -25,8 +24,8 @@
         android:name=".OishiApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/icon"
-        android:label="FaceTracker"
+        android:icon="@mipmap/ic_logo"
+        android:label="OISHI"
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.gms.version"
@@ -38,7 +37,7 @@
         <activity
             android:name=".FaceTrackerActivity"
             android:icon="@drawable/icon"
-            android:label="Face Tracker"
+            android:label="OISHI"
             android:screenOrientation="portrait">
         </activity>
         <activity android:name=".MainActivity"
