@@ -167,6 +167,10 @@ public class HTTPService {
             }
         };
 
+        final HashMap<String, String> params = new HashMap<String, String>();
+        params.put("gid", gid);
+        params.put("param2", where);
+        request.setParams(params);
         queue.add(request);
     }
 

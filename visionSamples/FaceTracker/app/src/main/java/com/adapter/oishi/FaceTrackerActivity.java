@@ -69,6 +69,8 @@ import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -114,6 +116,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         app = (OishiApplication) getApplicationContext();
         app.getHttpService().sendStat(HTTPService.SAVERESULT);
         app.sendPageStat("home");
+        app.getHttpService().sendStat(HTTPService.OPENAPP);
+
+        FirebaseMessaging.getInstance().subscribeToTopic("bat");
+        Log.d("fbt", FirebaseInstanceId.getInstance().getToken());
+
 
 
 
@@ -1001,8 +1008,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.mouthY;
         }
 
-        final int sizeX = (int) (MAX_X / 1.5);
-        final int sizeY = (int) (MAX_Y);
+        final int sizeX = MAX_X;
+        final int sizeY = MAX_Y;
 
         final ImageView light = new ImageView(getApplicationContext());
         light.setImageResource(cool ? R.drawable.light_blue: R.drawable.light_pink);
@@ -1047,7 +1054,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float x = face.leftEyeX;
         float y = face.leftEyeY;
 
-        final int sizeX = (int) (MAX_X / 1.5);
+        final int sizeX = MAX_X;
         final int sizeY = (int) (MAX_Y);
 
         final ImageView light = new ImageView(getApplicationContext());
@@ -1092,7 +1099,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float x = face.rightEyeX;
         float y = face.rightEyeY;
 
-        final int sizeX = (int) (MAX_X / 1.5);
+        final int sizeX = MAX_X;
         final int sizeY = (int) (MAX_Y);
 
         final ImageView light = new ImageView(getApplicationContext());
@@ -1154,7 +1161,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.leftEyeY + eeX / 1.5f;
         }
 
-        final int sizeX = (int) (MAX_X / 1.5);
+        final int sizeX = MAX_X;
         final int sizeY = (int) (MAX_Y);
 
         final ImageView light = new ImageView(getApplicationContext());
@@ -1221,7 +1228,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.rightEyeY + eeX / 1.5f;
         }
 
-        final int sizeX = (int) (MAX_X / 1.5);
+        final int sizeX = MAX_X;
         final int sizeY = (int) (MAX_Y);
 
         final ImageView light = new ImageView(getApplicationContext());

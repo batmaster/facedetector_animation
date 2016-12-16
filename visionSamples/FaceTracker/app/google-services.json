@@ -1,45 +1,45 @@
 {
   "project_info": {
-    "project_id": "oishi-promotion-2016-1de9a",
-    "project_number": "739475342103",
-    "name": "Oishi Promotion 2016"
+    "project_number": "818717432684",
+    "firebase_url": "https://oishi-promotion-2016.firebaseio.com",
+    "project_id": "oishi-promotion-2016",
+    "storage_bucket": "oishi-promotion-2016.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:739475342103:android:645e752b0f66c5ca",
-        "client_id": "android:com.adapter.oishi",
-        "client_type": 1,
+        "mobilesdk_app_id": "1:818717432684:android:645e752b0f66c5ca",
         "android_client_info": {
           "package_name": "com.adapter.oishi"
         }
       },
-      "oauth_client": [],
-      "api_key": [{ "current_key": "" }],
+      "oauth_client": [
+        {
+          "client_id": "818717432684-vrrd9e861ntmmst1ef8ea05pts5n6qtg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpwOe4pUojNVCSX5DuHZTZu9zAtHJDknQ"
+        }
+      ],
       "services": {
         "analytics_service": {
           "status": 2,
           "analytics_property": {
-            "tracking_id": "UA-48812367-17"
+            "tracking_id": "UA-48812367-21"
           }
-        },
-        "cloud_messaging_service": {
-          "status": 1,
-          "apns_config": []
         },
         "appinvite_service": {
           "status": 1,
           "other_platform_oauth_client": []
         },
-        "google_signin_service": {
-          "status": 1
-        },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }
   ],
-  "client_info": [],
-  "ARTIFACT_VERSION": "1"
+  "configuration_version": "1"
 }

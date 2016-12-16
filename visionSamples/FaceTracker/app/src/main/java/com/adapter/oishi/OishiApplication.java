@@ -32,7 +32,7 @@ public class OishiApplication extends Application {
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
 
-        AppsFlyerLib.getInstance().startTracking(this, "vdVe9UxXnHjhUoKFT2HAnK");
+        AppsFlyerLib.getInstance().startTracking(this, "HGETasn6yh8FhMC2LQgEWP");
         AppsFlyerLib.getInstance().setAppId("com.adapter.oishi");
 
         httpService = new HTTPService(getApplicationContext());
