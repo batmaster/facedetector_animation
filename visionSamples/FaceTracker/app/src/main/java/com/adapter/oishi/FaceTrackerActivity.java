@@ -275,25 +275,28 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             }
         });
 
+        final Dialog dialogNoInternet = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialogNoInternet.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogNoInternet.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialogNoInternet.setContentView(R.layout.dialog_no_internet);
+        dialogNoInternet.setCancelable(false);
+
+        ((ImageView) dialogNoInternet.findViewById(R.id.imageViewClose)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogNoInternet.dismiss();
+            }
+        });
+
+
         toggleButtonRecord.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (!app.isNetworkConnected()) {
 
-                    final Dialog dialogNoInternet = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-                    dialogNoInternet.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                    dialogNoInternet.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                    dialogNoInternet.setContentView(R.layout.dialog_no_internet);
-                    dialogNoInternet.setCancelable(false);
-
-                    ((ImageView) dialogNoInternet.findViewById(R.id.imageViewClose)).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialogNoInternet.dismiss();
-                        }
-                    });
-
-                    dialogNoInternet.show();
+                    if (!dialogNoInternet.isShowing()) {
+                        dialogNoInternet.show();
+                    }
 
                     return true;
                 }
@@ -358,6 +361,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             makeThreadSakura();
         }
 
+
+
+        finishDialog = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        finishDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        finishDialog.setContentView(R.layout.dialog_finish_record);
+        finishDialog.setCancelable(false);
 
     }
 
@@ -443,7 +452,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private ArrayList<ImageView> cheeks = new ArrayList<ImageView>();
     private ArrayList<ImageView> lights = new ArrayList<ImageView>();
-    private ArrayList<ImageView> sparks = new ArrayList<ImageView>();
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
@@ -497,9 +505,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     layoutLight.removeView(lights.get(i));
                     lights.get(i).setVisibility(View.GONE);
                     lights.remove(i);
-
-                    sparks.get(i).setVisibility(View.GONE);
-                    sparks.remove(i);
                 }
 
 
@@ -630,12 +635,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             public void run() {
 
                 if (toggleButtonMouth.isChecked()) {
-
-                    lightFrame++;
-                    if (lightFrame == 8) {
-                        lightFrame = 0;
-                    }
-
                     Log.d("handlerSakuraMouth", faces.toString());
                     for (int i = 0; i < faces.size(); i++) {
                         int key = faces.keyAt(i);
@@ -665,12 +664,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             public void run() {
 
                 if (toggleButtonEyes.isChecked()) {
-
-                    lightFrame++;
-                    if (lightFrame == 8) {
-                        lightFrame = 0;
-                    }
-
                     for (int i = 0; i < faces.size(); i++) {
                         int key = faces.keyAt(i);
                         com.adapter.oishi.Face f = faces.get(key);
@@ -707,12 +700,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
                 if (toggleButtonEars.isChecked()) {
-
-                    lightFrame++;
-                    if (lightFrame == 8) {
-                        lightFrame = 0;
-                    }
-
                     for (int i = 0; i < faces.size(); i++) {
                         int key = faces.keyAt(i);
                         com.adapter.oishi.Face f = faces.get(key);
@@ -837,21 +824,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         super.onPause();
         mPreview.stop();
 
-        finishDialog = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-        finishDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        finishDialog.setContentView(R.layout.dialog_finish_record);
-        finishDialog.setCancelable(false);
-
-        if (finishDialog.isShowing()) {
-            finishDialog.dismiss();
-        }
 
         for (int i = 0; i < faces.size(); i++) {
             int key = faces.keyAt(i);
             faces.get(key).waitForStop = true;
         }
 
-        if (!waitingForResult) {
+        if (!waitingForResult && !recording) {
             appRuning = false;
             finish();
         }
@@ -948,7 +927,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             {R.drawable.cheek1_left, R.drawable.cheek1_right},
             {R.drawable.cheek2_left, R.drawable.cheek2_right},
             {R.drawable.cheek3_left, R.drawable.cheek3_right},
-            {R.drawable.cheek4_left, R.drawable.cheek4_right},
     };
 
     int[] sa = {
@@ -978,7 +956,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
         ImageView cheekLeft = new ImageView(getApplicationContext());
-        cheekLeft.setImageResource(cheek[face.id % 4][0]);
+        cheekLeft.setImageResource(cheek[face.id % 3][0]);
 //        cheekLeft.setRotation(face.eulerY * 2 + face.eulerZ * 2);
 
         // TODO do (check) inverse for BACK CAM
@@ -1000,7 +978,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         paramsRight.topMargin = (int) y2 - (size / 2);
 
         ImageView cheekRight = new ImageView(getApplicationContext());
-        cheekRight.setImageResource(cheek[face.id % 4][1]);
+        cheekRight.setImageResource(cheek[face.id % 3][1]);
 //        cheekRight.setRotation(face.eulerY * 2 + face.eulerZ * 2);
 
         // TODO do (check) inverse for BACK CAM
@@ -1008,8 +986,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         layoutCheek.addView(cheekRight);
         cheeks.add(cheekRight);
     }
-
-    private static int lightFrame = 0;
 
     private void createLightMouth(com.adapter.oishi.Face face) {
 
@@ -1024,31 +1000,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             x = face.mouthX;
             y = face.mouthY;
         }
-
-        final int sizeSpark = (int) com.adapter.oishi.Face.getDistance(face.rightEyeX, face.rightEyeY, face.leftEyeX, face.leftEyeY);
-
-        final ImageView spark = new ImageView(getApplicationContext());
-        spark.setImageResource(R.drawable.img_light_spark);
-        spark.setScaleType(ImageView.ScaleType.FIT_XY);
-
-        FrameLayout.LayoutParams paramsSpark = new FrameLayout.LayoutParams(sizeSpark, sizeSpark);
-        paramsSpark.leftMargin = (int) x;
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            paramsSpark.leftMargin = MAX_X - paramsSpark.leftMargin;
-        }
-        paramsSpark.leftMargin -= (sizeSpark / 2);
-        paramsSpark.topMargin = (int) y - (sizeSpark / 2);
-
-        if (lightFrame > 4) {
-            spark.setVisibility(View.INVISIBLE);
-        }
-
-        spark.setLayoutParams(paramsSpark);
-        layoutLight.addView(spark);
-        sparks.add(spark);
-
-
-
 
         final int sizeX = (int) (MAX_X / 1.5);
         final int sizeY = (int) (MAX_Y);
@@ -1096,30 +1047,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float x = face.leftEyeX;
         float y = face.leftEyeY;
 
-        final int sizeSpark = (int) com.adapter.oishi.Face.getDistance(face.rightEyeX, face.rightEyeY, face.leftEyeX, face.leftEyeY);
-
-        final ImageView spark = new ImageView(getApplicationContext());
-        spark.setImageResource(R.drawable.img_light_spark);
-        spark.setScaleType(ImageView.ScaleType.FIT_XY);
-
-        FrameLayout.LayoutParams paramsSpark = new FrameLayout.LayoutParams(sizeSpark, sizeSpark);
-        paramsSpark.leftMargin = (int) x;
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            paramsSpark.leftMargin = MAX_X - paramsSpark.leftMargin;
-        }
-        paramsSpark.leftMargin -= (sizeSpark / 2);
-        paramsSpark.topMargin = (int) y - (sizeSpark / 2);
-
-        if (lightFrame > 4) {
-            spark.setVisibility(View.INVISIBLE);
-        }
-
-        spark.setLayoutParams(paramsSpark);
-        layoutLight.addView(spark);
-        sparks.add(spark);
-
-
-
         final int sizeX = (int) (MAX_X / 1.5);
         final int sizeY = (int) (MAX_Y);
 
@@ -1164,30 +1091,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float x = face.rightEyeX;
         float y = face.rightEyeY;
-
-        final int sizeSpark = (int) com.adapter.oishi.Face.getDistance(face.rightEyeX, face.rightEyeY, face.leftEyeX, face.leftEyeY);
-
-        final ImageView spark = new ImageView(getApplicationContext());
-        spark.setImageResource(R.drawable.img_light_spark);
-        spark.setScaleType(ImageView.ScaleType.FIT_XY);
-
-        FrameLayout.LayoutParams paramsSpark = new FrameLayout.LayoutParams(sizeSpark, sizeSpark);
-        paramsSpark.leftMargin = (int) x;
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            paramsSpark.leftMargin = MAX_X - paramsSpark.leftMargin;
-        }
-        paramsSpark.leftMargin -= (sizeSpark / 2);
-        paramsSpark.topMargin = (int) y - (sizeSpark / 2);
-
-        if (lightFrame > 4) {
-            spark.setVisibility(View.INVISIBLE);
-        }
-
-        spark.setLayoutParams(paramsSpark);
-        layoutLight.addView(spark);
-        sparks.add(spark);
-
-
 
         final int sizeX = (int) (MAX_X / 1.5);
         final int sizeY = (int) (MAX_Y);
@@ -1251,30 +1154,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.leftEyeY + eeX / 1.5f;
         }
 
-        final int sizeSpark = (int) com.adapter.oishi.Face.getDistance(face.rightEyeX, face.rightEyeY, face.leftEyeX, face.leftEyeY);
-
-        final ImageView spark = new ImageView(getApplicationContext());
-        spark.setImageResource(R.drawable.img_light_spark);
-        spark.setScaleType(ImageView.ScaleType.FIT_XY);
-
-        FrameLayout.LayoutParams paramsSpark = new FrameLayout.LayoutParams(sizeSpark, sizeSpark);
-        paramsSpark.leftMargin = (int) x;
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            paramsSpark.leftMargin = MAX_X - paramsSpark.leftMargin;
-        }
-        paramsSpark.leftMargin -= (sizeSpark / 2);
-        paramsSpark.topMargin = (int) y;
-
-        if (lightFrame > 4) {
-            spark.setVisibility(View.INVISIBLE);
-        }
-
-        spark.setLayoutParams(paramsSpark);
-        layoutLight.addView(spark);
-        sparks.add(spark);
-
-
-
         final int sizeX = (int) (MAX_X / 1.5);
         final int sizeY = (int) (MAX_Y);
 
@@ -1288,7 +1167,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             params.leftMargin = MAX_X - params.leftMargin;
         }
         params.leftMargin -= (sizeX / 2);
-        params.topMargin = (int) y + (sizeSpark / 2);
+        params.topMargin = (int) y + (sizeX / 2);
 
         // TODO do (check) inverse for BACK CAM
 
@@ -1342,30 +1221,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.rightEyeY + eeX / 1.5f;
         }
 
-        final int sizeSpark = (int) com.adapter.oishi.Face.getDistance(face.rightEyeX, face.rightEyeY, face.leftEyeX, face.leftEyeY);
-
-        final ImageView spark = new ImageView(getApplicationContext());
-        spark.setImageResource(R.drawable.img_light_spark);
-        spark.setScaleType(ImageView.ScaleType.FIT_XY);
-
-        FrameLayout.LayoutParams paramsSpark = new FrameLayout.LayoutParams(sizeSpark, sizeSpark);
-        paramsSpark.leftMargin = (int) x;
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            paramsSpark.leftMargin = MAX_X - paramsSpark.leftMargin;
-        }
-        paramsSpark.leftMargin -= (sizeSpark / 2);
-        paramsSpark.topMargin = (int) y;
-
-        if (lightFrame > 4) {
-            spark.setVisibility(View.INVISIBLE);
-        }
-
-        spark.setLayoutParams(paramsSpark);
-        layoutLight.addView(spark);
-        sparks.add(spark);
-
-
-
         final int sizeX = (int) (MAX_X / 1.5);
         final int sizeY = (int) (MAX_Y);
 
@@ -1379,7 +1234,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             params.leftMargin = MAX_X - params.leftMargin;
         }
         params.leftMargin -= (sizeX / 2);
-        params.topMargin = (int) y + (sizeSpark / 2);
+        params.topMargin = (int) y + (sizeX / 2);
 
         // TODO do (check) inverse for BACK CAM
 
@@ -2103,7 +1958,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                 Log.d("c511", "mMediaRecorder.stop mMediaRecorder.reset");
 
-                recording = false;
+//                recording = false;
             }
         }
     }
@@ -2167,49 +2022,59 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                                                                     for (int i = 0; i < faces.size(); i++) {
                                                                         int key = faces.keyAt(i);
+                                                                        faces.get(key).pauseSound();
                                                                         faces.get(key).waitForStop = true;
                                                                     }
-
-                                                                    Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
-                                                                    intent.putExtra("videoFileName", videoFileName);
-                                                                    intent.putExtra("gid", gid);
-                                                                    intent.putExtra("where", where);
-                                                                    startActivity(intent);
 
                                                                     new Handler().postDelayed(new Runnable() {
                                                                         @Override
                                                                         public void run() {
                                                                             Log.d("counting", "7 " + new Date().toString());
+
                                                                             appRuning = false;
 
-                                                                            try {
-                                                                                if (finishDialog.isShowing()) {
-                                                                                    finishDialog.dismiss();
-                                                                                }
-                                                                            }
-                                                                            catch (IllegalArgumentException e) {
-                                                                                e.printStackTrace();
-                                                                            }
+                                                                            Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
+                                                                            intent.putExtra("videoFileName", videoFileName);
+                                                                            intent.putExtra("gid", gid);
+                                                                            intent.putExtra("where", where);
+                                                                            startActivity(intent);
 
-//                                                                            finish();
+                                                                            new Handler().postDelayed(new Runnable() {
+                                                                                @Override
+                                                                                public void run() {
+                                                                                    Log.d("counting", "8 " + new Date().toString());
+
+                                                                                    try {
+                                                                                        if (finishDialog.isShowing()) {
+                                                                                            finishDialog.dismiss();
+                                                                                        }
+                                                                                    }
+                                                                                    catch (IllegalArgumentException e) {
+                                                                                        e.printStackTrace();
+                                                                                    }
+
+                                                                                    finish();
+
+                                                                                }
+                                                                            }, 3000);
 
                                                                         }
-                                                                    }, 3000);
+                                                                    }, 1500);
                                                                 }
                                                             }
-                                                        }, 1500);
+                                                        }, 1000); // p l3
                                                     }
                                                 }
-                                            }, 1500);
+                                            }, 500);// p l3
                                         }
                                     }
-                                }, 1500);
+                                }, 1000); // p l2
                             }
                         }
-                    }, 1500);
+                    }, 1000);  // p l1
                 }
             }
-        }, 3000);
+        }, 5000); // w
     }
 
     private boolean waitingForResult;
@@ -2294,7 +2159,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 //        mMediaRecorder.release(); //If used: mMediaRecorder object cannot be reused again
 //        mMediaRecorder = null;
         Log.d("c511", "MediaProjectionCallback stopScreenSharing");
-        destroyMediaProjection();
+//        destroyMediaProjection();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
