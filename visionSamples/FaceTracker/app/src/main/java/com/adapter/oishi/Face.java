@@ -34,6 +34,9 @@ public class Face {
     public float rightCheekX = -1;
     public float rightCheekY = -1;
 
+    public float faceHeight = 0;
+    public float scale = 0;
+
     public boolean waitForStop;
     public int count;
 
@@ -86,6 +89,10 @@ public class Face {
 
     public static float getDistance(float x1, float y1, float x2, float y2) {
         return (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    public int getSakuraSize() {
+        return (int) (faceHeight / 6 * scale);
     }
 
 //    @Override

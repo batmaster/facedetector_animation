@@ -1,6 +1,7 @@
 package com.adapter.oishi;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
@@ -109,6 +110,7 @@ public class FinishRecordActivity extends AppCompatActivity {
         VIDEO_FILE_PATH = Environment.getExternalStorageDirectory() + "/oishi";
         VIDEO_FILE_PATH_TEMP = getFilesDir().getAbsolutePath() + "/tmp";
 
+
         videoFileName = getIntent().getStringExtra("videoFileName");
 
         dialogConfirmNoSave = new Dialog(FinishRecordActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
@@ -175,6 +177,8 @@ public class FinishRecordActivity extends AppCompatActivity {
             public void onClick(View view) {
                 deleteTempVideo();
 
+//                Intent intent = new Intent(getApplicationContext(), SplashActivity.class);
+//                intent.putExtra("FaceTrackerActivity", true);
                 Intent intent = new Intent(getApplicationContext(), FaceTrackerActivity.class);
                 startActivity(intent);
 
@@ -187,8 +191,6 @@ public class FinishRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 saveVideoToPublic();
-
-                app.getHttpService().sendStat(HTTPService.SAVERESULT);
             }
         });
 
@@ -209,9 +211,7 @@ public class FinishRecordActivity extends AppCompatActivity {
             public void onCompletion(MediaPlayer mediaPlayer) {
                 imageViewPlay.setVisibility(View.VISIBLE);
 
-                videoView.start();
                 videoView.seekTo(1000);
-                videoView.pause();
 
                 videoView.setZ(0f);
             }
@@ -219,9 +219,7 @@ public class FinishRecordActivity extends AppCompatActivity {
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
-                videoView.start();
                 videoView.seekTo(1000);
-                videoView.pause();
 
                 videoView.setZ(0f);
             }
@@ -262,6 +260,7 @@ public class FinishRecordActivity extends AppCompatActivity {
 
             hasSaved = true;
             Toast.makeText(getApplicationContext(), "บันทึกไฟล์ " + videoFileName + " เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
+            app.getHttpService().sendStat(HTTPService.SAVERESULT);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
@@ -300,6 +299,7 @@ public class FinishRecordActivity extends AppCompatActivity {
             deleteTempVideo();
 
             Intent intent = new Intent(getApplicationContext(), FaceTrackerActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 
             finish();

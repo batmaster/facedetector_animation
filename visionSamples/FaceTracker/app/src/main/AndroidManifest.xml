@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
-        android:name="com.adapter.oishi.OishiApplication"
+        android:name=".OishiApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_logo"
@@ -35,20 +35,18 @@
             android:value="face" />
 
         <activity
-            android:name="com.adapter.oishi.FaceTrackerActivity"
+            android:name=".FaceTrackerActivity"
             android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.adapter.oishi.MainActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name="com.adapter.oishi.FinishRecordActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name="com.adapter.oishi.SplashActivity"
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".FinishRecordActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SplashActivity"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <meta-data
@@ -66,9 +64,19 @@
             android:name="com.facebook.FacebookContentProvider"
             android:authorities="com.facebook.app.FacebookContentProvider437435489752556"
             android:exported="true" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="7904b432feede08d67f6b0ef2866115bac3a2b6f" />
+
+        <activity android:name=".LogoActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

@@ -123,8 +123,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
         if (dir.isDirectory()) {
             String[] children = dir.list();
-            for (int i = 0; i < children.length; i++)
-            {
+            for (int i = 0; i < children.length; i++) {
                 new File(dir, children[i]).delete();
             }
         }
@@ -294,6 +293,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         }
                     });
 
+                    dialogNoInternet.show();
+
                     return true;
                 }
                 else {
@@ -338,14 +339,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
             }
         });
-
-
-        dialog = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_finish_record);
-        dialog.setCancelable(false);
-
-
 
         // mediaProjection
 
@@ -844,6 +837,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         super.onPause();
         mPreview.stop();
 
+        finishDialog = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        finishDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        finishDialog.setContentView(R.layout.dialog_finish_record);
+        finishDialog.setCancelable(false);
+
+        if (finishDialog.isShowing()) {
+            finishDialog.dismiss();
+        }
+
         for (int i = 0; i < faces.size(); i++) {
             int key = faces.keyAt(i);
             faces.get(key).waitForStop = true;
@@ -1244,10 +1246,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.leftEyeY - eeY;
         }
         else if (type == 2) {
-            float eeX = (face.rightEyeX - face.leftEyeX);
-            float eeY = (face.rightEyeY - face.leftEyeY);
+            float eeX = (face.rightEyeX - face.leftEyeX) / 1.5f;
             x = face.leftEyeX - eeX;
-            y = face.leftEyeY - eeY;
+            y = face.leftEyeY + eeX / 1.5f;
         }
 
         final int sizeSpark = (int) com.adapter.oishi.Face.getDistance(face.rightEyeX, face.rightEyeY, face.leftEyeX, face.leftEyeY);
@@ -1336,10 +1337,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.rightEyeY + eeY;
         }
         else if (type == 2) {
-            float eeX = (face.rightEyeX - face.leftEyeX);
-            float eeY = (face.rightEyeY - face.leftEyeY);
+            float eeX = (face.rightEyeX - face.leftEyeX) / 1.5f;
             x = face.rightEyeX + eeX;
-            y = face.rightEyeY + eeY;
+            y = face.rightEyeY + eeX / 1.5f;
         }
 
         final int sizeSpark = (int) com.adapter.oishi.Face.getDistance(face.rightEyeX, face.rightEyeY, face.leftEyeX, face.leftEyeY);
@@ -1441,9 +1441,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Random r = new Random();
         int im = randomSakura();
 
-        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
+        int size = (im < 4 ? face.getSakuraSize() : face.getSakuraSize() / 2);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x;
@@ -1552,9 +1551,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Random r = new Random();
         int im = randomSakura();
 
-        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
+        int size = (im < 4 ? face.getSakuraSize() : face.getSakuraSize() / 2);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x - (size / 2);
@@ -1659,9 +1657,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Random r = new Random();
         int im = randomSakura();
 
-        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
+        int size = (im < 4 ? face.getSakuraSize() : face.getSakuraSize() / 2);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x - (size / 2);
@@ -1774,18 +1771,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.leftEyeY - eeY;
         }
         else if (type == 2) {
-            float eeX = (face.rightEyeX - face.leftEyeX);
-            float eeY = (face.rightEyeY - face.leftEyeY);
+            float eeX = (face.rightEyeX - face.leftEyeX) / 1.5f;
             x = face.leftEyeX - eeX;
-            y = face.leftEyeY - eeY;
+            y = face.leftEyeY + eeX / 1.5f;
         }
 
         Random r = new Random();
         int im = randomSakura();
 
-        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
+        int size = (im < 4 ? face.getSakuraSize() : face.getSakuraSize() / 2);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x;
@@ -1904,18 +1899,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.rightEyeY + eeY;
         }
         else if (type == 2) {
-            float eeX = (face.rightEyeX - face.leftEyeX);
-            float eeY = (face.rightEyeY - face.leftEyeY);
+            float eeX = (face.rightEyeX - face.leftEyeX) / 1.5f;
             x = face.rightEyeX + eeX;
-            y = face.rightEyeY + eeY;
+            y = face.rightEyeY + eeX / 1.5f;
         }
 
         Random r = new Random();
         int im = randomSakura();
 
-        int size = (int) Math.sqrt(Math.pow(face.leftEyeX - face.rightEyeX, 2) + Math.pow(face.leftEyeY - face.rightEyeY, 2)) / 2;
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(im < 4 ? size : size / 3, im < 4 ? size : size / 3);
+        int size = (im < 4 ? face.getSakuraSize() : face.getSakuraSize() / 2);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         params.leftMargin = (int) x - (size / 2);
@@ -2072,7 +2065,14 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
             mMediaProjection.registerCallback(mMediaProjectionCallback, null);
             mVirtualDisplay = createVirtualDisplay();
-            mMediaRecorder.start();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mMediaRecorder.start();
+                }
+            }, 1000);
+
 //        }
 
         startCountDownRecording();
@@ -2108,7 +2108,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
-    private Dialog dialog;
+    private Dialog finishDialog;
 
     private void startCountDownRecording() {
         recording = true;
@@ -2150,7 +2150,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                     Log.d("counting", "5 " + new Date().toString());
                                                     if (recording) {
                                                         // show endPopup
-                                                        dialog.show();
+                                                        finishDialog.show();
 
                                                         for (int i = 0; i < faces.size(); i++) {
                                                             int key = faces.keyAt(i);
@@ -2165,38 +2165,36 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                 if (recording) {
                                                                     toggleButtonRecord.setChecked(false);
 
-                                                                    dialog.dismiss();
-
                                                                     for (int i = 0; i < faces.size(); i++) {
                                                                         int key = faces.keyAt(i);
                                                                         faces.get(key).waitForStop = true;
                                                                     }
 
+                                                                    Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
+                                                                    intent.putExtra("videoFileName", videoFileName);
+                                                                    intent.putExtra("gid", gid);
+                                                                    intent.putExtra("where", where);
+                                                                    startActivity(intent);
 
                                                                     new Handler().postDelayed(new Runnable() {
                                                                         @Override
                                                                         public void run() {
-
+                                                                            Log.d("counting", "7 " + new Date().toString());
                                                                             appRuning = false;
 
                                                                             try {
-                                                                                dialog.dismiss();
+                                                                                if (finishDialog.isShowing()) {
+                                                                                    finishDialog.dismiss();
+                                                                                }
                                                                             }
                                                                             catch (IllegalArgumentException e) {
                                                                                 e.printStackTrace();
                                                                             }
 
-
-                                                                            Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
-                                                                            intent.putExtra("videoFileName", videoFileName);
-                                                                            intent.putExtra("gid", gid);
-                                                                            intent.putExtra("where", where);
-                                                                            startActivity(intent);
-
-
+//                                                                            finish();
 
                                                                         }
-                                                                    }, 1000);
+                                                                    }, 3000);
                                                                 }
                                                             }
                                                         }, 1500);
@@ -2251,7 +2249,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Log.d("c511", "initRecorder");
         videoFileName = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".mp4";
 
-        try {
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -2264,6 +2261,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             int orientation = ORIENTATIONS.get(rotation + 90);
             mMediaRecorder.setOrientationHint(orientation);
+
+        try {
             mMediaRecorder.prepare();
         } catch (IOException e) {
             e.printStackTrace();
@@ -2292,8 +2291,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             return;
         }
         mVirtualDisplay.release();
-        //mMediaRecorder.release(); //If used: mMediaRecorder object cannot
-        // be reused again
+//        mMediaRecorder.release(); //If used: mMediaRecorder object cannot be reused again
+//        mMediaRecorder = null;
         Log.d("c511", "MediaProjectionCallback stopScreenSharing");
         destroyMediaProjection();
     }

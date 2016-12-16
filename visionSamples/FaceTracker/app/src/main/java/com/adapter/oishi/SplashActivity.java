@@ -22,6 +22,13 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getIntent().getBooleanExtra("FaceTrackerActivity", false)) {
+            Intent intent = new Intent(getApplicationContext(), FaceTrackerActivity.class);
+            startActivity(intent);
+
+            finish();
+        }
         setContentView(R.layout.activity_splash);
 
         app = (OishiApplication) getApplicationContext();
