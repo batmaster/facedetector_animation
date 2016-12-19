@@ -775,6 +775,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .setMode(FaceDetector.ACCURATE_MODE)
                 .setTrackingEnabled(true)
+                .setMinFaceSize(0.5f)
                 .build();
 
         detector.setProcessor(
@@ -816,11 +817,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setAutoFocusEnabled(true)
                 .setRequestedFps(30f)
                 .build();
-
-        // 4:3 a8 640 480
-        // note4 720 480
-
-
 
 
     }
@@ -1184,7 +1180,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             params.leftMargin = MAX_X - params.leftMargin;
         }
         params.leftMargin -= (sizeX / 2);
-        params.topMargin = (int) y + (sizeX / 2);
+        params.topMargin = (int) y + face.getSakuraSize();
 
         // TODO do (check) inverse for BACK CAM
 
@@ -1251,7 +1247,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             params.leftMargin = MAX_X - params.leftMargin;
         }
         params.leftMargin -= (sizeX / 2);
-        params.topMargin = (int) y + (sizeX / 2);
+        params.topMargin = (int) y + face.getSakuraSize();
 
         // TODO do (check) inverse for BACK CAM
 

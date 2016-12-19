@@ -55,7 +55,13 @@ public class SplashActivity extends AppCompatActivity {
         float x = size.x;
         float y = size.y;
 
-//        if (Config.getInt(getApplicationContext(), Config.wFront) == -1) {
+        float width = x;
+        float height = y;
+
+        float width640 = -1;
+        float height640 = -1;
+
+        if (Config.getInt(getApplicationContext(), Config.wFront) == -1) {
             Camera camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
             List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
             for (int i = 0; i < sizes.size(); i++) {
@@ -69,8 +75,24 @@ public class SplashActivity extends AppCompatActivity {
                 if (w <= x && h <= y && (h / w == y / x)) {
                     Config.setInt(getApplicationContext(), Config.wFront, (int) w);
                     Config.setInt(getApplicationContext(), Config.hFront, (int) h);
-                    break;
+
+                    width = w;
+                    height = h;
+
+                    if (h < 640) {
+                        width640 = w;
+                        height640 = h;
+                        break;
+                    }
                 }
+            }
+            if (width640 != -1) {
+                Config.setInt(getApplicationContext(), Config.wFront, (int) width640);
+                Config.setInt(getApplicationContext(), Config.hFront, (int) height640);
+            }
+            else {
+                Config.setInt(getApplicationContext(), Config.wFront, (int) width);
+                Config.setInt(getApplicationContext(), Config.hFront, (int) height);
             }
             camera.release();
             camera = null;
@@ -87,14 +109,30 @@ public class SplashActivity extends AppCompatActivity {
                     w = t;
                 }
                 if (w <= x && h <= y && (h / w == y / x)) {
-                    Config.setInt(getApplicationContext(), Config.wBack, (int) w);
-                    Config.setInt(getApplicationContext(), Config.hBack, (int) h);
-                    break;
+                    Config.setInt(getApplicationContext(), Config.wFront, (int) w);
+                    Config.setInt(getApplicationContext(), Config.hFront, (int) h);
+
+                    width = w;
+                    height = h;
+
+                    if (h < 640) {
+                        width640 = w;
+                        height640 = h;
+                        break;
+                    }
                 }
+            }
+            if (width640 != -1) {
+                Config.setInt(getApplicationContext(), Config.wBack, (int) width640);
+                Config.setInt(getApplicationContext(), Config.hBack, (int) height640);
+            }
+            else {
+                Config.setInt(getApplicationContext(), Config.wBack, (int) width);
+                Config.setInt(getApplicationContext(), Config.hBack, (int) height);
             }
             camera.release();
             camera = null;
-//        }
+        }
 
         Log.d("Camera.Size", x + " " + y + " " + Config.getInt(getApplicationContext(), Config.wFront) + " " +
                 Config.getInt(getApplicationContext(), Config.hFront) + " " +

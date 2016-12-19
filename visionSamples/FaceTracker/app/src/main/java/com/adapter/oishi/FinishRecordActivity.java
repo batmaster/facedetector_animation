@@ -3,12 +3,16 @@ package com.adapter.oishi;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,6 +36,7 @@ import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
 import com.facebook.share.widget.ShareDialog;
+import com.google.android.gms.plus.PlusShare;
 
 import org.json.JSONObject;
 
@@ -42,6 +47,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.List;
 
 public class FinishRecordActivity extends AppCompatActivity {
 
@@ -168,25 +174,61 @@ public class FinishRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 final BottomSheetDialog dialog = new BottomSheetDialog(FinishRecordActivity.this);
+
                 View v = LayoutInflater.from(getApplicationContext()).inflate(R.layout.share_dialog, null);
+//                final BottomSheetBehavior behavior = BottomSheetBehavior.from(v);
+//                behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+//                    @Override
+//                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+//                        if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+//                            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+//
+//                    }
+//                });
 
                 ((LinearLayout) v.findViewById(R.id.linearFacebook)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-
+                        String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + Config.getString(getApplicationContext(), Config.share_url);
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
+                        startActivity(intent);
                     }
                 });
 
                 ((LinearLayout) v.findViewById(R.id.linearTwitter)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        String url = Config.getString(getApplicationContext(), Config.share_twitter_url);
+                        String desc = Config.getString(getApplicationContext(), Config.share_twitter_description);
 
+                        String uri = "http://www.twitter.com/intent/tweet?url=" + url + "&text=" + desc;
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(uri));
+                        startActivity(i);
                     }
                 });
 
                 ((LinearLayout) v.findViewById(R.id.linearGoogle)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+//                        Intent intent = new Intent(Intent.ACTION_VIEW);
+//                        intent.setType("text/plain");
+//                        intent.putExtra(Intent.EXTRA_TEXT, Config.getString(getApplicationContext(), Config.share_gplus_url));
+//                        intent.setPackage(filterByPackageName(getApplicationContext(), intent, "com.google.android.apps.plus"));
+//                        startActivity(intent);
+
+                        Intent shareIntent = new PlusShare.Builder(FinishRecordActivity.this)
+                                .setType("text/plain")
+//                                .setText(Config.getString(getApplicationContext(), Config.share_gplus_url))
+                                .setContentUrl(Uri.parse(Config.getString(getApplicationContext(), Config.share_gplus_url)))
+                                .getIntent();
+                        startActivity(shareIntent);
+
 
                     }
                 });
@@ -194,11 +236,12 @@ public class FinishRecordActivity extends AppCompatActivity {
                 ((LinearLayout) v.findViewById(R.id.linearUrl)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-
+                        setClipboard(Config.getString(getApplicationContext(), Config.copy_url));
+                        Toast.makeText(getApplicationContext(), "คัดลอกลิ้งค์เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
                     }
                 });
 
-                dialog.setContentView(v );
+                dialog.setContentView(v);
                 dialog.show();
             }
         });
@@ -348,6 +391,27 @@ public class FinishRecordActivity extends AppCompatActivity {
 
             finish();
         }
+    }
+
+    private void setClipboard(String text) {
+        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+            android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboard.setText(text);
+        } else {
+            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", text);
+            clipboard.setPrimaryClip(clip);
+        }
+    }
+
+    private static String filterByPackageName(Context context, Intent intent, String prefix) {
+        List<ResolveInfo> matches = context.getPackageManager().queryIntentActivities(intent, 0);
+        for (ResolveInfo info : matches) {
+            if (info.activityInfo.packageName.toLowerCase().startsWith(prefix)) {
+                return info.activityInfo.packageName;
+            }
+        }
+        return null;
     }
 
     private boolean sharing = false;
