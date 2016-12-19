@@ -2036,17 +2036,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                     for (int i = 0; i < faces.size(); i++) {
                                                                         int key = faces.keyAt(i);
                                                                         faces.get(key).pauseSound();
+                                                                        faces.get(key).waitForStop = true;
                                                                     }
+
+                                                                    appRuning = false;
 
                                                                     new Handler().postDelayed(new Runnable() {
                                                                         @Override
                                                                         public void run() {
                                                                             Log.d("counting", "7 " + new Date().toString());
-
-                                                                            for (int i = 0; i < faces.size(); i++) {
-                                                                                int key = faces.keyAt(i);
-                                                                                faces.get(key).waitForStop = true;
-                                                                            }
 
                                                                             Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
                                                                             intent.putExtra("videoFileName", videoFileName);
@@ -2058,8 +2056,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                                 @Override
                                                                                 public void run() {
                                                                                     Log.d("counting", "8 " + new Date().toString());
-
-                                                                                    appRuning = false;
 
                                                                                     try {
                                                                                         if (finishDialog.isShowing()) {

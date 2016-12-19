@@ -33,6 +33,7 @@ import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.share.Sharer;
+import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
 import com.facebook.share.widget.ShareDialog;
@@ -194,9 +195,41 @@ public class FinishRecordActivity extends AppCompatActivity {
                 ((LinearLayout) v.findViewById(R.id.linearFacebook)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + Config.getString(getApplicationContext(), Config.share_url);
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
-                        startActivity(intent);
+//                        String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + Config.getString(getApplicationContext(), Config.share_url);
+//                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
+//                        startActivity(intent);
+
+                        ShareLinkContent content = new ShareLinkContent.Builder()
+                                .setContentUrl(Uri.parse(Config.getString(getApplicationContext(), Config.share_url)))
+                                .build();
+
+                        ShareDialog dialog = new ShareDialog(FinishRecordActivity.this);
+                        dialog.registerCallback(callbackManager, new FacebookCallback<Sharer.Result>() {
+                            @Override
+                            public void onSuccess(Sharer.Result result) {
+                                sharing = false;
+                                Log.d("FBShare", "onSuccess " + result);
+
+                            }
+
+                            @Override
+                            public void onCancel() {
+                                sharing = false;
+                                Log.d("FBShare", "onCancel()");
+
+                            }
+
+                            @Override
+                            public void onError(FacebookException error) {
+                                error.printStackTrace();
+
+                                sharing = false;
+                                Log.d("FBShare", "onError" + error.getMessage());
+                                Crashlytics.logException(error);
+
+                            }
+                        });
+
                     }
                 });
 
