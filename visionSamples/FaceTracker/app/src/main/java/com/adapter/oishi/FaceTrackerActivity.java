@@ -2072,13 +2072,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                             }, 3000);
 
                                                                         }
-                                                                    }, 1500);
+                                                                    }, 2000);
                                                                 }
                                                             }
-                                                        }, 1000); // p l3
+                                                        }, 500); // p l3
                                                     }
                                                 }
-                                            }, 500);// p l3
+                                            }, 1500);// p l3
                                         }
                                     }
                                 }, 1000); // p l2

@@ -230,6 +230,12 @@ public class FinishRecordActivity extends AppCompatActivity {
                             }
                         });
 
+                        if (dialog.canShow(ShareVideoContent.class)) {
+                            dialog.show(content, ShareDialog.Mode.AUTOMATIC);
+                        } else {
+                            Log.d("FBShare", "you cannot share :(");
+                        }
+
                     }
                 });
 
@@ -339,7 +345,9 @@ public class FinishRecordActivity extends AppCompatActivity {
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
+                videoView.start();
                 videoView.seekTo(1000);
+                videoView.pause();
 
                 videoView.setZ(0f);
             }
