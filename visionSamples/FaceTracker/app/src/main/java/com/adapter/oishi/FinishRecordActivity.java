@@ -118,7 +118,7 @@ public class FinishRecordActivity extends AppCompatActivity {
             }
         });
 
-        VIDEO_FILE_PATH = Environment.getExternalStorageDirectory() + "/oishi";
+        VIDEO_FILE_PATH = Environment.getExternalStorageDirectory() + "/OISHI";
         VIDEO_FILE_PATH_TEMP = getFilesDir().getAbsolutePath() + "/tmp";
 
 
@@ -177,27 +177,10 @@ public class FinishRecordActivity extends AppCompatActivity {
                 final BottomSheetDialog dialog = new BottomSheetDialog(FinishRecordActivity.this);
 
                 View v = LayoutInflater.from(getApplicationContext()).inflate(R.layout.share_dialog, null);
-//                final BottomSheetBehavior behavior = BottomSheetBehavior.from(v);
-//                behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-//                    @Override
-//                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-//                        if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-//                            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-//
-//                    }
-//                });
-
                 ((LinearLayout) v.findViewById(R.id.linearFacebook)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-//                        String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + Config.getString(getApplicationContext(), Config.share_url);
-//                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
-//                        startActivity(intent);
+                        app.sendButtonStat("share_campaign_fb");
 
                         ShareLinkContent content = new ShareLinkContent.Builder()
                                 .setContentUrl(Uri.parse(Config.getString(getApplicationContext(), Config.share_url)))
@@ -242,6 +225,8 @@ public class FinishRecordActivity extends AppCompatActivity {
                 ((LinearLayout) v.findViewById(R.id.linearTwitter)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        app.sendButtonStat("share_campaign_tw");
+
                         String url = Config.getString(getApplicationContext(), Config.share_twitter_url);
                         String desc = Config.getString(getApplicationContext(), Config.share_twitter_description);
 
@@ -255,11 +240,7 @@ public class FinishRecordActivity extends AppCompatActivity {
                 ((LinearLayout) v.findViewById(R.id.linearGoogle)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-//                        Intent intent = new Intent(Intent.ACTION_VIEW);
-//                        intent.setType("text/plain");
-//                        intent.putExtra(Intent.EXTRA_TEXT, Config.getString(getApplicationContext(), Config.share_gplus_url));
-//                        intent.setPackage(filterByPackageName(getApplicationContext(), intent, "com.google.android.apps.plus"));
-//                        startActivity(intent);
+                        app.sendButtonStat("share_campaign_gp");
 
                         Intent shareIntent = new PlusShare.Builder(FinishRecordActivity.this)
                                 .setType("text/plain")
@@ -275,6 +256,8 @@ public class FinishRecordActivity extends AppCompatActivity {
                 ((LinearLayout) v.findViewById(R.id.linearUrl)).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        app.sendButtonStat("share_campaign_copy");
+
                         setClipboard(Config.getString(getApplicationContext(), Config.copy_url));
                         Toast.makeText(getApplicationContext(), "คัดลอกลิ้งค์เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
                     }
@@ -337,7 +320,14 @@ public class FinishRecordActivity extends AppCompatActivity {
             public void onCompletion(MediaPlayer mediaPlayer) {
                 imageViewPlay.setVisibility(View.VISIBLE);
 
-                videoView.seekTo(1000);
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
+                    videoView.seekTo(1000);
+                }
+                else {
+                    videoView.start();
+                    videoView.seekTo(1000);
+                    videoView.pause();
+                }
 
                 videoView.setZ(0f);
             }
@@ -345,9 +335,15 @@ public class FinishRecordActivity extends AppCompatActivity {
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
-                videoView.start();
-                videoView.seekTo(1000);
-                videoView.pause();
+
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
+                    videoView.seekTo(1000);
+                }
+                else {
+                    videoView.start();
+                    videoView.seekTo(1000);
+                    videoView.pause();
+                }
 
                 videoView.setZ(0f);
             }

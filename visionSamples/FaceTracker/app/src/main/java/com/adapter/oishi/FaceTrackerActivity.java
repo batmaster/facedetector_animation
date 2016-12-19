@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.Camera;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaRecorder;
@@ -80,6 +81,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -361,6 +363,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         // permission
         if (getIntent().getBooleanExtra("pass", true)) {
             hasPermissions = true;
+
+            checkCameraSupportSize();
 
             createCameraSource();
             initRecorder();
@@ -843,8 +847,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             faces.get(key).waitForStop = true;
         }
 
-        if (!waitingForResult && !recording) {
+        if (!waitingForResult) {
             appRuning = false;
+            recording = false;
             finish();
         }
     }
@@ -2039,6 +2044,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                         faces.get(key).waitForStop = true;
                                                                     }
 
+                                                                    for (int i = 0; i < faces.size(); i++) {
+                                                                        int key = faces.keyAt(i);
+                                                                        faces.get(key).pauseSound();
+                                                                        faces.get(key).waitForStop = true;
+                                                                    }
+
                                                                     appRuning = false;
 
                                                                     new Handler().postDelayed(new Runnable() {
@@ -2050,6 +2061,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                             intent.putExtra("videoFileName", videoFileName);
                                                                             intent.putExtra("gid", gid);
                                                                             intent.putExtra("where", where);
+
+                                                                            while (faces.size() > 0) {
+
+                                                                            }
+
                                                                             startActivity(intent);
 
                                                                             new Handler().postDelayed(new Runnable() {
@@ -2072,7 +2088,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                             }, 3000);
 
                                                                         }
-                                                                    }, 2000);
+                                                                    }, 2500);
                                                                 }
                                                             }
                                                         }, 500); // p l3
@@ -2114,6 +2130,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private VirtualDisplay createVirtualDisplay() {
+
         return mMediaProjection.createVirtualDisplay("FaceTrackerActivity",
                 MAX_X, MAX_Y, mScreenDensity,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
@@ -2212,6 +2229,110 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private void checkCameraSupportSize() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        float x = size.x;
+        float y = size.y;
+
+        float width = x;
+        float height = y;
+
+        float width640 = -1;
+        float height640 = -1;
+
+        if (Config.getInt(getApplicationContext(), Config.wFront) == -1) {
+            try {
+                Camera camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+                List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
+                for (int i = 0; i < sizes.size(); i++) {
+                    float w = sizes.get(i).width;
+                    float h = sizes.get(i).height;
+                    if (w > h) {
+                        float t = h;
+                        h = w;
+                        w = t;
+                    }
+                    if (w <= x && h <= y && (h / w == y / x)) {
+                        Config.setInt(getApplicationContext(), Config.wFront, (int) w);
+                        Config.setInt(getApplicationContext(), Config.hFront, (int) h);
+
+                        width = w;
+                        height = h;
+
+                        if (h < 640) {
+                            width640 = w;
+                            height640 = h;
+                            break;
+                        }
+                    }
+                }
+                camera.release();
+                camera = null;
+            }
+            catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+
+            if (width640 != -1) {
+                Config.setInt(getApplicationContext(), Config.wFront, (int) width640);
+                Config.setInt(getApplicationContext(), Config.hFront, (int) height640);
+            } else {
+                Config.setInt(getApplicationContext(), Config.wFront, (int) width);
+                Config.setInt(getApplicationContext(), Config.hFront, (int) height);
+            }
+
+
+
+            try {
+                Camera camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+                List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
+                for (int i = 0; i < sizes.size(); i++) {
+                    float w = sizes.get(i).width;
+                    float h = sizes.get(i).height;
+                    if (w > h) {
+                        float t = h;
+                        h = w;
+                        w = t;
+                    }
+                    if (w <= x && h <= y && (h / w == y / x)) {
+                        Config.setInt(getApplicationContext(), Config.wFront, (int) w);
+                        Config.setInt(getApplicationContext(), Config.hFront, (int) h);
+
+                        width = w;
+                        height = h;
+
+                        if (h < 640) {
+                            width640 = w;
+                            height640 = h;
+                            break;
+                        }
+                    }
+                }
+                camera.release();
+                camera = null;
+            }
+            catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+
+            if (width640 != -1) {
+                Config.setInt(getApplicationContext(), Config.wBack, (int) width640);
+                Config.setInt(getApplicationContext(), Config.hBack, (int) height640);
+            } else {
+                Config.setInt(getApplicationContext(), Config.wBack, (int) width);
+                Config.setInt(getApplicationContext(), Config.hBack, (int) height);
+            }
+
+            Log.d("Camera.Size", x + " " + y + " " + Config.getInt(getApplicationContext(), Config.wFront) + " " +
+                    Config.getInt(getApplicationContext(), Config.hFront) + " " +
+                    Config.getInt(getApplicationContext(), Config.wBack) + " " +
+                    Config.getInt(getApplicationContext(), Config.hBack));
+
+        }
     }
 
 
