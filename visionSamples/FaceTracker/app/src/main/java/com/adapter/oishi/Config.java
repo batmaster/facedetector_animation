@@ -23,6 +23,13 @@ public class Config {
     public static final String share_gplus_url = "share_gplus_url";
     public static final String copy_url = "copy_url";
 
+    public static final String wFront = "wFront";
+    public static final String hFront = "hFront";
+    public static final String wBack = "wBack";
+    public static final String hBack = "hBack";
+
+
+
     private static final String[] pages = {
             "http://www.oishidrink.com/sakura/app_install.php",
             "โหลดเลย! แอป Oishi \\\"ระเบิดความฮา ซากุระมาเต็ม\\\"",
@@ -38,7 +45,7 @@ public class Config {
 
     public static int getInt(Context context, String key) {
         SharedPreferences sp = context.getSharedPreferences("sakura", Context.MODE_PRIVATE);
-        return sp.getInt(key, 1);
+        return sp.getInt(key, -1);
     }
 
     public static void setInt(Context context, String key, int value) {

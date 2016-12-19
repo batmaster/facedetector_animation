@@ -44,7 +44,7 @@ public class HTTPService {
     public void getDataInfo(final OnResponseCallback<JSONObject> responseCallback) {
         Log.d("httpapi", "API 0 getDataInfo");
 
-        final StringRequest request = new StringRequest(Request.Method.POST, BASE_URL + "getdatainfo.aspx", new Response.Listener<String>() {
+        final StringRequest request = new StringRequest(Request.Method.GET, BASE_URL + "getDatainfo.aspx", new Response.Listener<String>() {
 
             @Override
             public void onResponse(String s) {
@@ -75,6 +75,8 @@ public class HTTPService {
                 return headers;
             }
         };
+
+        queue.add(request);
     }
 
 

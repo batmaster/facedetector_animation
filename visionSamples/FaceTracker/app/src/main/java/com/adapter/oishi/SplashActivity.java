@@ -3,12 +3,16 @@ package com.adapter.oishi;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
+import android.hardware.Camera;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Display;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -17,6 +21,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class SplashActivity extends AppCompatActivity {
@@ -42,6 +48,58 @@ public class SplashActivity extends AppCompatActivity {
         if (AccessToken.getCurrentAccessToken() == null && SharePref.getStringRid(getApplicationContext()) == null) {
             SharePref.setStringRid(getApplicationContext(), "fbid_" + UUID.randomUUID().toString());
         }
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        float x = size.x;
+        float y = size.y;
+
+//        if (Config.getInt(getApplicationContext(), Config.wFront) == -1) {
+            Camera camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+            List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
+            for (int i = 0; i < sizes.size(); i++) {
+                float w = sizes.get(i).width;
+                float h = sizes.get(i).height;
+                if (w > h) {
+                    float t = h;
+                    h = w;
+                    w = t;
+                }
+                if (w <= x && h <= y && (h / w == y / x)) {
+                    Config.setInt(getApplicationContext(), Config.wFront, (int) w);
+                    Config.setInt(getApplicationContext(), Config.hFront, (int) h);
+                    break;
+                }
+            }
+            camera.release();
+            camera = null;
+
+
+            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
+            sizes = camera.getParameters().getSupportedPreviewSizes();
+            for (int i = 0; i < sizes.size(); i++) {
+                float w = sizes.get(i).width;
+                float h = sizes.get(i).height;
+                if (w > h) {
+                    float t = h;
+                    h = w;
+                    w = t;
+                }
+                if (w <= x && h <= y && (h / w == y / x)) {
+                    Config.setInt(getApplicationContext(), Config.wBack, (int) w);
+                    Config.setInt(getApplicationContext(), Config.hBack, (int) h);
+                    break;
+                }
+            }
+            camera.release();
+            camera = null;
+//        }
+
+        Log.d("Camera.Size", x + " " + y + " " + Config.getInt(getApplicationContext(), Config.wFront) + " " +
+                Config.getInt(getApplicationContext(), Config.hFront) + " " +
+                Config.getInt(getApplicationContext(), Config.wBack) + " " +
+                Config.getInt(getApplicationContext(), Config.hBack));
 
         app.getHttpService().getDataInfo(new HTTPService.OnResponseCallback<JSONObject>() {
             @Override

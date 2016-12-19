@@ -794,17 +794,27 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             Log.w(TAG, "Face detector dependencies are not yet available.");
         }
 
-        int pW = MAX_X;
-        int pH = MAX_Y;
-        if (MAX_Y / MAX_X * 1.0 == 4 / 3.0) {
-            pW = 480;
-            pH = 640;
+//        int pW = MAX_X;
+//        int pH = MAX_Y;
+//        if (MAX_Y / MAX_X * 1.0 == 4 / 3.0) {
+//            pW = 480;
+//            pH = 640;
+//        }
+        int w = 0;
+        int h = 0;
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            w = Config.getInt(getApplicationContext(), Config.wFront);
+            h = Config.getInt(getApplicationContext(), Config.hFront);
+        }
+        else {
+            w = Config.getInt(getApplicationContext(), Config.wBack);
+            h = Config.getInt(getApplicationContext(), Config.hBack);
         }
         mCameraSource = new CameraSource.Builder(context, detector)
-                .setRequestedPreviewSize(pH, pW)
+                .setRequestedPreviewSize(h, w)
                 .setFacing(CAMERA_FACING)
                 .setAutoFocusEnabled(true)
-                .setRequestedFps(15f)
+                .setRequestedFps(30f)
                 .build();
 
         // 4:3 a8 640 480
@@ -2030,7 +2040,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                     for (int i = 0; i < faces.size(); i++) {
                                                                         int key = faces.keyAt(i);
                                                                         faces.get(key).pauseSound();
-                                                                        faces.get(key).waitForStop = true;
                                                                     }
 
                                                                     new Handler().postDelayed(new Runnable() {
@@ -2038,7 +2047,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                         public void run() {
                                                                             Log.d("counting", "7 " + new Date().toString());
 
-                                                                            appRuning = false;
+                                                                            for (int i = 0; i < faces.size(); i++) {
+                                                                                int key = faces.keyAt(i);
+                                                                                faces.get(key).waitForStop = true;
+                                                                            }
 
                                                                             Intent intent = new Intent(getApplicationContext(), FinishRecordActivity.class);
                                                                             intent.putExtra("videoFileName", videoFileName);
@@ -2050,6 +2062,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                                 @Override
                                                                                 public void run() {
                                                                                     Log.d("counting", "8 " + new Date().toString());
+
+                                                                                    appRuning = false;
 
                                                                                     try {
                                                                                         if (finishDialog.isShowing()) {
