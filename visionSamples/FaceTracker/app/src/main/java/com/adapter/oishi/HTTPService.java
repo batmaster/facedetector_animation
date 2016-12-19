@@ -36,6 +36,47 @@ public class HTTPService {
         queue = Volley.newRequestQueue(context);
     }
 
+    /**
+     * API 0 getDataInfo
+     *
+     * @param responseCallback
+     */
+    public void getDataInfo(final OnResponseCallback<JSONObject> responseCallback) {
+        Log.d("httpapi", "API 0 getDataInfo");
+
+        final StringRequest request = new StringRequest(Request.Method.POST, BASE_URL + "getdatainfo.aspx", new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String s) {
+                Log.d("httpapi", "API 0 onResponse: " + s);
+                try {
+                    JSONObject json = new JSONObject(s);
+
+                    responseCallback.onResponse(true, null, json);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.d("httpapi", "API 0 onErrorResponse: " + volleyError);
+                responseCallback.onResponse(false, volleyError, null);
+
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<String, String>();
+                headers.put("User-agent", _UA);
+                return headers;
+            }
+        };
+    }
+
 
     /**
      * API 1 SaveGameNonToken-iOS/Android ส่งค่าตอนเริ่มเกม

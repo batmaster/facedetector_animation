@@ -36,6 +36,15 @@
                 android:layout_marginTop="10dp"
                 android:src="@drawable/btn_review_home" />
 
+            <ImageView
+                android:id="@+id/imageViewShareCorner"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/btn_review_share_corner" />
+
         </RelativeLayout>
 
         <LinearLayout

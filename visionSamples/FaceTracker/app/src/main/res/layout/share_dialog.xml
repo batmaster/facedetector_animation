@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Share to"
+        android:textColor="#020202"
+        android:background="#e6e6e6"/>
+
+    <LinearLayout
+        android:id="@+id/linearFacebook"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/btn_facebook"/>
+
+        <TextView
+            android:paddingLeft="20dp"
+            android:textColor="#020202"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Facebook"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearTwitter"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/btn_twitter"/>
+
+        <TextView
+            android:paddingLeft="20dp"
+            android:textColor="#020202"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Twitter"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearGoogle"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/btn_google"/>
+
+        <TextView
+            android:paddingLeft="20dp"
+            android:textColor="#020202"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Google+"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearUrl"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/btn_url"/>
+
+        <TextView
+            android:paddingLeft="20dp"
+            android:textColor="#020202"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Copy URL"/>
+    </LinearLayout>
+
+</LinearLayout>

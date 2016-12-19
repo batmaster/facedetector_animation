@@ -9,12 +9,15 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -45,6 +48,7 @@ public class FinishRecordActivity extends AppCompatActivity {
     private OishiApplication app;
 
     private ImageView imageViewHome;
+    private ImageView imageViewShareCorner;
     private ImageView imageViewPlay;
     private ImageView imageViewDelete;
     private ImageView imageViewSave;
@@ -156,6 +160,46 @@ public class FinishRecordActivity extends AppCompatActivity {
                 startActivity(intent);
 
                 finish();
+            }
+        });
+
+        imageViewShareCorner = (ImageView) findViewById(R.id.imageViewShareCorner);
+        imageViewShareCorner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final BottomSheetDialog dialog = new BottomSheetDialog(FinishRecordActivity.this);
+                View v = LayoutInflater.from(getApplicationContext()).inflate(R.layout.share_dialog, null);
+
+                ((LinearLayout) v.findViewById(R.id.linearFacebook)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+
+                ((LinearLayout) v.findViewById(R.id.linearTwitter)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+
+                ((LinearLayout) v.findViewById(R.id.linearGoogle)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+
+                ((LinearLayout) v.findViewById(R.id.linearUrl)).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                    }
+                });
+
+                dialog.setContentView(v );
+                dialog.show();
             }
         });
 
