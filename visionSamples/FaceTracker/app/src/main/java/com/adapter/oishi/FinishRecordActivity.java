@@ -72,6 +72,8 @@ public class FinishRecordActivity extends AppCompatActivity {
     private Dialog dialogNoInternet;
     private Dialog dialogConfirmNoSave;
 
+    private Dialog dialogComplete;
+
     private CallbackManager callbackManager;
 
     private String gid;
@@ -120,9 +122,21 @@ public class FinishRecordActivity extends AppCompatActivity {
 
         VIDEO_FILE_PATH = Environment.getExternalStorageDirectory() + "/OISHI";
         VIDEO_FILE_PATH_TEMP = getFilesDir().getAbsolutePath() + "/tmp";
-
-
         videoFileName = getIntent().getStringExtra("videoFileName");
+
+        dialogComplete = new Dialog(FinishRecordActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialogComplete.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogComplete.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialogComplete.setContentView(R.layout.dialog);
+        dialogComplete.setCancelable(true);
+        ((ImageView) dialogComplete.findViewById(R.id.imageView)).setImageResource(R.drawable.bg_popup_complete);
+        ((ImageView) dialogComplete.findViewById(R.id.imageView)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogComplete.dismiss();
+            }
+        });
+
 
         dialogConfirmNoSave = new Dialog(FinishRecordActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         dialogConfirmNoSave.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -192,6 +206,7 @@ public class FinishRecordActivity extends AppCompatActivity {
                             public void onSuccess(Sharer.Result result) {
                                 sharing = false;
                                 Log.d("FBShare", "onSuccess " + result);
+                                dialogComplete.show();
 
                             }
 
@@ -213,7 +228,7 @@ public class FinishRecordActivity extends AppCompatActivity {
                             }
                         });
 
-                        if (dialog.canShow(ShareVideoContent.class)) {
+                        if (dialog.canShow(ShareLinkContent.class)) {
                             dialog.show(content, ShareDialog.Mode.AUTOMATIC);
                         } else {
                             Log.d("FBShare", "you cannot share :(");
@@ -259,7 +274,8 @@ public class FinishRecordActivity extends AppCompatActivity {
                         app.sendButtonStat("share_campaign_copy");
 
                         setClipboard(Config.getString(getApplicationContext(), Config.copy_url));
-                        Toast.makeText(getApplicationContext(), "คัดลอกลิ้งค์เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
+
+                        dialogComplete.show();
                     }
                 });
 
@@ -481,7 +497,7 @@ public class FinishRecordActivity extends AppCompatActivity {
                             app.getHttpService().saveShare(gid, result.getPostId(), new HTTPService.OnResponseCallback<JSONObject>() {
                                 @Override
                                 public void onResponse(boolean success, Throwable error, JSONObject data) {
-
+                                    dialogComplete.show();
                                 }
                             });
 

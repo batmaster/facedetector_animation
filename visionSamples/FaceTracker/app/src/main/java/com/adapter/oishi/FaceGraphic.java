@@ -153,7 +153,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             if (Singleton.activity.CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
                 whereX = Singleton.activity.MAX_X - whereX;
             }
-//            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
+            canvas.drawCircle(whereX, landmarks.get(i).getPosition().y * scale, FACE_POSITION_RADIUS, mFacePositionPaint);
 
             Log.d("drawCircle", whereX + " " + (landmarks.get(i).getPosition().y * scale));
 

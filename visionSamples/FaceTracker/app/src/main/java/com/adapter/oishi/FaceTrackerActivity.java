@@ -63,6 +63,8 @@ import android.widget.ToggleButton;
 
 import com.adapter.oishi.ui.camera.CameraSourcePreview;
 import com.adapter.oishi.ui.camera.GraphicOverlay;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.CameraSource;
@@ -99,6 +101,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private ToggleButton toggleButtonRecord;
 
+    private Dialog dialogOs;
+
     private static final String TAG = "FaceTracker";
 
     private CameraSource mCameraSource = null;
@@ -120,22 +124,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         app.sendPageStat("home");
         app.getHttpService().sendStat(HTTPService.OPENAPP);
 
-        FirebaseMessaging.getInstance().subscribeToTopic("bat");
-        Log.d("fbt", FirebaseInstanceId.getInstance().getToken());
 
 
-
-
-        File dir = new File(getFilesDir().getAbsolutePath() + "/tmp/");
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                new File(dir, children[i]).delete();
-            }
-        }
 
 
 
@@ -155,6 +145,19 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         mScreenDensity = metrics.densityDpi;
 
+        dialogOs = new Dialog(FaceTrackerActivity.this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        dialogOs.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogOs.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialogOs.setContentView(R.layout.dialog);
+        dialogOs.setCancelable(true);
+        ((ImageView) dialogOs.findViewById(R.id.imageView)).setImageResource(R.drawable.bg_popup_os_warning);
+        ((ImageView) dialogOs.findViewById(R.id.imageView)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogOs.dismiss();
+            }
+        });
+
 
         topLayout = (ClonableRelativeLayout) findViewById(R.id.topLayout);
         layoutSakura = (RelativeLayout) findViewById(R.id.layoutSakura);
@@ -162,10 +165,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         layoutLight = (FrameLayout) findViewById(R.id.layoutLight);
 
         toggleButtonRecord = (ToggleButton) findViewById(R.id.toggleButtonRecord);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            toggleButtonRecord.setVisibility(View.GONE);
-        }
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
@@ -301,37 +300,43 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         toggleButtonRecord.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (!app.isNetworkConnected()) {
 
-                    if (!dialogNoInternet.isShowing()) {
-                        dialogNoInternet.show();
-                    }
-
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    dialogOs.show();
                     return true;
                 }
                 else {
-                    final String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO};
+                    if (!app.isNetworkConnected()) {
 
-                    if (ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.CAMERA) +
-                            ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) +
-                            ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        if (!dialogNoInternet.isShowing()) {
+                            dialogNoInternet.show();
+                        }
 
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.CAMERA) ||
-                                ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
-                                ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO)) {
+                        return true;
+                    } else {
+                        final String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO};
+
+                        if (ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.CAMERA) +
+                                ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) +
+                                ContextCompat.checkSelfPermission(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                            if (ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.CAMERA) ||
+                                    ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
+                                    ActivityCompat.shouldShowRequestPermissionRationale(FaceTrackerActivity.this, Manifest.permission.RECORD_AUDIO)) {
 //                        toggleButtonRecord.setChecked(false);
 
-                            waitingForResult = true;
-                            ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
-                            return true;
-                        } else {
-                            waitingForResult = true;
-                            ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
-                            return true;
+                                waitingForResult = true;
+                                ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
+                                return true;
+                            } else {
+                                waitingForResult = true;
+                                ActivityCompat.requestPermissions(FaceTrackerActivity.this, permissions, REQUEST_PERMISSIONS);
+                                return true;
+                            }
                         }
-                    }
 
-                    return false;
+                        return false;
+                    }
                 }
             }
         });
@@ -362,9 +367,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         // permission
         if (getIntent().getBooleanExtra("pass", true)) {
-            hasPermissions = true;
-
             checkCameraSupportSize();
+            hasPermissions = true;
 
             createCameraSource();
             initRecorder();
@@ -494,15 +498,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     int key = faces.keyAt(i);
                     com.adapter.oishi.Face f = faces.get(key);
 
-                    if ((f.leftCheekX != -1 && f.leftCheekY != -1) &&
-                            (f.rightCheekX != -1 && f.rightCheekY != -1)) {
+//                    if ((f.leftCheekX != -1 && f.leftCheekY != -1) &&
+//                            (f.rightCheekX != -1 && f.rightCheekY != -1)) {
 
                         createCheek(f);
-                    }
+//                    }
                 }
 
                 if (appRuning) {
-                    handlerCheek.postDelayed(this, 16);
+                    handlerCheek.postDelayed(this, 32);
                 }
             }
         });
@@ -579,7 +583,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
 
                 if (appRuning) {
-                    handlerLight.postDelayed(this, 16);
+                    handlerLight.postDelayed(this, 48);
                 }
             }
         });
@@ -632,9 +636,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
 
-                if (appRuning) {
+//                if (appRuning) {
                     handlerRemover.postDelayed(this, CHECKING_DELAY);
-                }
+//                }
             }
         });
 
@@ -655,6 +659,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                 (f.mouthX != -1 && f.mouthY != -1)) {
                             createSakuraMouth(f);
                             createSakuraMouth(f);
+                            createSakuraMouth(f);
 
                             if (!f.waitForStop && !f.isPlayingSound()) {
                                 f.playSound();
@@ -664,7 +669,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
                 if (appRuning) {
-                    handlerSakuraMouth.postDelayed(this, 16);
+                    handlerSakuraMouth.postDelayed(this, 48);
                 }
             }
         });
@@ -683,10 +688,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         if (f.leftEyeX != -1 && f.leftEyeY != -1) {
                             createSakuraEyesLeft(f);
                             createSakuraEyesLeft(f);
+                            createSakuraEyesLeft(f);
                             sakuring++;
                         }
 
                         if (f.rightEyeX != -1 && f.rightEyeY != -1) {
+                            createSakuraEyesRight(f);
                             createSakuraEyesRight(f);
                             createSakuraEyesRight(f);
                             sakuring++;
@@ -699,7 +706,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
                 if (appRuning) {
-                    handlerSakuraEyes.postDelayed(this, 16);
+                    handlerSakuraEyes.postDelayed(this, 48);
                 }
             }
         });
@@ -762,7 +769,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
 
                 if (appRuning) {
-                    handlerSakuraEars.postDelayed(this, 16);
+                    handlerSakuraEars.postDelayed(this, 48);
                 }
             }
         });
@@ -773,13 +780,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private void createCameraSource() {
         Log.d("c511", "createCameraSource");
 
+        float minFaceSize = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? 0.6f : 0.4f;
+
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
                 .setLandmarkType(FaceDetector.ALL_LANDMARKS)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .setMode(FaceDetector.ACCURATE_MODE)
                 .setTrackingEnabled(true)
-                .setMinFaceSize(0.5f)
+                .setMinFaceSize(minFaceSize)
                 .build();
 
         detector.setProcessor(
@@ -959,50 +968,58 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private void createCheek(com.adapter.oishi.Face face) {
 
-        int x1 = (int) face.leftCheekX;
-        int y1 = (int) face.leftCheekY;
+        float mountX = face.mouthX != -1 ? face.mouthX : face.bottomMouthX;
+        float mountY = face.mouthY != -1 ? face.mouthY : face.bottomMouthY;
 
-        int size = (int) Math.abs(face.leftCheekX - face.rightCheekX) / 2;
+        int size = (int) face.getSakuraSize();
 
-        FrameLayout.LayoutParams paramsLeft = new FrameLayout.LayoutParams(size, size);
-        paramsLeft.leftMargin = x1;
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            paramsLeft.leftMargin = MAX_X - paramsLeft.leftMargin;
-        }
-        paramsLeft.leftMargin -= (size / 2);
-        paramsLeft.topMargin = (int) y1 - (size / 2);
+        if (mountX != -1 && mountY != -1 && face.leftEyeX != -1 && face.leftEyeY != -1) {
+            int x1 = (int) (face.leftEyeX + (Math.abs(mountX - face.leftEyeX)) / 2);
+            int y1 = (int) ((face.leftEyeY + mountY) / 2);
+
+            FrameLayout.LayoutParams paramsLeft = new FrameLayout.LayoutParams(size, size);
+            paramsLeft.leftMargin = x1;
+            if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+                paramsLeft.leftMargin = MAX_X - paramsLeft.leftMargin;
+            }
+            paramsLeft.leftMargin -= (size / 2);
+            paramsLeft.topMargin = (int) y1 - (size / 2);
 
 
-        ImageView cheekLeft = new ImageView(getApplicationContext());
-        cheekLeft.setImageResource(cheek[face.id % 3][0]);
+            ImageView cheekLeft = new ImageView(getApplicationContext());
+            cheekLeft.setImageResource(cheek[face.id % 3][0]);
+            cheekLeft.setAlpha(0.4f);
 //        cheekLeft.setRotation(face.eulerY * 2 + face.eulerZ * 2);
 
-        // TODO do (check) inverse for BACK CAM
-        cheekLeft.setLayoutParams(paramsLeft);
-        layoutCheek.addView(cheekLeft);
-        cheeks.add(cheekLeft);
-
-
-
-        int x2 = (int) face.rightCheekX;
-        int y2 = (int) face.rightCheekY;
-
-        FrameLayout.LayoutParams paramsRight = new FrameLayout.LayoutParams(size, size);
-        paramsRight.leftMargin = (int) x2;
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            paramsRight.leftMargin = MAX_X - paramsRight.leftMargin;
+            // TODO do (check) inverse for BACK CAM
+            cheekLeft.setLayoutParams(paramsLeft);
+            layoutCheek.addView(cheekLeft);
+            cheeks.add(cheekLeft);
         }
-        paramsRight.leftMargin -= (size / 2);
-        paramsRight.topMargin = (int) y2 - (size / 2);
 
-        ImageView cheekRight = new ImageView(getApplicationContext());
-        cheekRight.setImageResource(cheek[face.id % 3][1]);
+
+        if (mountX != -1 && mountY != -1 && face.rightEyeX != -1 && face.rightEyeY != -1) {
+            int x2 = (int) (face.rightEyeX - (Math.abs(mountX - face.rightEyeX)) / 2);
+            int y2 = (int) ((face.rightEyeY + mountY) / 2);
+
+            FrameLayout.LayoutParams paramsRight = new FrameLayout.LayoutParams(size, size);
+            paramsRight.leftMargin = (int) x2;
+            if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+                paramsRight.leftMargin = MAX_X - paramsRight.leftMargin;
+            }
+            paramsRight.leftMargin -= (size / 2);
+            paramsRight.topMargin = (int) y2 - (size / 2);
+
+            ImageView cheekRight = new ImageView(getApplicationContext());
+            cheekRight.setImageResource(cheek[face.id % 3][1]);
+            cheekRight.setAlpha(0.4f);
 //        cheekRight.setRotation(face.eulerY * 2 + face.eulerZ * 2);
 
-        // TODO do (check) inverse for BACK CAM
-        cheekRight.setLayoutParams(paramsRight);
-        layoutCheek.addView(cheekRight);
-        cheeks.add(cheekRight);
+            // TODO do (check) inverse for BACK CAM
+            cheekRight.setLayoutParams(paramsRight);
+            layoutCheek.addView(cheekRight);
+            cheeks.add(cheekRight);
+        }
     }
 
     private void createLightMouth(com.adapter.oishi.Face face) {
@@ -1172,8 +1189,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.leftEyeY + eeX / 1.5f;
         }
 
-        final int sizeX = MAX_X;
-        final int sizeY = (int) (MAX_Y);
+        final int sizeX = MAX_X * 2;
+        final int sizeY = MAX_Y;
 
         final ImageView light = new ImageView(getApplicationContext());
         light.setImageResource(cool ? R.drawable.light_blue: R.drawable.light_pink);
@@ -1206,7 +1223,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             light.setRotation(((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
         }
 
-        light.setAlpha(0.8f);
+        light.setAlpha(0.9f);
 
         light.setLayoutParams(params);
         layoutLight.addView(light);
@@ -1239,8 +1256,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             y = face.rightEyeY + eeX / 1.5f;
         }
 
-        final int sizeX = MAX_X;
-        final int sizeY = (int) (MAX_Y);
+        final int sizeX = MAX_X * 2;
+        final int sizeY = MAX_Y;
 
         final ImageView light = new ImageView(getApplicationContext());
         light.setImageResource(cool ? R.drawable.light_blue: R.drawable.light_pink);
@@ -1274,7 +1291,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             light.setRotation(-1 * ((float) (Math.toDegrees(Math.atan2(realY, realX))) - 90));
         }
 
-        light.setAlpha(0.8f);
+        light.setAlpha(0.9f);
 
         light.setLayoutParams(params);
         layoutLight.addView(light);
@@ -1340,7 +1357,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         boolean sign = r.nextDouble() > 0.5 ? true : false;
         int startD = sign ? 0 : 359;
         int endD = sign ? 359 : 0;
-        long duration = (long) (r.nextDouble() * 5000) + 2000;
+        long duration = (long) (r.nextDouble() * 5000) + 1500;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
@@ -1351,7 +1368,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/10.0));
-        duration *= 1.5;
+        duration *= 1.3;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1374,7 +1391,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float posX = (float) (r.nextDouble() * (MAX_X/2.5) * (sign ? 1 : -1));
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
-//        duration /= ;
+//        duration /= 1.2;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX - (size / 2));
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -1424,7 +1441,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Random r = new Random();
         int im = randomSakura();
 
-        int size = (im < 4 ? face.getSakuraSize() : face.getSakuraSize() / 2);
+        int size = (int) (im < 4 ? face.getSakuraSize() / 1.2 : face.getSakuraSize() / 2.4);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
@@ -1449,7 +1466,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int startD = sign ? 0 : 359;
         int endD = sign ? 359 : 0;
         long duration = (long) (r.nextDouble() * 5000) + 2000;
-        duration *= 3;
+        duration *= 2.7;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
@@ -1460,7 +1477,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/5.0));
-        duration *= 2.5;
+        duration *= 2.3;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1481,6 +1498,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float posX = (float) (r.nextDouble() * (MAX_X/2.5) * (sign ? 1 : -1));
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX + posX) : realX + posX;
+//        duration /= 1.2;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX - (size / 2));
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -1530,7 +1548,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         Random r = new Random();
         int im = randomSakura();
 
-        int size = (im < 4 ? face.getSakuraSize() : face.getSakuraSize() / 2);
+        int size = (int) (im < 4 ? face.getSakuraSize() / 1.2 : face.getSakuraSize() / 2.4);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
         params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
@@ -1555,7 +1573,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         int startD = sign ? 0 : 359;
         int endD = sign ? 359 : 0;
         long duration = (long) (r.nextDouble() * 5000) + 2000;
-        duration *= 3;
+        duration *= 2.7;
 
         ObjectAnimator rotationZ = ObjectAnimator.ofFloat(sakura, View.ROTATION, startD, endD);
         rotationZ.setRepeatCount(ValueAnimator.INFINITE);
@@ -1566,7 +1584,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/5.0));
-        duration *= 2.5;
+        duration *= 2.3;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1688,7 +1706,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/7.0));
-        duration *= 1.2;
+//        duration *= 1.2;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1708,7 +1726,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? -1 * (realX - (size / 2)) : (realX + (size / 2));
 
-        duration *= 1.8;
+        duration *= 1.4;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -1815,7 +1833,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float scale = (float) (r.nextDouble() * 0.1 * finalSize1) + 1.2f;
         duration = (long) (((r.nextDouble() * 200.0 * facespeed1) + 2000) / (speed1/7.0));
-        duration *= 1.2;
+//        duration *= 1.2;
 
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(sakura, View.SCALE_X, sakura.getScaleX() * (1f + (0.05f * startSize1)), scale);
         scaleX.setInterpolator(new LinearInterpolator());
@@ -1835,7 +1853,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float toX = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? (realX - (size / 2)) : -1 * (realX + (size / 2));
 
-        duration *= 1.8;
+        duration *= 1.4;
 
         ObjectAnimator translationX = ObjectAnimator.ofFloat(sakura, View.TRANSLATION_X, 0, toX);
         translationX.setInterpolator(new DecelerateInterpolator());
@@ -2210,6 +2228,9 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_PERMISSIONS: {
                 if ((grantResults.length > 0) && (grantResults[0] + grantResults[1] + grantResults[2]) == PackageManager.PERMISSION_GRANTED) {
+
+                    checkCameraSupportSize();
+
                     hasPermissions = true;
 
                     createCameraSource();
@@ -2256,18 +2277,19 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         h = w;
                         w = t;
                     }
-                    if (w <= x && h <= y && (h / w == y / x)) {
+//                    if (w <= x && h <= y && (h / w == y / x)) {
+                    if ((h / w == y / x)) {
                         Config.setInt(getApplicationContext(), Config.wFront, (int) w);
                         Config.setInt(getApplicationContext(), Config.hFront, (int) h);
 
                         width = w;
                         height = h;
 
-                        if (h < 640) {
-                            width640 = w;
-                            height640 = h;
-                            break;
-                        }
+//                        if (h < 640) {
+//                            width640 = w;
+//                            height640 = h;
+//                            break;
+//                        }
                     }
                 }
                 camera.release();
@@ -2298,18 +2320,19 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         h = w;
                         w = t;
                     }
-                    if (w <= x && h <= y && (h / w == y / x)) {
+//                    if (w <= x && h <= y && (h / w == y / x)) {
+                    if ((h / w == y / x)) {
                         Config.setInt(getApplicationContext(), Config.wFront, (int) w);
                         Config.setInt(getApplicationContext(), Config.hFront, (int) h);
 
                         width = w;
                         height = h;
 
-                        if (h < 640) {
-                            width640 = w;
-                            height640 = h;
-                            break;
-                        }
+//                        if (h < 640) {
+//                            width640 = w;
+//                            height640 = h;
+//                            break;
+//                        }
                     }
                 }
                 camera.release();
@@ -2327,11 +2350,28 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 Config.setInt(getApplicationContext(), Config.hBack, (int) height);
             }
 
-            Log.d("Camera.Size", x + " " + y + " " + Config.getInt(getApplicationContext(), Config.wFront) + " " +
+            String log = x + " " + y + " " + Config.getInt(getApplicationContext(), Config.wFront) + " " +
                     Config.getInt(getApplicationContext(), Config.hFront) + " " +
                     Config.getInt(getApplicationContext(), Config.wBack) + " " +
-                    Config.getInt(getApplicationContext(), Config.hBack));
+                    Config.getInt(getApplicationContext(), Config.hBack);
 
+            Log.d("Camera.Size", log);
+
+            Answers.getInstance().logCustom(new CustomEvent("Camera Support Size")
+                    .putCustomAttribute("Device", HTTPService._UA + " " + log)
+            );
+
+        }
+
+        File dir = new File(getFilesDir().getAbsolutePath() + "/tmp/");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                new File(dir, children[i]).delete();
+            }
         }
     }
 
