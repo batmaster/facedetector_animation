@@ -139,6 +139,7 @@
                 android:textOff=""
                 android:textOn=""
                 android:layout_below="@+id/toggleButtonEars"
+                android:visibility="gone"
                 android:background="@drawable/face" />
 
 

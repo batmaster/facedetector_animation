@@ -506,7 +506,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
 
                 if (appRuning) {
-                    handlerCheek.postDelayed(this, 32);
+                    handlerCheek.postDelayed(this, 16);
                 }
             }
         });
@@ -583,13 +583,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
 
                 if (appRuning) {
-                    handlerLight.postDelayed(this, 48);
+                    handlerLight.postDelayed(this, 16);
                 }
             }
         });
 
-        final int lastChecking = 0;
-        final int CHECKING_DELAY = 50;
+
         final Handler handlerRemover = new Handler();
         handlerRemover.post(new Runnable() {
             @Override
@@ -597,48 +596,51 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                 // prevent handler not accurate
                 if (SystemClock.currentThreadTimeMillis() - lastChecking < CHECKING_DELAY) {
-                    return;
+
                 }
+                else {
+                    for (int i = 0; i < faces.size(); i++) {
+                        int key = faces.keyAt(i);
+                        com.adapter.oishi.Face f = faces.get(key);
 
-                for (int i = 0; i < faces.size(); i++) {
-                    int key = faces.keyAt(i);
-                    com.adapter.oishi.Face f = faces.get(key);
-
-                    f.count++;
-                    Log.d("remover", f.id + " f++ " + f.count + " " + SystemClock.currentThreadTimeMillis());
-                    if (f.count > 3) {
-                        faces.get(f.id).waitForStop = true;
-                    }
-
-                    if (f.waitForStop) {
-                        Log.d("remover", f.id + " " + faces.size());
-                        if (f.isPlayingSound()) {
-                            f.stopSound();
+                        f.count++;
+                        Log.d("remover", f.id + " f++ " + f.count + " " + lastChecking);
+                        if (f.count > 4) {
+                            faces.get(f.id).waitForStop = true;
                         }
 
-                        faces.remove(f.id);
-                        Log.d("remover", f.id + " " + faces.size());
-
-                        if (!recording && faces.size() == 0) {
-                            cool = false;
-                            ((ImageView) findViewById(R.id.imageFrameIce1)).setAlpha(0f);
-                        }
-                    }
-
-                    if (!toggleButtonEyes.isChecked() && !toggleButtonEars.isChecked() && !toggleButtonMouth.isChecked()) {
-                        try {
+                        if (f.waitForStop) {
+                            Log.d("remover", f.id + " " + faces.size());
                             if (f.isPlayingSound()) {
-                                f.pauseSound();
+                                f.stopSound();
                             }
-                        } catch (IllegalStateException e) {
-                            e.printStackTrace();
+
+                            faces.remove(f.id);
+                            Log.d("remover", f.id + " " + faces.size());
+
+                            if (!recording && faces.size() == 0) {
+                                cool = false;
+                                ((ImageView) findViewById(R.id.imageFrameIce1)).setAlpha(0f);
+                            }
+                        }
+
+                        if (!toggleButtonEyes.isChecked() && !toggleButtonEars.isChecked() && !toggleButtonMouth.isChecked()) {
+                            try {
+                                if (f.isPlayingSound()) {
+                                    f.pauseSound();
+                                }
+                            } catch (IllegalStateException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
+
+                    lastChecking = SystemClock.currentThreadTimeMillis();
                 }
 
-//                if (appRuning) {
+                if (appRuning) {
                     handlerRemover.postDelayed(this, CHECKING_DELAY);
-//                }
+                }
             }
         });
 
@@ -659,7 +661,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                 (f.mouthX != -1 && f.mouthY != -1)) {
                             createSakuraMouth(f);
                             createSakuraMouth(f);
-                            createSakuraMouth(f);
 
                             if (!f.waitForStop && !f.isPlayingSound()) {
                                 f.playSound();
@@ -669,7 +670,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
                 if (appRuning) {
-                    handlerSakuraMouth.postDelayed(this, 48);
+                    handlerSakuraMouth.postDelayed(this, 16);
                 }
             }
         });
@@ -706,7 +707,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     }
                 }
                 if (appRuning) {
-                    handlerSakuraEyes.postDelayed(this, 48);
+                    handlerSakuraEyes.postDelayed(this, 16);
                 }
             }
         });
@@ -769,18 +770,20 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
 
                 if (appRuning) {
-                    handlerSakuraEars.postDelayed(this, 48);
+                    handlerSakuraEars.postDelayed(this, 16);
                 }
             }
         });
 
     }
+    private static long lastChecking = 0;
+    private static final int CHECKING_DELAY = 30;
 
 
     private void createCameraSource() {
         Log.d("c511", "createCameraSource");
 
-        float minFaceSize = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? 0.6f : 0.4f;
+        float minFaceSize = CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT ? 0.4f : 0.4f;
 
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context)
@@ -828,7 +831,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setRequestedPreviewSize(h, w)
                 .setFacing(CAMERA_FACING)
                 .setAutoFocusEnabled(true)
-                .setRequestedFps(30f)
+                .setRequestedFps(15f)
                 .build();
 
 
@@ -971,10 +974,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float mountX = face.mouthX != -1 ? face.mouthX : face.bottomMouthX;
         float mountY = face.mouthY != -1 ? face.mouthY : face.bottomMouthY;
 
-        int size = (int) face.getSakuraSize();
+        int size = (int) (face.getSakuraSize() * 0.85);
 
         if (mountX != -1 && mountY != -1 && face.leftEyeX != -1 && face.leftEyeY != -1) {
-            int x1 = (int) (face.leftEyeX + (Math.abs(mountX - face.leftEyeX)) / 2);
+            int x1 = (int) (face.leftEyeX + ((face.leftEyeX - mountX)) / 2);
             int y1 = (int) ((face.leftEyeY + mountY) / 2);
 
             FrameLayout.LayoutParams paramsLeft = new FrameLayout.LayoutParams(size, size);
@@ -999,7 +1002,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
 
         if (mountX != -1 && mountY != -1 && face.rightEyeX != -1 && face.rightEyeY != -1) {
-            int x2 = (int) (face.rightEyeX - (Math.abs(mountX - face.rightEyeX)) / 2);
+            int x2 = (int) (face.rightEyeX - ((mountX - face.rightEyeX)) / 2);
             int y2 = (int) ((face.rightEyeY + mountY) / 2);
 
             FrameLayout.LayoutParams paramsRight = new FrameLayout.LayoutParams(size, size);
@@ -2059,12 +2062,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                     for (int i = 0; i < faces.size(); i++) {
                                                                         int key = faces.keyAt(i);
                                                                         faces.get(key).pauseSound();
-                                                                        faces.get(key).waitForStop = true;
                                                                     }
 
                                                                     for (int i = 0; i < faces.size(); i++) {
                                                                         int key = faces.keyAt(i);
-                                                                        faces.get(key).pauseSound();
                                                                         faces.get(key).waitForStop = true;
                                                                     }
 
@@ -2277,19 +2278,19 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         h = w;
                         w = t;
                     }
-//                    if (w <= x && h <= y && (h / w == y / x)) {
-                    if ((h / w == y / x)) {
+                    if (w <= x && h <= y && (h / w == y / x)) {
+//                    if ((h / w == y / x)) {
                         Config.setInt(getApplicationContext(), Config.wFront, (int) w);
                         Config.setInt(getApplicationContext(), Config.hFront, (int) h);
 
                         width = w;
                         height = h;
 
-//                        if (h < 640) {
-//                            width640 = w;
-//                            height640 = h;
-//                            break;
-//                        }
+                        if (h < 640) {
+                            width640 = w;
+                            height640 = h;
+                            break;
+                        }
                     }
                 }
                 camera.release();
@@ -2320,19 +2321,19 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         h = w;
                         w = t;
                     }
-//                    if (w <= x && h <= y && (h / w == y / x)) {
-                    if ((h / w == y / x)) {
+                    if (w <= x && h <= y && (h / w == y / x)) {
+//                    if ((h / w == y / x)) {
                         Config.setInt(getApplicationContext(), Config.wFront, (int) w);
                         Config.setInt(getApplicationContext(), Config.hFront, (int) h);
 
                         width = w;
                         height = h;
 
-//                        if (h < 640) {
-//                            width640 = w;
-//                            height640 = h;
-//                            break;
-//                        }
+                        if (h < 640) {
+                            width640 = w;
+                            height640 = h;
+                            break;
+                        }
                     }
                 }
                 camera.release();
