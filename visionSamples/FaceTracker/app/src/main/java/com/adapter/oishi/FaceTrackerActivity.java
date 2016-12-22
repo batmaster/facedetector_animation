@@ -2346,13 +2346,13 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float x = size.x;
         float y = size.y;
 
-        float width = x;
-        float height = y;
+        float width = 0;
+        float height = 0;
 
         float width640 = -1;
         float height640 = -1;
 
-        if (Config.getInt(getApplicationContext(), Config.wFront) == -1) {
+//        if (Config.getInt(getApplicationContext(), Config.wFront) == -1) {
             try {
                 Camera camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
                 List<Camera.Size> sizes = camera.getParameters().getSupportedPreviewSizes();
@@ -2364,15 +2364,16 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         h = w;
                         w = t;
                     }
+                    Log.d("Camera.Size", "front " + w + " " + h);
                     if (w <= x && h <= y && (h / w == y / x)) {
 //                    if ((h / w == y / x)) {
-                        Config.setInt(getApplicationContext(), Config.wFront, (int) w);
-                        Config.setInt(getApplicationContext(), Config.hFront, (int) h);
 
-                        width = w;
-                        height = h;
+                        if (height == 0) {
+                            width = w;
+                            height = h;
+                        }
 
-                        if (h < 640) {
+                        if (h < 640 && h >=480) {
                             width640 = w;
                             height640 = h;
                             break;
@@ -2390,11 +2391,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 Config.setInt(getApplicationContext(), Config.wFront, (int) width640);
                 Config.setInt(getApplicationContext(), Config.hFront, (int) height640);
             } else {
-                Config.setInt(getApplicationContext(), Config.wFront, (int) width);
-                Config.setInt(getApplicationContext(), Config.hFront, (int) height);
+                Config.setInt(getApplicationContext(), Config.wFront, (int) (width == 0 ? x : width));
+                Config.setInt(getApplicationContext(), Config.hFront, (int) (height == 0 ? y : height));
             }
 
+        width = 0;
+        height = 0;
 
+        width640 = -1;
+        height640 = -1;
 
             try {
                 Camera camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
@@ -2407,15 +2412,17 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         h = w;
                         w = t;
                     }
+
+                    Log.d("Camera.Size", "back " + w + " " + h);
                     if (w <= x && h <= y && (h / w == y / x)) {
 //                    if ((h / w == y / x)) {
-                        Config.setInt(getApplicationContext(), Config.wFront, (int) w);
-                        Config.setInt(getApplicationContext(), Config.hFront, (int) h);
 
-                        width = w;
-                        height = h;
+                        if (height == 0) {
+                            width = w;
+                            height = h;
+                        }
 
-                        if (h < 640) {
+                        if (h < 640 && h >=480) {
                             width640 = w;
                             height640 = h;
                             break;
@@ -2433,8 +2440,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 Config.setInt(getApplicationContext(), Config.wBack, (int) width640);
                 Config.setInt(getApplicationContext(), Config.hBack, (int) height640);
             } else {
-                Config.setInt(getApplicationContext(), Config.wBack, (int) width);
-                Config.setInt(getApplicationContext(), Config.hBack, (int) height);
+                Config.setInt(getApplicationContext(), Config.wFront, (int) (width == 0 ? x : width));
+                Config.setInt(getApplicationContext(), Config.hFront, (int) (height == 0 ? y : height));
             }
 
             String log = x + " " + y + " " + Config.getInt(getApplicationContext(), Config.wFront) + " " +
@@ -2448,7 +2455,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     .putCustomAttribute("Device", HTTPService._UA + " " + log)
             );
 
-        }
+//        }
 
         File dir = new File(getFilesDir().getAbsolutePath() + "/tmp/");
         if (!dir.exists()) {
