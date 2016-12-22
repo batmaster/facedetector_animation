@@ -19,17 +19,17 @@
     </com.adapter.oishi.ui.camera.CameraSourcePreview>
 
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="fitXY"
-        android:src="@drawable/bg_record_frame"/>
-
     <FrameLayout
         android:id="@+id/layoutCheek"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </FrameLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/bg_record_frame"/>
 
     <FrameLayout
         android:id="@+id/layoutLight"
@@ -60,6 +60,41 @@
         android:layout_height="match_parent"
         android:scaleType="fitXY"
         android:src="@drawable/img_frame_ice3"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="100" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="85">
+        </RelativeLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:weightSum="100"
+            android:layout_weight="13">
+
+            <RelativeLayout
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="62">
+            </RelativeLayout>
+
+            <ImageView
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="36"
+                android:src="@drawable/img_record_logo"
+                android:scaleType="fitXY"/>
+        </LinearLayout>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/layoutSakura"
@@ -156,41 +191,5 @@
 
         </RelativeLayout>
     </LinearLayout>
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="100" >
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="85">
-        </RelativeLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:weightSum="100"
-            android:layout_weight="13">
-
-            <RelativeLayout
-                android:layout_width="0px"
-                android:layout_height="match_parent"
-                android:layout_weight="62">
-            </RelativeLayout>
-
-            <ImageView
-                android:layout_width="0px"
-                android:layout_height="match_parent"
-                android:layout_weight="36"
-                android:src="@drawable/img_record_logo"
-                android:scaleType="fitXY"/>
-        </LinearLayout>
-
-    </LinearLayout>
-
 
 </com.adapter.oishi.ClonableRelativeLayout>

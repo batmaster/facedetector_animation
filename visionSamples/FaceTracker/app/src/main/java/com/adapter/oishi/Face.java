@@ -79,8 +79,16 @@ public class Face {
     }
 
     public boolean isPlayingSound() {
-        Log.d("sounddd", "isPlayingSound " + id);
-        return mp.isPlaying();
+        boolean playing = false;
+
+        try {
+            playing = mp.isPlaying();
+        }
+        catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+
+        return playing;
     }
 
     @Override

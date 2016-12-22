@@ -622,6 +622,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             @Override
             public void run() {
 
+                Log.d("remover", faces.size() + "");
+
                 // prevent handler not accurate
                 if (SystemClock.currentThreadTimeMillis() - lastChecking < CHECKING_DELAY) {
 
@@ -915,6 +917,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         for (int i = 0; i < faces.size(); i++) {
             int key = faces.keyAt(i);
             faces.get(key).waitForStop = true;
+            faces.get(key).stopSound();
         }
 
         if (!waitingForResult) {
