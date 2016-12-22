@@ -10,7 +10,7 @@ import java.util.Random;
  * Created by batmaster on 11/21/2016 AD.
  */
 
-public class Face {
+public class Face implements Comparable<Face> {
 
     public int id;
     public float mouthX = -1;
@@ -53,9 +53,15 @@ public class Face {
         Random r = new Random();
     }
 
+    private static final int[] sids = {
+            R.raw.sfx,
+            R.raw.beam,
+            R.raw.face
+    };
+
     public void initSound(final Context context) {
         Log.d("sounddd", "initSound " + id);
-        mp = MediaPlayer.create(context, id % 2 == 0 ? R.raw.sfx : R.raw.beam);
+        mp = MediaPlayer.create(context, sids[id % 3]);
         mp.setLooping(true);
     }
 
@@ -138,11 +144,18 @@ public class Face {
 //    }
 
 
+
+
     @Override
     public String toString() {
         return "Face{" +
                 "id=" + id +
                 ", count=" + count +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Face face) {
+        return Float.compare(faceHeight, face.faceHeight);
     }
 }

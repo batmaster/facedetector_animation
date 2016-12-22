@@ -146,10 +146,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             existFace.id = face.getId();
         }
 
-        existFace.left = left;
-        existFace.right = right;
-        existFace.top = top;
-        existFace.bottom = bottom;
+        existFace.left = left;// * scale;
+        existFace.right = right;// * scale;
+        existFace.top = top;// * scale;
+        existFace.bottom = bottom;// * scale;
 
         for (int i = 0; i < landmarks.size(); i++) {
             float whereX = landmarks.get(i).getPosition().x * scale;

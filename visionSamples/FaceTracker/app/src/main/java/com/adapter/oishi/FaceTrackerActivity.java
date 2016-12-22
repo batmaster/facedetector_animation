@@ -82,6 +82,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -123,11 +125,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         app.getHttpService().sendStat(HTTPService.SAVERESULT);
         app.sendPageStat("home");
         app.getHttpService().sendStat(HTTPService.OPENAPP);
-
-
-
-
-
 
         faces = new SparseArray<com.adapter.oishi.Face>();
 
@@ -189,12 +186,14 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                     Random r = new Random();
                     double d = r.nextDouble();
-                    if (d < 0.4) {
+                    if (d < 0.25) {
                         toggleButtonEyes.setChecked(true);
-                    } else if (d < 0.8) {
+                    } else if (d < 0.50) {
                         toggleButtonMouth.setChecked(true);
-                    } else {
+                    } else if (d < 0.75) {
                         toggleButtonEars.setChecked(true);
+                    } else {
+                        toggleButtonFace .setChecked(true);
                     }
 
                     if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
@@ -654,7 +653,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                             }
                         }
 
-                        if (!toggleButtonEyes.isChecked() && !toggleButtonEars.isChecked() && !toggleButtonMouth.isChecked()) {
+                        if (!toggleButtonEyes.isChecked() && !toggleButtonEars.isChecked() && !toggleButtonMouth.isChecked() && !toggleButtonFace.isChecked()) {
                             try {
                                 if (f.isPlayingSound()) {
                                     f.pauseSound();
@@ -678,17 +677,23 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         handlerFace.post(new Runnable() {
             @Override
             public void run() {
-
                 for (int i = 0; i < imageViewFaces.size(); i++) {
                     layoutCheek.removeView(imageViewFaces.get(i));
                     imageViewFaces.get(i).setVisibility(View.GONE);
                     imageViewFaces.remove(i);
+
                 }
 
                 if (toggleButtonFace.isChecked()) {
+
+                    ArrayList<com.adapter.oishi.Face> reorderFaces = new ArrayList<com.adapter.oishi.Face>();
                     for (int i = 0; i < faces.size(); i++) {
-                        int key = faces.keyAt(i);
-                        com.adapter.oishi.Face f = faces.get(key);
+                        reorderFaces.add(faces.get(faces.keyAt(i)));
+                    }
+                    Collections.sort(reorderFaces);
+
+                    for (int i = 0; i < reorderFaces.size(); i++) {
+                        com.adapter.oishi.Face f = reorderFaces.get(i);
 
                         if (f.left != -1 && f.right != -1 && f.top != -1 && f.bottom != -1) {
                             createFace(f);
@@ -891,7 +896,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 .setRequestedPreviewSize(h, w)
                 .setFacing(CAMERA_FACING)
                 .setAutoFocusEnabled(true)
-                .setRequestedFps(15f)
+                .setRequestedFps(60f)
                 .build();
 
 
@@ -1034,21 +1039,20 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         float x = (face.left + face.right) / 2;
         float y = (face.top + face.bottom) / 2;
-        float sizeX = Math.abs(face.right - face.leftEarX);
-        float sizeY = Math.abs(face.bottom - face.top);
 
+        Log.d("faceq", face.left + " " + face.right + " " + face.top + " " + face.bottom);
 
-        FrameLayout.LayoutParams paramsLeft = new FrameLayout.LayoutParams((int) sizeX,(int) sizeY);
+        int sizeX = (int) (Math.abs(face.left - face.right) * 1.8);
+        int sizeY = (int) Math.abs(face.top - face.bottom) * 2;
+
+        FrameLayout.LayoutParams paramsLeft = new FrameLayout.LayoutParams(sizeX, sizeY);
         paramsLeft.leftMargin = (int) (x - (sizeX / 2));
-        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
-            paramsLeft.leftMargin = MAX_X - paramsLeft.leftMargin;
-        }
-        paramsLeft.leftMargin -= (sizeX / 2);
         paramsLeft.topMargin = (int) (y - (sizeY / 2));
-
 
         ImageView imageViewFace = new ImageView(getApplicationContext());
         imageViewFace.setImageResource(R.drawable.img_face_sakura);
+        imageViewFace.setRotation(face.eulerZ);
+        imageViewFace.setRotationY(-1 * face.eulerY);
 
         imageViewFace.setLayoutParams(paramsLeft);
         layoutCheek.addView(imageViewFace);
@@ -2147,11 +2151,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                                                                     for (int i = 0; i < faces.size(); i++) {
                                                                         int key = faces.keyAt(i);
-                                                                        faces.get(key).pauseSound();
-                                                                    }
-
-                                                                    for (int i = 0; i < faces.size(); i++) {
-                                                                        int key = faces.keyAt(i);
                                                                         faces.get(key).waitForStop = true;
                                                                     }
 
@@ -2196,7 +2195,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                                                                     }, 2500);
                                                                 }
                                                             }
-                                                        }, 500); // p l3
+                                                        }, 1000); // p l3
                                                     }
                                                 }
                                             }, 1500);// p l3
@@ -2440,8 +2439,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 Config.setInt(getApplicationContext(), Config.wBack, (int) width640);
                 Config.setInt(getApplicationContext(), Config.hBack, (int) height640);
             } else {
-                Config.setInt(getApplicationContext(), Config.wFront, (int) (width == 0 ? x : width));
-                Config.setInt(getApplicationContext(), Config.hFront, (int) (height == 0 ? y : height));
+                Config.setInt(getApplicationContext(), Config.wBack, (int) (width == 0 ? x : width));
+                Config.setInt(getApplicationContext(), Config.hBack, (int) (height == 0 ? y : height));
             }
 
             String log = x + " " + y + " " + Config.getInt(getApplicationContext(), Config.wFront) + " " +
