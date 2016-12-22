@@ -23,8 +23,8 @@ android {
         applicationId "com.adapter.oishi"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 29
-        versionName "4.2"
+        versionCode 30
+        versionName "4.3"
     }
     buildTypes {
         release {

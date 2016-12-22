@@ -139,7 +139,6 @@
                 android:textOff=""
                 android:textOn=""
                 android:layout_below="@+id/toggleButtonEars"
-                android:visibility="gone"
                 android:background="@drawable/face" />
 
 
@@ -167,7 +166,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0px"
-            android:layout_weight="87">
+            android:layout_weight="85">
         </RelativeLayout>
 
         <LinearLayout
@@ -175,7 +174,7 @@
             android:layout_width="match_parent"
             android:layout_height="0px"
             android:weightSum="100"
-            android:layout_weight="10">
+            android:layout_weight="13">
 
             <RelativeLayout
                 android:layout_width="0px"

@@ -37,6 +37,11 @@ public class Face {
     public float faceHeight = 0;
     public float scale = 0;
 
+    public float left = -1;
+    public float right = -1;
+    public float top = -1;
+    public float bottom = -1;
+
     public boolean waitForStop;
     public int count;
 

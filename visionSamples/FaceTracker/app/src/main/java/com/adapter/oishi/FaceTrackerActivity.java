@@ -221,7 +221,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         toggleButtonEars.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (toggleButtonEars.isChecked() && !toggleButtonEyes.isChecked() && !toggleButtonMouth.isChecked()) {
+                if (toggleButtonEars.isChecked() && !toggleButtonEyes.isChecked() && !toggleButtonMouth.isChecked() && !toggleButtonFace.isChecked()) {
                     return true;
                 }
                 return false;
@@ -235,6 +235,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                     toggleButtonEyes.setChecked(false);
                     toggleButtonMouth.setChecked(false);
+                    toggleButtonFace.setChecked(false);
                 }
             }
         });
@@ -243,7 +244,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         toggleButtonEyes.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (!toggleButtonEars.isChecked() && toggleButtonEyes.isChecked() && !toggleButtonMouth.isChecked()) {
+                if (!toggleButtonEars.isChecked() && toggleButtonEyes.isChecked() && !toggleButtonMouth.isChecked() && !toggleButtonFace.isChecked()) {
                     return true;
                 }
                 return false;
@@ -257,6 +258,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                     toggleButtonEars.setChecked(false);
                     toggleButtonMouth.setChecked(false);
+                    toggleButtonFace.setChecked(false);
                 }
             }
         });
@@ -265,7 +267,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         toggleButtonMouth.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (!toggleButtonEars.isChecked() && !toggleButtonEyes.isChecked() && toggleButtonMouth.isChecked()) {
+                if (!toggleButtonEars.isChecked() && !toggleButtonEyes.isChecked() && toggleButtonMouth.isChecked() && !toggleButtonFace.isChecked()) {
                     return true;
                 }
                 return false;
@@ -279,6 +281,29 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
                     toggleButtonEars.setChecked(false);
                     toggleButtonEyes.setChecked(false);
+                    toggleButtonFace.setChecked(false);
+                }
+            }
+        });
+
+        toggleButtonFace = (ToggleButton) findViewById(R.id.toggleButtonFace);
+        toggleButtonFace.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (!toggleButtonEars.isChecked() && !toggleButtonEyes.isChecked() && !toggleButtonMouth.isChecked() && toggleButtonFace.isChecked()) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        toggleButtonFace.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    where = "face";
+                    toggleButtonEars.setChecked(false);
+                    toggleButtonEyes.setChecked(false);
+                    toggleButtonMouth.setChecked(false);
                 }
             }
         });
@@ -360,9 +385,10 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         // mediaProjection
 
         mMediaRecorder = new MediaRecorder();
-        mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        }
 
-        Log.d("c511", "new MediaRecorder()");
 
 
         // permission
@@ -458,6 +484,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private ToggleButton toggleButtonEars;
     private ToggleButton toggleButtonEyes;
     private ToggleButton toggleButtonMouth;
+    private ToggleButton toggleButtonFace;
 
     private LinearLayout selector;
 
@@ -467,6 +494,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
     private ArrayList<ImageView> cheeks = new ArrayList<ImageView>();
     private ArrayList<ImageView> lights = new ArrayList<ImageView>();
+    private ArrayList<ImageView> imageViewFaces = new ArrayList<ImageView>();
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void makeThreadSakura() {
@@ -644,7 +672,37 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             }
         });
 
+        final Handler handlerFace = new Handler();
+        handlerFace.post(new Runnable() {
+            @Override
+            public void run() {
 
+                for (int i = 0; i < imageViewFaces.size(); i++) {
+                    layoutCheek.removeView(imageViewFaces.get(i));
+                    imageViewFaces.get(i).setVisibility(View.GONE);
+                    imageViewFaces.remove(i);
+                }
+
+                if (toggleButtonFace.isChecked()) {
+                    for (int i = 0; i < faces.size(); i++) {
+                        int key = faces.keyAt(i);
+                        com.adapter.oishi.Face f = faces.get(key);
+
+                        if (f.left != -1 && f.right != -1 && f.top != -1 && f.bottom != -1) {
+                            createFace(f);
+
+                            if (!f.waitForStop && !f.isPlayingSound()) {
+                                f.playSound();
+                            }
+
+                        }
+                    }
+                }
+                if (appRuning) {
+                    handlerFace.postDelayed(this, 16);
+                }
+            }
+        });
 
         final Handler handlerSakuraMouth = new Handler();
         handlerSakuraMouth.post(new Runnable() {
@@ -968,6 +1026,31 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             R.drawable.sakura4,
             R.drawable.sakura5,
     };
+
+    private void createFace(com.adapter.oishi.Face face) {
+
+        float x = (face.left + face.right) / 2;
+        float y = (face.top + face.bottom) / 2;
+        float sizeX = Math.abs(face.right - face.leftEarX);
+        float sizeY = Math.abs(face.bottom - face.top);
+
+
+        FrameLayout.LayoutParams paramsLeft = new FrameLayout.LayoutParams((int) sizeX,(int) sizeY);
+        paramsLeft.leftMargin = (int) (x - (sizeX / 2));
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            paramsLeft.leftMargin = MAX_X - paramsLeft.leftMargin;
+        }
+        paramsLeft.leftMargin -= (sizeX / 2);
+        paramsLeft.topMargin = (int) (y - (sizeY / 2));
+
+
+        ImageView imageViewFace = new ImageView(getApplicationContext());
+        imageViewFace.setImageResource(R.drawable.img_face_sakura);
+
+        imageViewFace.setLayoutParams(paramsLeft);
+        layoutCheek.addView(imageViewFace);
+        imageViewFaces.add(imageViewFace);
+    }
 
     private void createCheek(com.adapter.oishi.Face face) {
 
@@ -1954,7 +2037,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             toggleButtonRecord.setChecked(false);
             return;
         }
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mMediaProjectionCallback = new MediaProjectionCallback();
             mMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
             mMediaProjection.registerCallback(mMediaProjectionCallback, null);
@@ -1967,7 +2050,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                 }
             }, 1000);
 
-//        }
+        }
 
         startCountDownRecording();
     }
