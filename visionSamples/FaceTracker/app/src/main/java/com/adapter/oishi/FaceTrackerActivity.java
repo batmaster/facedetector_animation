@@ -1040,8 +1040,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         float x = (face.left + face.right) / 2;
         float y = (face.top + face.bottom) / 2;
 
-        Log.d("faceq", face.left + " " + face.right + " " + face.top + " " + face.bottom);
-
         int sizeX = (int) (Math.abs(face.left - face.right) * 1.8);
         int sizeY = (int) (Math.abs(face.top - face.bottom) * 1.5);
 

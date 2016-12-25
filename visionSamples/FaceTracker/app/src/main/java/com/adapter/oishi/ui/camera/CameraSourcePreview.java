@@ -22,7 +22,9 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.images.Size;
 import com.adapter.oishi.Singleton;
 import com.google.android.gms.vision.CameraSource;
@@ -85,23 +87,29 @@ public class CameraSourcePreview extends ViewGroup {
 
     private void startIfReady() throws IOException {
         if (mStartRequested && mSurfaceAvailable) {
-            mCameraSource.start(mSurfaceView.getHolder());
-            if (mOverlay != null) {
-                Size size = mCameraSource.getPreviewSize();
-                int min = Math.min(size.getWidth(), size.getHeight());
-                int max = Math.max(size.getWidth(), size.getHeight());
-                if (isPortraitMode()) {
-                    // Swap width and height sizes when in portrait, since it will be rotated by
-                    // 90 degrees
-                    mOverlay.setCameraInfo(min, max, mCameraSource.getCameraFacing());
-                } else {
-                    mOverlay.setCameraInfo(max, min, mCameraSource.getCameraFacing());
-                }
-                mOverlay.clear();
+            try {
+                mCameraSource.start(mSurfaceView.getHolder());
+                if (mOverlay != null) {
+                    Size size = mCameraSource.getPreviewSize();
+                    int min = Math.min(size.getWidth(), size.getHeight());
+                    int max = Math.max(size.getWidth(), size.getHeight());
+                    if (isPortraitMode()) {
+                        // Swap width and height sizes when in portrait, since it will be rotated by
+                        // 90 degrees
+                        mOverlay.setCameraInfo(min, max, mCameraSource.getCameraFacing());
+                    } else {
+                        mOverlay.setCameraInfo(max, min, mCameraSource.getCameraFacing());
+                    }
+                    mOverlay.clear();
 
-                Log.d("mPreview", "startIfReady " + min + " " + max);
+                    Log.d("mPreview", "startIfReady " + min + " " + max);
+                }
+                mStartRequested = false;
             }
-            mStartRequested = false;
+            catch (RuntimeException e) {
+                Toast.makeText(mContext, "โปรดอนุญาติการขอใช้งานกล้อง", Toast.LENGTH_SHORT).show();
+                Crashlytics.logException(e);
+            }
         }
     }
 

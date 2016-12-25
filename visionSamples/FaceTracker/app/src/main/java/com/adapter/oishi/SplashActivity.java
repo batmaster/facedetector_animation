@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -34,6 +35,8 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
         if (getIntent().getBooleanExtra("FaceTrackerActivity", false)) {
             Intent intent = new Intent(getApplicationContext(), FaceTrackerActivity.class);
             startActivity(intent);
@@ -41,6 +44,16 @@ public class SplashActivity extends AppCompatActivity {
             finish();
         }
         setContentView(R.layout.activity_splash);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        float x = size.x;
+        float y = size.y;
+
+        if (y / x < 1.5) {
+            ((ImageView) findViewById(R.id.imageView)).setImageResource(R.drawable.bg_splash_fat);
+        }
 
         app = (OishiApplication) getApplicationContext();
         app.sendPageStat("splash_page");
