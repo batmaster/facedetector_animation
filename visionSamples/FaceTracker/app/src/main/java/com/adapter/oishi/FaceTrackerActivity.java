@@ -525,11 +525,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                     int key = faces.keyAt(i);
                     com.adapter.oishi.Face f = faces.get(key);
 
-//                    if ((f.leftCheekX != -1 && f.leftCheekY != -1) &&
-//                            (f.rightCheekX != -1 && f.rightCheekY != -1)) {
+                    if ((f.leftCheekX != -1 && f.leftCheekY != -1) &&
+                            (f.rightCheekX != -1 && f.rightCheekY != -1)) {
 
-                        createCheek(f);
-//                    }
+                        createCheekOld(f);
+                    }
                 }
 
                 if (appRuning) {
@@ -1056,6 +1056,54 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         imageViewFace.setLayoutParams(paramsLeft);
         layoutCheek.addView(imageViewFace);
         imageViewFaces.add(imageViewFace);
+    }
+
+    private void createCheekOld(com.adapter.oishi.Face face) {
+
+        int x1 = (int) face.leftCheekX;
+        int y1 = (int) face.leftCheekY;
+
+        int size = (int) Math.abs(face.leftCheekX - face.rightCheekX) / 2;
+
+        FrameLayout.LayoutParams paramsLeft = new FrameLayout.LayoutParams(size, size);
+        paramsLeft.leftMargin = x1;
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            paramsLeft.leftMargin = MAX_X - paramsLeft.leftMargin;
+        }
+        paramsLeft.leftMargin -= (size / 2);
+        paramsLeft.topMargin = (int) y1 - (size / 2);
+
+
+        ImageView cheekLeft = new ImageView(getApplicationContext());
+        cheekLeft.setImageResource(cheek[face.id % 3][0]);
+//        cheekLeft.setRotation(face.eulerY * 2 + face.eulerZ * 2);
+
+        // TODO do (check) inverse for BACK CAM
+        cheekLeft.setLayoutParams(paramsLeft);
+        layoutCheek.addView(cheekLeft);
+        cheeks.add(cheekLeft);
+
+
+
+        int x2 = (int) face.rightCheekX;
+        int y2 = (int) face.rightCheekY;
+
+        FrameLayout.LayoutParams paramsRight = new FrameLayout.LayoutParams(size, size);
+        paramsRight.leftMargin = (int) x2;
+        if (CAMERA_FACING == CameraSource.CAMERA_FACING_FRONT) {
+            paramsRight.leftMargin = MAX_X - paramsRight.leftMargin;
+        }
+        paramsRight.leftMargin -= (size / 2);
+        paramsRight.topMargin = (int) y2 - (size / 2);
+
+        ImageView cheekRight = new ImageView(getApplicationContext());
+        cheekRight.setImageResource(cheek[face.id % 3][1]);
+//        cheekRight.setRotation(face.eulerY * 2 + face.eulerZ * 2);
+
+        // TODO do (check) inverse for BACK CAM
+        cheekRight.setLayoutParams(paramsRight);
+        layoutCheek.addView(cheekRight);
+        cheeks.add(cheekRight);
     }
 
     private void createCheek(com.adapter.oishi.Face face) {

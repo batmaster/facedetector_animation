@@ -120,7 +120,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float top = y - yOffset;
         float right = x + xOffset;
         float bottom = y + yOffset;
-        canvas.drawRect(left, top, right, bottom, mBoxPaint);
+//        canvas.drawRect(left, top, right, bottom, mBoxPaint);
 
         double viewWidth = canvas.getWidth();
         double viewHeight = canvas.getHeight();
